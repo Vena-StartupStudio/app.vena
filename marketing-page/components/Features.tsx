@@ -9,7 +9,7 @@ interface FeatureCardProps {
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => (
     <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-stone-100 transform hover:-translate-y-2">
-      <div className="flex items-center justify-center h-16 w-16 rounded-full bg-rose-100 mb-6">
+      <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 mb-6">
         {icon}
       </div>
       <h3 className="text-2xl font-bold text-slate-800 mb-4">{title}</h3>
@@ -22,18 +22,18 @@ const Features: React.FC = () => {
   const features = [
     {
       icon: <FeatureIcons.Hub />,
-      title: 'Your Personal Wellness Hub',
-      description: 'Build your brand and deepen client relationships with a personalized landing page for your services, content, and contact info.',
+      title: 'Intelligent Time Management',
+      description: 'Our advanced AI optimizes your schedule, maximizing productivity and client focus.',
     },
     {
       icon: <FeatureIcons.Connector />,
-      title: 'Seamless Practice Connector',
-      description: 'Streamline your admin with integrated scheduling, payments, and automated reminders. More time for clients, less time on paperwork.',
+      title: 'Automated Workflow Generation',
+      description: 'Automatically generate post-appointment tasks and workflows for seamless client follow-up.',
     },
     {
       icon: <FeatureIcons.Builder />,
-      title: 'Boutique Business Builder',
-      description: 'Share your expertise through exclusive content and scale your practice with a premium, professional online presence and a quick-connect QR code.',
+      title: 'Dynamic Personal Landing Page',
+      description: 'Showcase your brand with a customizable landing page to attract and retain clients.',
     },
   ];
 

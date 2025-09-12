@@ -1,7 +1,7 @@
 import React from 'react';
 
 const CheckIcon: React.FC = () => (
-    <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
     </svg>
 );
@@ -28,7 +28,7 @@ const ValueProposition: React.FC = () => {
             />
           </div>
           <div className="lg:w-1/2">
-            <span className="font-semibold text-emerald-600 uppercase tracking-wider">Why Vena?</span>
+            <span className="font-semibold text-indigo-600 uppercase tracking-wider">Why Vena?</span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 mt-3 mb-6 tracking-tight">
               Designed for the Modern Wellness Professional
             </h2>
@@ -38,7 +38,7 @@ const ValueProposition: React.FC = () => {
             <ul className="space-y-4">
               {benefits.map((benefit, index) => (
                 <li key={index} className="flex items-center">
-                  <div className="flex-shrink-0 bg-rose-100 rounded-full p-2 mr-4">
+                  <div className="flex-shrink-0 bg-indigo-100 rounded-full p-2 mr-4">
                     <CheckIcon />
                   </div>
                   <span className="text-slate-700 font-medium">{benefit}</span>
