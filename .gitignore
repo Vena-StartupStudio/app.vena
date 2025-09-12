@@ -8,6 +8,3 @@ dist-ssr
 
 # Editor directories and files
 .vscode/*
-
-# Image files
-*.png
