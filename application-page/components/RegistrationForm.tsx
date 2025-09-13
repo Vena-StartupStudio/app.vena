@@ -81,7 +81,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           error={errors.socialMedia}
         />
 
-        <SelectField
         <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
           <div className="w-full md:w-1/2">
             <div className="border-2 border-primary-light rounded-lg p-4 bg-zinc-50">
