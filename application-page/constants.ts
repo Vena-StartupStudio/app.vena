@@ -2,6 +2,7 @@
 import { BusinessNiche } from './types';
 
 export const BUSINESS_NICHES = [
+  { value: '', label: 'Choose your business niche' },
   { value: BusinessNiche.IceBathInstructor, label: 'Ice Bath Instructor' },
   { value: BusinessNiche.YogaInstructor, label: 'Yoga Instructor' },
   { value: BusinessNiche.PilatesInstructor, label: 'Pilates Instructor' },
