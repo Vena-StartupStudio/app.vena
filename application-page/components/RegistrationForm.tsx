@@ -23,9 +23,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   return (
     <>
       <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-zinc-800">Register Your Business with Vena</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-zinc-800">Ready to take your Business to the next step?</h1>
         <p className="mt-3 text-base text-zinc-600">
-          Start growing your wellness practice today—simplify scheduling, payments, and client engagement with Vena.
+          Start growing your wellness practice today - simplify scheduling, payments, and client engagement with Vena.
         </p>
       </div>
       <form onSubmit={onSubmit} noValidate className="space-y-6">
