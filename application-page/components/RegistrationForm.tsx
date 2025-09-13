@@ -83,8 +83,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
         <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
           <div className="w-full md:w-1/2">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">What's your business niche? <span className="text-red-500">*</span></label>
-            <div className="border-2 border-primary-light rounded-lg bg-zinc-50 p-0">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">What's your business niche?</label>
+            <div className="border border-zinc-300 rounded-lg p-0">
               <SelectField
                 label=""
                 id="businessNiche"
