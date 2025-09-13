@@ -22,8 +22,8 @@ const ValueProposition: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
           <div className="lg:w-1/2">
             <img 
-              src="https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?auto=format&fit=crop&w=600&h=500&q=80" 
-              alt="Wellness professional using a tablet" 
+              src="https://images.unsplash.com/photo-1458501534264-7d326fa0ca04?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+              alt="Structured" 
               className="rounded-2xl shadow-2xl object-cover w-full h-auto"
             />
           </div>
@@ -33,7 +33,9 @@ const ValueProposition: React.FC = () => {
               Designed for the Modern Wellness Professional
             </h2>
             <p className="text-lg text-slate-600 mb-8">
-              Stop juggling multiple apps and complex websites. Vena brings everything together in one elegant, easy-to-use platform, so you can focus on what you do best—helping your clients thrive.
+              Stop juggling multiple apps and complex websites.<br /> 
+              Vena brings everything together in one elegant, easy-to-use platform,<br />
+              so you can focus on what you do best - helping your clients thrive.
             </p>
             <ul className="space-y-4">
               {benefits.map((benefit, index) => (

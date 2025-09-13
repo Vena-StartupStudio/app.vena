@@ -15,10 +15,10 @@ const Hero: React.FC = () => {
                     The All-in-One Place for Your Wellness Business
                 </h1>
                 <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10">
-                    Vena gives you a single, beautiful hub to connect with clients, manage your schedule, and grow your boutique business—effortlessly.
+                    Vena gives you a single interactive hub to connect with clients, manage your schedule, and grow your boutique business effortlessly.
                 </p>
                 <div className="flex justify-center items-center gap-4">
-                     <a href="#cta" className="bg-indigo-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                     <a href="#cta" className="bg-indigo-500 text-white font-semibold px-8 py-4 rounded-xl hover:bg-indigo-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                         Get Early Access
                     </a>
                 </div>

@@ -26,7 +26,7 @@ const Header: React.FC = () => {
           ))}
         </nav>
         <div className="hidden md:block">
-            <a href="#cta" className="bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-sm hover:shadow-md">
+            <a href="#cta" className="bg-indigo-500 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-800 transition-all duration-300 shadow-sm hover:shadow-md">
                 Join Waitlist
             </a>
         </div>
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
                 {link.label}
               </a>
             ))}
-            <a href="#cta" className="w-full text-center bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition-all duration-300 shadow-sm hover:shadow-md">
+            <a href="#cta" className="w-full text-center bg-indigo-500 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-800 transition-all duration-300 shadow-sm hover:shadow-md">
                 Join Waitlist
             </a>
           </nav>
