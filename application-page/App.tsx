@@ -66,7 +66,7 @@ const App: React.FC = () => {
         <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 transition-all duration-500">
           <header style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem 0' }}>
             <img src={VenaLogo} alt="Vena Logo" style={{ height: '48px', marginBottom: '0.5rem' }} />
-            <h1 style={{ margin: 0, textAlign: 'center' }}>Vena</h1>
+            <h1 style={{ margin: 0, textAlign: 'center' }}></h1>
           </header>
           {isSubmitted ? (
             <ConfirmationMessage />
