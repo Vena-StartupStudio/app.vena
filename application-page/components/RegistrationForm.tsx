@@ -41,7 +41,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputField
-            label="Owner First Name"
+            label="First Name"
             id="firstName"
             name="firstName"
             value={formData.firstName}
@@ -50,7 +50,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
             required
           />
           <InputField
-            label="Owner Last Name"
+            label="Last Name"
             id="lastName"
             name="lastName"
             value={formData.lastName}
@@ -61,7 +61,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         </div>
 
         <InputField
-          label="Owner Email"
+          label="Email"
           id="email"
           name="email"
           type="email"
@@ -82,7 +82,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         />
 
         <SelectField
-            label="Business Niche"
+            label="What's your business niche?"
             id="businessNiche"
             name="businessNiche"
             value={formData.businessNiche}
@@ -93,7 +93,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         />
 
         <FileUploadField
-            label="Business Logo or Picture"
+            label="Add your logo"
             id="logo"
             name="logo"
             fileName={formData.logo?.name}
