@@ -4,25 +4,35 @@ const CTA: React.FC = () => {
   return (
     <section id="cta" className="bg-[#fcfaf7]">
         <div className="container mx-auto px-6 py-20 md:py-28">
-            <div className="bg-indigo-800 rounded-2xl p-10 md:p-16 text-center relative overflow-hidden">
+            <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl hover:shadow-3xl hover:from-purple-500 hover:via-purple-600 hover:to-indigo-700 transition-all duration-500 ease-out transform hover:-translate-y-1 hover:scale-[1.02] group cursor-pointer">
+                {/* Subtle background pattern */}
+                <div className="absolute inset-0 opacity-10 group-hover:opacity-15 transition-opacity duration-500">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full -translate-y-1/2 translate-x-1/3 group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-white rounded-full translate-y-1/2 -translate-x-1/3 group-hover:scale-110 transition-transform duration-700"></div>
+                </div>
+                
                 <div className="relative z-10 max-w-2xl mx-auto">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-                        Ready to Transform Your Practice?
+                    <h2 className="text-3xl md:text-5xl font-light text-white tracking-wide mb-6 leading-tight group-hover:text-purple-50 transition-colors duration-300">
+                        Ready to Transform
+                        <span className="block font-extralight text-purple-100 group-hover:text-white transition-colors duration-300">Your Practice?</span>
                     </h2>
-                    <p className="mt-4 text-lg text-indigo-100 mb-8">
+                    <p className="text-lg md:text-xl text-purple-50 mb-12 font-light leading-relaxed max-w-lg mx-auto group-hover:text-purple-100 transition-colors duration-300">
                         Join our waitlist to be the first to know when Vena launches. Get exclusive early access and special offers.
                     </p>
-                    <form className="mt-8 flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                        <input 
-                            type="email" 
-                            placeholder="Enter your email"
-                            className="w-full px-5 py-3 rounded-xl border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-white text-gray-800 placeholder-gray-500"
-                        />
+                    
+                    <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                        <div className="flex-1">
+                            <input 
+                                type="email" 
+                                placeholder="Enter your email address"
+                                className="w-full px-6 py-4 rounded-2xl border border-purple-200/20 bg-white/95 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white text-gray-800 placeholder-gray-500 font-light text-base shadow-lg transition-all duration-300"
+                            />
+                        </div>
                         <button 
                             type="submit"
-                            className="bg-white text-indigo-800 font-semibold px-8 py-3 rounded-xl hover:bg-violet-50 transition-colors duration-300 shadow-md flex-shrink-0"
+                            className="bg-white text-purple-700 font-medium px-8 py-4 rounded-2xl hover:bg-purple-50 hover:text-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex-shrink-0 border border-white/20"
                         >
-                            Join Now
+                            Join Waitlist
                         </button>
                     </form>
                 </div>

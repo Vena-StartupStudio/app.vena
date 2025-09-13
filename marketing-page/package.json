@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sentry/react": "^10.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
