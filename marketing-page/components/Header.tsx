@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import venaLogoSrc from '../assets/venalogo.png';
 
 const VenaLogo: React.FC = () => (
   <img 
-    src="/venalogo.png" 
+    src={venaLogoSrc} 
     alt="Vena Logo" 
-    className="h-12 w-auto md:w-48 lg:w-56" 
+    className="h-12 w-auto md:w-48 lg:w-56" // Header sizing
+    // or className="h-8 w-auto md:w-36 lg:w-40" // Footer sizing
   />
 );
 
