@@ -16,6 +16,17 @@ const App: React.FC = () => {
         <Features />
         <ValueProposition />
         <CTA />
+
+        {/* Sentry test button */}
+        <button
+          onClick={() => {
+            throw new Error("This is my first Sentry error!");
+          }}
+          className="mt-8 p-2 bg-red-500 text-white rounded"
+        >
+          Break the world
+        </button>
+
       </main>
       <Footer />
     </div>
