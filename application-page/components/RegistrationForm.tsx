@@ -83,9 +83,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
         <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
           <div className="w-full md:w-1/2">
-            <div className="border-2 border-primary-light rounded-lg p-4 bg-zinc-50">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">What's your business niche? <span className="text-red-500">*</span></label>
+            <div className="border-2 border-primary-light rounded-lg bg-zinc-50 p-0">
               <SelectField
-                label="What's your business niche?"
+                label=""
                 id="businessNiche"
                 name="businessNiche"
                 value={formData.businessNiche}
@@ -94,8 +95,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 error={errors.businessNiche}
                 required
               />
-              <p className="text-xs text-zinc-500 mt-2">Tap to select your business niche.</p>
             </div>
+            <p className="text-xs text-zinc-500 mt-2">Tap to select your business niche.</p>
           </div>
           <div className="w-full md:w-1/2 flex justify-center">
             <FileUploadField
