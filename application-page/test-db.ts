@@ -1,80 +1,38 @@
 import fs from "fs";
-import path from "path";
 import { Client } from "pg";
 import "dotenv/config";
 
-function loadCA(): string | undefined {
-  const certEnv = process.env.PGSSLROOTCERT;
-  
-  if (!certEnv) {
-    console.log("No PGSSLROOTCERT specified");
-    return undefined;
-  }
-  
-  // If the env variable contains the PEM content directly (for Render)
-  if (certEnv.startsWith("-----BEGIN CERTIFICATE-----")) {
-    console.log("✓ Using CA from environment variable");
-    return certEnv;
-  }
-  
-  // Try to read from file path (for local development)
-  try {
-    const fullPath = path.resolve(certEnv);
-    console.log("✓ Loading CA from file:", fullPath);
-    return fs.readFileSync(fullPath, "utf8");
-  } catch (error) {
-    console.error("❌ Could not load CA from file:", error);
-    return undefined;
-  }
+function loadCA(): string {
+  const v = (process.env.PGSSLROOTCERT || "").trim();
+  if (!v) throw new Error("PGSSLROOTCERT missing");
+  if (v.startsWith("-----BEGIN CERTIFICATE-----")) return v; // env contains PEM
+  return fs.readFileSync(v, "utf8"); // env is a path
 }
 
 async function main() {
-  console.log("🚀 Starting database connection test...");
-  
   const ca = loadCA();
-  const connectionConfig: any = {
+  const host = new URL(process.env.DATABASE_URL!).hostname;
+  console.log("CA loaded chars:", ca.length, "  SNI host:", host);
+
+  const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    application_name: "vena-app",
-  };
-
-  if (ca) {
-    connectionConfig.ssl = {
-      ca,
-      rejectUnauthorized: true,
-    };
-    console.log("🔒 SSL configured with CA certificate");
-  } else {
-    connectionConfig.ssl = {
-      rejectUnauthorized: false,
-    };
-    console.log("⚠️ SSL configured without CA verification");
-  }
-
-  const client = new Client(connectionConfig);
+    ssl: {
+      ca: [ca],                 // array helps on some Node/Windows setups
+      rejectUnauthorized: true, // keep ON once fixed
+      servername: host,         // SNI/hostname verification
+      minVersion: "TLSv1.2",
+    },
+    application_name: "vena-test",
+  });
 
   try {
-    console.log("🔌 Connecting to database...");
     await client.connect();
-    
-    const { rows } = await client.query("SELECT NOW() as now, version() as version");
-    console.log("✅ DATABASE CONNECTION SUCCESSFUL!");
-    console.log("📅 DB time:", rows[0].now);
-    console.log("🗄️ DB version:", rows[0].version.split(" ")[0]);
-    
+    const { rows } = await client.query("SELECT NOW() as now");
+    console.log("✅ Connected. DB time:", rows[0].now);
   } catch (err) {
-    console.error("❌ DATABASE CONNECTION FAILED:", err);
-    
-    // Debug information
-    if (err instanceof Error) {
-      console.log("\n🔍 Debug Information:");
-      console.log("- Error code:", (err as any).code);
-      console.log("- CA loaded:", ca ? "✓ Yes" : "❌ No");
-      console.log("- DATABASE_URL:", process.env.DATABASE_URL ? "✓ Set" : "❌ Missing");
-      console.log("- Environment:", process.env.NODE_ENV || "development");
-    }
+    console.error("❌ Connection failed:", err);
   } finally {
     await client.end().catch(() => {});
-    console.log("🔌 Database connection closed");
   }
 }
 
