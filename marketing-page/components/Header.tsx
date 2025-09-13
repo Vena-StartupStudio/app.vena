@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 
 const VenaLogo: React.FC = () => (
   <img 
-    src="/vena_logo.png" 
+    src="/venalogo.png" 
     alt="Vena Logo" 
-    className="h-24 w-auto" 
+    className="h-12 w-auto md:w-48 lg:w-56" 
   />
 );
 
