@@ -1,15 +1,15 @@
 
 export enum BusinessNiche {
-  Physiotherapist = 'Physiotherapist',
-  Chiropractor = 'Chiropractor',
-  Nutritionist = 'Nutritionist',
+  IceBathInstructor = 'Ice Bath Instructor',
   YogaInstructor = 'Yoga Instructor',
   PilatesInstructor = 'Pilates Instructor',
-  MassageTherapist = 'Massage Therapist',
   PersonalTrainer = 'Personal Trainer',
+  MeditationCoach = 'Meditation Coach',
+  MassageTherapist = 'Massage Therapist',
+  HolisticHealthTherapist = 'Holistic Health Therapist',
   WellnessCoach = 'Wellness Coach',
-  Acupuncturist = 'Acupuncturist',
-  MeditationTeacher = 'Meditation Teacher',
+  RunningCoach = 'Running Coach',
+  HikingCoach = 'Hiking Coach',
 }
 
 export interface FormData {
