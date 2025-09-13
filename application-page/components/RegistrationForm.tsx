@@ -22,6 +22,11 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 }) => {
   // Custom validation for business niche
   const isBusinessNicheValid = formData.businessNiche !== '';
+
+  // Ensure default value is '' for businessNiche
+  if (formData.businessNiche === undefined) {
+    formData.businessNiche = '';
+  }
   return (
     <>
       <div className="text-center mb-10">
