@@ -1,0 +1,118 @@
+import React from 'react';
+import type { FormData, FormErrors } from '../types';
+import { BUSINESS_NICHES } from '../constants';
+import InputField from './InputField';
+import SelectField from './SelectField';
+import FileUploadField from './FileUploadField';
+
+interface RegistrationFormProps {
+  formData: FormData;
+  errors: FormErrors;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}
+
+const RegistrationForm: React.FC<RegistrationFormProps> = ({
+  formData,
+  errors,
+  onInputChange,
+  onFileChange,
+  onSubmit,
+}) => {
+  return (
+    <>
+      <div className="text-center mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-zinc-800">Register Your Business with Vena</h1>
+        <p className="mt-3 text-base text-zinc-600">
+          Start growing your wellness practice today—simplify scheduling, payments, and client engagement with Vena.
+        </p>
+      </div>
+      <form onSubmit={onSubmit} noValidate className="space-y-6">
+        <InputField
+          label="Business Name"
+          id="businessName"
+          name="businessName"
+          value={formData.businessName}
+          onChange={onInputChange}
+          error={errors.businessName}
+          required
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputField
+            label="Owner First Name"
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
+            onChange={onInputChange}
+            error={errors.firstName}
+            required
+          />
+          <InputField
+            label="Owner Last Name"
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={onInputChange}
+            error={errors.lastName}
+            required
+          />
+        </div>
+
+        <InputField
+          label="Owner Email"
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={onInputChange}
+          error={errors.email}
+          required
+        />
+
+        <InputField
+          label="Link to Social Media Page (Optional)"
+          id="socialMedia"
+          name="socialMedia"
+          value={formData.socialMedia || ''}
+          onChange={onInputChange}
+          placeholder="https://instagram.com/yourbusiness"
+          error={errors.socialMedia}
+        />
+
+        <SelectField
+            label="Business Niche"
+            id="businessNiche"
+            name="businessNiche"
+            value={formData.businessNiche}
+            onChange={onInputChange}
+            options={BUSINESS_NICHES}
+            error={errors.businessNiche}
+            required
+        />
+
+        <FileUploadField
+            label="Business Logo or Picture"
+            id="logo"
+            name="logo"
+            fileName={formData.logo?.name}
+            onChange={onFileChange}
+            error={errors.logo}
+            required
+        />
+
+        <div>
+          <button
+            type="submit"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light transition-colors duration-300"
+          >
+            Create My Vena Account
+          </button>
+        </div>
+      </form>
+    </>
+  );
+};
+
+export default RegistrationForm;
