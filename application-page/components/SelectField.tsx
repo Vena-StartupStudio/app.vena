@@ -40,10 +40,16 @@ const SelectField: React.FC<SelectFieldProps> = ({
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
       >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
+        {options.map((option, idx) => (
+          idx === 0 ? (
+            <option key={option.value} value={option.value} disabled style={{ color: '#a1a1aa' }}>
+              {option.label}
+            </option>
+          ) : (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          )
         ))}
       </select>
       {error && <p id={`${id}-error`} className="mt-2 text-sm text-red-600">{error}</p>}

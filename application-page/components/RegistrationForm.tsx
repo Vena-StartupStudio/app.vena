@@ -20,6 +20,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   onFileChange,
   onSubmit,
 }) => {
+  // Custom validation for business niche
+  const isBusinessNicheValid = formData.businessNiche !== '';
   return (
     <>
       <div className="text-center mb-10">
@@ -114,7 +116,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         <div>
           <button
             type="submit"
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light transition-colors duration-300"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light transition-colors duration-300 disabled:opacity-50"
+            disabled={!isBusinessNicheValid}
           >
             Create My Vena Account
           </button>
