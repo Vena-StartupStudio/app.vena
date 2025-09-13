@@ -82,25 +82,34 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         />
 
         <SelectField
-            label="What's your business niche?"
-            id="businessNiche"
-            name="businessNiche"
-            value={formData.businessNiche}
-            onChange={onInputChange}
-            options={BUSINESS_NICHES}
-            error={errors.businessNiche}
-            required
-        />
-
-        <FileUploadField
-            label="Add your logo"
-            id="logo"
-            name="logo"
-            fileName={formData.logo?.name}
-            onChange={onFileChange}
-            error={errors.logo}
-            required
-        />
+        <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
+          <div className="w-full md:w-1/2">
+            <div className="border-2 border-primary-light rounded-lg p-4 bg-zinc-50">
+              <SelectField
+                label="What's your business niche?"
+                id="businessNiche"
+                name="businessNiche"
+                value={formData.businessNiche}
+                onChange={onInputChange}
+                options={BUSINESS_NICHES}
+                error={errors.businessNiche}
+                required
+              />
+              <p className="text-xs text-zinc-500 mt-2">Tap to select your business niche.</p>
+            </div>
+          </div>
+          <div className="w-full md:w-1/2 flex justify-center">
+            <FileUploadField
+              label="Add your logo"
+              id="logo"
+              name="logo"
+              fileName={formData.logo?.name}
+              onChange={onFileChange}
+              error={errors.logo}
+              required
+            />
+          </div>
+        </div>
 
         <div>
           <button
