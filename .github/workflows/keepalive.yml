@@ -3,7 +3,7 @@ name: Keep Render Awake
 on:
   schedule:
     - cron: "*/5 * * * *"   # every 5 minutes (UTC)
-  workflow_dispatch:
+  workflow_dispatch:        # allow manual run from the Actions tab
 
 permissions: {}
 
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: GET ping Render subdomain and print status
+      - name: Ping Render subdomain
         run: |
           curl -sS https://app-vena.onrender.com/ -o /dev/null -w "HTTP %{http_code}\n" \
             --retry 3 --retry-delay 5 --max-time 20 --fail
