@@ -28,7 +28,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-zinc-700 mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
+        {label} {required && <span className="text-red-500"></span>}
       </label>
       <select
         id={id}
