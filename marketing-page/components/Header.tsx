@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
-// TODO: Replace with proper import once build configuration is fixed
-const venaLogoSrc = '/assets/venalogo.png'; // Update this with your actual logo URL
 
 const VenaLogo: React.FC = () => (
   <img 
-    src={venaLogoSrc} 
+    src="/vena_logo.png" 
     alt="Vena Logo" 
-    className="h-12 w-auto md:w-48 lg:w-56" // Header sizing
-    onError={(e) => {
-      console.error('Failed to load Vena logo');
-      e.currentTarget.style.display = 'none';
-    }}
+    className="h-14 w-auto" 
   />
 );
 
