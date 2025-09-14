@@ -17,6 +17,7 @@ export interface FormData {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   socialMedia?: string;
   businessNiche: BusinessNiche | '';
   logo: File | null;

@@ -79,6 +79,17 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         />
 
         <InputField
+          label="Password"
+          id="password"
+          name="password"
+          type="password"
+          value={(formData as any).password || ''}
+          onChange={onInputChange}
+          error={errors.password}
+          required
+        />
+
+        <InputField
           label="Link to Social Media Page (Optional)"
           id="socialMedia"
           name="socialMedia"
