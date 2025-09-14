@@ -2,6 +2,7 @@ import React from 'react';
 import type { FormData, FormErrors } from '../types';
 import { BUSINESS_NICHES } from '../constants';
 import InputField from './InputField';
+import PasswordField from './PasswordField';
 import SelectField from './SelectField';
 import FileUploadField from './FileUploadField';
 
@@ -78,14 +79,22 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           required
         />
 
-        <InputField
+        <PasswordField
           label="Password"
           id="password"
           name="password"
-          type="password"
           value={(formData as any).password || ''}
           onChange={onInputChange}
           error={errors.password}
+          required
+        />
+        <PasswordField
+          label="Confirm Password"
+          id="confirmPassword"
+          name="confirmPassword"
+          value={(formData as any).confirmPassword || ''}
+          onChange={onInputChange}
+          error={errors.confirmPassword}
           required
         />
 

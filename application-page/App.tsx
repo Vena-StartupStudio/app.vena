@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import bcrypt from 'bcryptjs';
 import RegistrationForm from './components/RegistrationForm';
 import ConfirmationMessage from './components/ConfirmationMessage';
 import type { FormData, FormErrors } from './types';
@@ -13,6 +14,7 @@ const App: React.FC = () => {
     lastName: '',
     email: '',
   password: '',
+  confirmPassword: '',
     socialMedia: '',
   businessNiche: '',
     logo: null,
@@ -33,6 +35,11 @@ const App: React.FC = () => {
       newErrors.password = 'Password is required.';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters.';
+    }
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Please confirm your password.';
+    } else if (formData.password && formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = 'Passwords do not match.';
     }
     if (!formData.businessNiche) {
       newErrors.businessNiche = 'Business niche is required.';
@@ -62,10 +69,12 @@ const App: React.FC = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validate()) {
-      // Here you would typically send data to a server.
-      // For this example, we'll just simulate a successful submission.
-  const { password, ...safe } = formData;
-  console.log('Form data submitted (excluding password):', safe);
+      const { password, confirmPassword, ...rest } = formData as any;
+      // Hash password (sync for simplicity; async preferred in production)
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      const payload = { ...rest, password: hashedPassword };
+      console.log('Submitting payload (hashed password only):', payload);
+      // TODO: send payload to backend API
       setIsSubmitted(true);
     }
   };
