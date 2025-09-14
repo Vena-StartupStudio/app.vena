@@ -81,11 +81,26 @@ const Hero: React.FC = () => {
                         <div className="h-[64px] w-[3px] bg-gray-700 absolute -right-[15px] top-[142px] rounded-r-lg"></div>
                         
                         {/* Screen with enhanced border */}
-                        <div className="rounded-[2.2rem] overflow-hidden w-full h-full bg-white border-2 border-gray-100 relative">
+                        <div className="rounded-[2rem] overflow-hidden w-full h-full bg-white border-2 border-gray-100 relative">
                             <img 
-                                src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=300&h=600&q=80" 
+                                src="https://images.pexels.com/photos/3822668/pexels-photo-3822668.jpeg?_gl=1*1mw5c5p*_ga*Mzg0NjEzNzU0LjE3NTc4Mzk5NTA.*_ga_8JE65Q40S6*czE3NTc4Mzk5NTAkbzEkZzEkdDE3NTc4NDAwNDckajU5JGwwJGgw" 
                                 alt="Vena app interface" 
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover object-bottom scale-110"
+                                /* 
+                                Adjust the image display options:
+                                1. object-position: controls which part of the image is visible
+                                   Examples: object-left, object-right, object-top, object-bottom
+                                   Or custom positioning: object-position: 70% 30%
+                                
+                                2. scale: makes the image larger or smaller within the container
+                                   Increase to zoom in (e.g., scale-110, scale-125)
+                                   Decrease to zoom out (e.g., scale-90, scale-75)
+                                
+                                3. object-fit: controls how the image fills the container
+                                   object-cover: fills while maintaining aspect ratio (crops if needed)
+                                   object-contain: shows the entire image (may leave empty space)
+                                   object-fill: stretches to fill the container
+                                */
                             />
                             {/* Screen reflection effect */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none"></div>
