@@ -12,8 +12,9 @@ const App: React.FC = () => {
     firstName: '',
     lastName: '',
     email: '',
+  password: '',
     socialMedia: '',
-    businessNiche: BusinessNiche.Physiotherapist,
+  businessNiche: '',
     logo: null,
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -27,6 +28,14 @@ const App: React.FC = () => {
       newErrors.email = 'Email is required.';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid.';
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required.';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters.';
+    }
+    if (!formData.businessNiche) {
+      newErrors.businessNiche = 'Business niche is required.';
     }
     if (!formData.logo) newErrors.logo = 'Business logo or picture is required.';
 
@@ -55,7 +64,8 @@ const App: React.FC = () => {
     if (validate()) {
       // Here you would typically send data to a server.
       // For this example, we'll just simulate a successful submission.
-      console.log('Form data submitted:', formData);
+  const { password, ...safe } = formData;
+  console.log('Form data submitted (excluding password):', safe);
       setIsSubmitted(true);
     }
   };
