@@ -26,17 +26,19 @@ const Hero: React.FC = () => {
         <div className="container mx-auto px-6 text-center relative z-10">
             {/* Enhanced Content Section */}
             <div className="max-w-4xl mx-auto space-y-8">
-                {/* Premium Badge Design */}
-                <div className="inline-flex items-center space-x-3 bg-white/80 backdrop-blur-sm border border-purple-100 rounded-full px-6 py-3 shadow-sm">
-                    <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full opacity-80"></div>
-                        <div className="w-2 h-2 bg-indigo-400 rounded-full opacity-60"></div>
-                        <div className="w-2 h-2 bg-purple-300 rounded-full opacity-40"></div>
-                    </div>
-                    <span className="text-purple-700 font-medium tracking-wide text-sm">
-                        For Health & Wellness Professionals
-                    </span>
+            {/* New Badge Design */}
+            <div className="inline-block relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 blur-md rounded-lg transform -rotate-1"></div>
+                <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-2 rounded-lg">
+                <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M7.5 12.5L10.5 15.5L16.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="text-sm font-medium tracking-wide">Made For Professionals</span>
                 </div>
+                </div>
+            </div>
 
                 {/* Enhanced Heading */}
                 <div className="space-y-6">

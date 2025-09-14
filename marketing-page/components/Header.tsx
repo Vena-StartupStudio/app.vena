@@ -18,7 +18,7 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-50 border-b border-purple-100/30 shadow-sm">
+    <header className="bg-white backdrop-blur-xl sticky top-0 z-50 border-b border-purple-100/30 shadow-sm">
       {/* Subtle gradient line at top */}
       <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
       
@@ -28,8 +28,6 @@ const Header: React.FC = () => {
           {/* Logo Section */}
           <div className="flex items-center">
             <VenaLogo />
-            {/* Subtle separator */}
-            <div className="hidden lg:block ml-8 w-px h-6 bg-gradient-to-b from-transparent via-slate-300/50 to-transparent"></div>
           </div>
 
           {/* Navigation - Ultra Clean Design */}
