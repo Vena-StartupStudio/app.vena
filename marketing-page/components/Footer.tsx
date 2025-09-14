@@ -1,8 +1,9 @@
 import React from 'react';
 
 const VenaLogo: React.FC = () => (
-    <img src="/vena_logo.png" alt="Vena Logo" className="h-11 w-auto" />
-);const Footer: React.FC = () => {
+    <img src="/vena_logo.png" alt="Vena Logo" className="h-7 w-auto" />
+);
+const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-stone-200">
       <div className="container mx-auto px-6 py-8">

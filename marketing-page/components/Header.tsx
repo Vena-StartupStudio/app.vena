@@ -4,7 +4,7 @@ const VenaLogo: React.FC = () => (
   <img 
     src="/vena_logo.png" 
     alt="Vena Logo" 
-    className="h-24 w-auto" 
+    className="h-14 w-auto" 
   />
 );
 
