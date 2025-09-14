@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+// TODO: Replace with proper import once build configuration is fixed
+const venaLogoSrc = '/assets/venalogo.png'; // Update this with your actual logo URL
 
 const VenaLogo: React.FC = () => (
   <img 
-    src="/vena_logo.png" 
+    src={venaLogoSrc} 
     alt="Vena Logo" 
     className="h-14 w-auto" 
   />
