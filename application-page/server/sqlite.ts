@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 const DEFAULT_PATH = path.resolve(process.cwd(), 'data', 'app.db');
-const dbFile = process.env.SQLITE_DB_PATH || DEFAULT_PATH;
+export const dbFile = process.env.SQLITE_DB_PATH || DEFAULT_PATH;
 
 // Ensure parent folder exists
 fs.mkdirSync(path.dirname(dbFile), { recursive: true });

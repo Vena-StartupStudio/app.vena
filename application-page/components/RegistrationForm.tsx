@@ -1,10 +1,10 @@
 import React from 'react';
-import type { FormData, FormErrors } from '../types';
-import { BUSINESS_NICHES } from '../constants';
-import InputField from './InputField';
-import PasswordField from './PasswordField';
-import SelectField from './SelectField';
-import FileUploadField from './FileUploadField';
+import type { FormData, FormErrors } from '../types.ts';
+import { BUSINESS_NICHES } from '../constants.js';
+import InputField from './InputField.js';
+import PasswordField from './PasswordField.js';
+import SelectField from './SelectField.js';
+import FileUploadField from './FileUploadField.js';
 
 interface RegistrationFormProps {
   formData: FormData;
@@ -43,7 +43,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           name="businessName"
           value={formData.businessName}
           onChange={onInputChange}
-          error={errors.businessName}
+          error={errors.businessName ?? ''}
           required
         />
 
@@ -54,7 +54,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
             name="firstName"
             value={formData.firstName}
             onChange={onInputChange}
-            error={errors.firstName}
+            error={errors.firstName ?? ''}
             required
           />
           <InputField
@@ -63,7 +63,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
             name="lastName"
             value={formData.lastName}
             onChange={onInputChange}
-            error={errors.lastName}
+            error={errors.lastName ?? ''}
             required
           />
         </div>
@@ -75,7 +75,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           type="email"
           value={formData.email}
           onChange={onInputChange}
-          error={errors.email}
+          error={errors.email ?? ''}
           required
         />
 
@@ -85,7 +85,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           name="password"
           value={(formData as any).password || ''}
           onChange={onInputChange}
-          error={errors.password}
+          error={errors.password ?? ''}
           required
         />
         <PasswordField
@@ -94,7 +94,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           name="confirmPassword"
           value={(formData as any).confirmPassword || ''}
           onChange={onInputChange}
-          error={errors.confirmPassword}
+          error={errors.confirmPassword ?? ''}
           required
         />
 
@@ -105,7 +105,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
           value={formData.socialMedia || ''}
           onChange={onInputChange}
           placeholder="https://instagram.com/yourbusiness"
-          error={errors.socialMedia}
+          error={errors.socialMedia ?? ''}
         />
 
         <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
@@ -119,7 +119,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 value={formData.businessNiche}
                 onChange={onInputChange}
                 options={BUSINESS_NICHES}
-                error={errors.businessNiche}
+                error={errors.businessNiche ?? ''}
                 required
               />
             </div>
@@ -130,10 +130,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               label="Add your logo"
               id="logo"
               name="logo"
-              fileName={formData.logo?.name}
+              fileName={formData.logo?.name ?? ''}
               onChange={onFileChange}
-              error={errors.logo}
-              required
+              error={errors.logo ?? ''}
+              //required
             />
           </div>
         </div>

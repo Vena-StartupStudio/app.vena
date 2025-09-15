@@ -1,5 +1,5 @@
 
-import { BusinessNiche } from './types';
+import { BusinessNiche } from './types.js';
 
 export const BUSINESS_NICHES = [
   { value: '', label: 'Choose your business niche' },

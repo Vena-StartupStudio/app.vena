@@ -1,96 +1,155 @@
 import React, { useState, useCallback } from 'react';
+import RegistrationForm from './components/RegistrationForm.js';
+import ConfirmationMessage from './components/ConfirmationMessage.js';
 import bcrypt from 'bcryptjs';
-import RegistrationForm from './components/RegistrationForm';
-import ConfirmationMessage from './components/ConfirmationMessage';
-import type { FormData, FormErrors } from './types';
-import { BusinessNiche } from './types';
-import VenaLogo from './components/icons/VenaLogo.png';
+import type { FormData as RegistrationFormData, FormErrors as BaseFormErrors } from './types.js';
 
-const App: React.FC = () => {
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [formData, setFormData] = useState<FormData>({
-    businessName: '',
-    firstName: '',
-    lastName: '',
-    email: '',
+type FormErrors = BaseFormErrors & { submit?: string };
+
+// If your types.ts does not define these fields, ensure it matches what is used here.
+const initialFormData: RegistrationFormData & {
+  password: string;
+  confirmPassword: string;
+  businessNiche: string;
+  logo: File | null;
+} = {
+  businessName: '',
+  firstName: '',        // If not used in your UI, can be left blank or removed
+  lastName: '',         // Same as above
+  email: '',
   password: '',
   confirmPassword: '',
-    socialMedia: '',
-  businessNiche: '',
-    logo: null,
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
+  socialMedia: '',
+  businessNiche: '',    // empty means "Choose your business niche"
+  logo: null
+};
 
-  const validate = (): boolean => {
+const App: React.FC = () => {
+  const [formData, setFormData] = useState<typeof initialFormData>(initialFormData);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const validate = useCallback((): boolean => {
     const newErrors: FormErrors = {};
-    if (!formData.businessName.trim()) newErrors.businessName = 'Business name is required.';
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required.';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required.';
+
+    if (!formData.businessName.trim()) {
+      newErrors.businessName = 'Business name is required';
+    }
+
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required.';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid.';
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = 'Enter a valid email';
     }
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password is required.';
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters.';
+      newErrors.password = 'Minimum 8 characters';
     }
-    if (!formData.confirmPassword.trim()) {
-      newErrors.confirmPassword = 'Please confirm your password.';
-    } else if (formData.password && formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = 'Passwords do not match.';
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
+
     if (!formData.businessNiche) {
-      newErrors.businessNiche = 'Business niche is required.';
+      newErrors.businessNiche = 'Please choose your business niche';
     }
-    if (!formData.logo) newErrors.logo = 'Business logo or picture is required.';
+
+    // Optional: validate social media URL if provided
+    if (formData.socialMedia) {
+      try {
+        // Basic URL validation
+        // eslint-disable-next-line no-new
+        new URL(formData.socialMedia);
+      } catch {
+        newErrors.socialMedia = 'Enter a valid URL (e.g., https://instagram.com/yourbusiness)';
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      // Clear field error on change
+      if (errors[name as keyof FormErrors]) {
+        setErrors(prev => {
+          const copy = { ...prev };
+            delete copy[name as keyof FormErrors];
+          return copy;
+        });
+      }
+    },
+    [errors]
+  );
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFormData(prev => ({ ...prev, logo: e.target.files![0] }));
-      setErrors(prev => {
-        const newErrors = {...prev};
-        delete newErrors.logo;
-        return newErrors;
-      })
-    }
+    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+    setFormData(prev => ({ ...prev, logo: file as File | null }));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // VERSION B: client-side hashing (NOTE: Prefer hashing on the server in production)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (validate()) {
-      const { password, confirmPassword, ...rest } = formData as any;
-      // Hash password (sync for simplicity; async preferred in production)
-      const hashedPassword = bcrypt.hashSync(password, 10);
-      const payload = { ...rest, password: hashedPassword };
-      console.log('Submitting payload (hashed password only):', payload);
-      // TODO: send payload to backend API
+    if (submitting) return;
+    if (!validate()) return;
+
+    setSubmitting(true);
+    try {
+      // Hash password locally (sync). For better UX / performance, use async hashing or hash on server.
+      const passwordHash = bcrypt.hashSync(formData.password, 10);
+
+      const payload = {
+        businessName: formData.businessName,
+        firstName: formData.firstName || null,
+        lastName: formData.lastName || null,
+        email: formData.email,
+        passwordHash, // IMPORTANT: sending hash, not plain password
+        socialMedia: formData.socialMedia || null,
+        businessNiche: formData.businessNiche,
+        logoFilename: formData.logo ? formData.logo.name : null
+      };
+
+      console.log('Submitting registration (hashed password only):', payload);
+
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error('Registration failed:', txt);
+        // Show backend error reason to user
+        setErrors(prev => ({ ...prev, submit: `Registration failed: ${txt}` }));
+        return;
+      }
+
       setIsSubmitted(true);
+    } catch (err) {
+      console.error('Network or hashing error:', err);
+      setErrors(prev => ({ ...prev, submit: 'Unexpected error. Try again.' }));
+    } finally {
+      setSubmitting(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <main className="w-full max-w-2xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 transition-all duration-500">
-          <header style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem 0' }}>
-            <img src={VenaLogo} alt="Vena Logo" style={{ height: '48px', marginBottom: '0.5rem' }} />
-            <h1 style={{ margin: 0, textAlign: 'center' }}></h1>
-          </header>
           {isSubmitted ? (
             <ConfirmationMessage />
           ) : (
-            <RegistrationForm 
+            <RegistrationForm
               formData={formData}
               errors={errors}
               onInputChange={handleInputChange}
@@ -98,10 +157,13 @@ const App: React.FC = () => {
               onSubmit={handleSubmit}
             />
           )}
+          {!isSubmitted && errors.submit && (
+            <p className="mt-4 text-sm text-red-600">{errors.submit}</p>
+          )}
+          {!isSubmitted && submitting && (
+            <p className="mt-4 text-sm text-zinc-500">Submitting...</p>
+          )}
         </div>
-         <p className="text-center text-xs text-zinc-400 mt-6">
-            &copy; 2025 Vena. All rights reserved. vena.software
-        </p>
       </main>
     </div>
   );
