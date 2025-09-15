@@ -5,6 +5,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+node_modules
 
 # Editor directories and files
 .vscode/*
