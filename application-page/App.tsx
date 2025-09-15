@@ -1,29 +1,36 @@
-import React, { useState, useCallback } from 'react';
-import { RegistrationForm } from "./components/RegistrationForm";
-import { ConfirmationMessage } from "./components/ConfirmationMessage";
+// application-page/App.tsx
+import React, { useState, useCallback } from "react";
+import RegistrationForm from "./components/RegistrationForm";      
+import ConfirmationMessage from "./components/ConfirmationMessage"; 
 
-type FormErrors = BaseFormErrors & { submit?: string };
-
-// If your types.ts does not define these fields, ensure it matches what is used here.
-const initialFormData: RegistrationFormData & {
+type FormData = {
+  businessName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  socialMedia: string;
   password: string;
   confirmPassword: string;
   businessNiche: string;
   logo: File | null;
-} = {
-  businessName: '',
-  firstName: '',        // If not used in your UI, can be left blank or removed
-  lastName: '',         // Same as above
-  email: '',
-  password: '',
-  confirmPassword: '',
-  socialMedia: '',
-  businessNiche: '',    // empty means "Choose your business niche"
-  logo: null
 };
 
+const initialFormData: FormData = {
+  businessName: "",
+  firstName: "",        // If not used in your UI, can be left blank or removed
+  lastName: "",         // Same as above
+  email: "",
+  password: "",
+  confirmPassword: "",
+  socialMedia: "",
+  businessNiche: "",    // empty means "Choose your business niche"
+  logo: null,
+};
+
+type FormErrors = Partial<Record<keyof FormData, string>> & { submit?: string };
+
 const App: React.FC = () => {
-  const [formData, setFormData] = useState<typeof initialFormData>(initialFormData);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -32,39 +39,38 @@ const App: React.FC = () => {
     const newErrors: FormErrors = {};
 
     if (!formData.businessName.trim()) {
-      newErrors.businessName = 'Business name is required';
+      newErrors.businessName = "Business name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = 'Enter a valid email';
+      newErrors.email = "Enter a valid email";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Minimum 8 characters';
+      newErrors.password = "Minimum 8 characters";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirm your password';
+      newErrors.confirmPassword = "Confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!formData.businessNiche) {
-      newErrors.businessNiche = 'Please choose your business niche';
+      newErrors.businessNiche = "Please choose your business niche";
     }
 
-    // Optional: validate social media URL if provided
     if (formData.socialMedia) {
       try {
         // Basic URL validation
         // eslint-disable-next-line no-new
         new URL(formData.socialMedia);
       } catch {
-        newErrors.socialMedia = 'Enter a valid URL (e.g., https://instagram.com/yourbusiness)';
+        newErrors.socialMedia = "Enter a valid URL (e.g., https://instagram.com/yourbusiness)";
       }
     }
 
@@ -75,12 +81,12 @@ const App: React.FC = () => {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
       // Clear field error on change
       if (errors[name as keyof FormErrors]) {
-        setErrors(prev => {
+        setErrors((prev) => {
           const copy = { ...prev };
-            delete copy[name as keyof FormErrors];
+          delete copy[name as keyof FormErrors];
           return copy;
         });
       }
@@ -88,39 +94,51 @@ const App: React.FC = () => {
     [errors]
   );
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
-    setFormData(prev => ({ ...prev, logo: file as File | null }));
-  }, []);
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files ? e.target.files[0] : null;
+      setFormData((prev) => ({ ...prev, logo: file }));
+      // Clear logo error on change (if you ever set one)
+      if (errors.logo) {
+        setErrors((prev) => {
+          const copy = { ...prev };
+          delete copy.logo;
+          return copy;
+        });
+      }
+    },
+    [errors]
+  );
 
-  // VERSION B: client-side hashing (NOTE: Prefer hashing on the server in production)
-  const handleSubmit = async (payload: FormValues) => {
+  const handleSubmit = async (payload: FormData) => {
     setSubmitting(true);
     setErrors({});
 
     try {
-      // DO NOT hash the password on the client.
-      // Send the raw payload directly to the server.
-      // The server is responsible for hashing.
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      // Note: If you later want to actually upload the logo file,
+      // use FormData() and multipart/form-data, not JSON.
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // ⚠️ Consider excluding `logo` from JSON if it might be a File.
+        body: JSON.stringify({ ...payload, logo: null }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        console.error('Registration failed:', data);
-        // Show backend error reason to user
-        setErrors(prev => ({ ...prev, submit: `Registration failed: ${data.message || 'Unknown error'}` }));
+        console.error("Registration failed:", data);
+        setErrors((prev) => ({
+          ...prev,
+          submit: `Registration failed: ${data.message || "Unknown error"}`,
+        }));
         return;
       }
 
       setIsSubmitted(true);
     } catch (err) {
-      console.error('Network error:', err);
-      setErrors(prev => ({ ...prev, submit: 'Unexpected error. Try again.' }));
+      console.error("Network error:", err);
+      setErrors((prev) => ({ ...prev, submit: "Unexpected error. Try again." }));
     } finally {
       setSubmitting(false);
     }

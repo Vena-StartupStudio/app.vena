@@ -1,3 +1,7 @@
+import React, { useState, useCallback } from 'react';
+// Change to default imports
+import type { FormData as RegistrationFormData, FormErrors as BaseFormErrors } from './types';
+
 import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
