@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import RegistrationForm from './components/RegistrationForm.js';
-import ConfirmationMessage from './components/ConfirmationMessage.js';
-import bcrypt from 'bcryptjs';
-import type { FormData as RegistrationFormData, FormErrors as BaseFormErrors } from './types.js';
+import { RegistrationForm } from "./components/RegistrationForm";
+import { ConfirmationMessage } from "./components/ConfirmationMessage";
 
 type FormErrors = BaseFormErrors & { submit?: string };
 
@@ -96,46 +94,32 @@ const App: React.FC = () => {
   }, []);
 
   // VERSION B: client-side hashing (NOTE: Prefer hashing on the server in production)
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (submitting) return;
-    if (!validate()) return;
-
+  const handleSubmit = async (payload: FormValues) => {
     setSubmitting(true);
+    setErrors({});
+
     try {
-      // Hash password locally (sync). For better UX / performance, use async hashing or hash on server.
-      const passwordHash = bcrypt.hashSync(formData.password, 10);
-
-      const payload = {
-        businessName: formData.businessName,
-        firstName: formData.firstName || null,
-        lastName: formData.lastName || null,
-        email: formData.email,
-        passwordHash, // IMPORTANT: sending hash, not plain password
-        socialMedia: formData.socialMedia || null,
-        businessNiche: formData.businessNiche,
-        logoFilename: formData.logo ? formData.logo.name : null
-      };
-
-      console.log('Submitting registration (hashed password only):', payload);
-
+      // DO NOT hash the password on the client.
+      // Send the raw payload directly to the server.
+      // The server is responsible for hashing.
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const txt = await res.text();
-        console.error('Registration failed:', txt);
+        console.error('Registration failed:', data);
         // Show backend error reason to user
-        setErrors(prev => ({ ...prev, submit: `Registration failed: ${txt}` }));
+        setErrors(prev => ({ ...prev, submit: `Registration failed: ${data.message || 'Unknown error'}` }));
         return;
       }
 
       setIsSubmitted(true);
     } catch (err) {
-      console.error('Network or hashing error:', err);
+      console.error('Network error:', err);
       setErrors(prev => ({ ...prev, submit: 'Unexpected error. Try again.' }));
     } finally {
       setSubmitting(false);

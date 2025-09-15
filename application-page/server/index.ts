@@ -12,6 +12,7 @@ import {
   type RegistrationRecord,
   dbFile,
 } from "./sqlite.js";
+import argon2 from "argon2";
 
 // ------------ Config ------------
 const PORT = Number(process.env.PORT || 3001);
@@ -39,54 +40,49 @@ app.use("/uploads", express.static(UPLOADS_DIR, { maxAge: "7d", index: false }))
 // ------------ Routes ------------
 
 // POST /api/register (accepts JSON body with optional multipart/form-data for logo)
-app.post("/api/register", upload.single("logo"), (req: Request, res: Response) => {
+app.post("/api/register", upload.single("logo"), async (req: Request, res: Response) => {
   try {
-    console.log("Received registration request:", { body: req.body, file: req.file });
-
     const {
       businessName,
       firstName,
       lastName,
       email,
-      passwordHash,
+      password, // Receive the plain-text password from the client
       socialMedia,
       businessNiche,
     } = req.body;
 
-    // Basic validation
-    if (!businessName || !email || !passwordHash || !businessNiche) {
-      const missing = ["businessName", "email", "passwordHash", "businessNiche"].filter(
-        (key) => !req.body[key]
-      );
-      return res
-        .status(400)
-        .json({ ok: false, error: "Missing required fields", fields: missing });
+    // --- SERVER-SIDE VALIDATION ---
+    if (!businessName || !email || !password || !businessNiche) {
+      return res.status(400).json({ ok: false, error: "Missing required fields." });
     }
+
+    const existingUser = getRegistrationByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({ ok: false, error: "Email already registered." });
+    }
+
+    // --- HASH THE PASSWORD ON THE SERVER ---
+    const passwordHash = await argon2.hash(password);
 
     const data: RegistrationRecord = {
       businessName,
-      firstName: firstName || null,
-      lastName: lastName || null,
+      firstName: firstName || "",
+      lastName: lastName || "",
       email,
-      passwordHash,
-      socialMedia: socialMedia || null,
+      passwordHash, // Save the hash, not the plain password
+      socialMedia: socialMedia || "",
       businessNiche,
-      logoFilename: req.file ? req.file.filename : null,
+      logoFilename: req.file?.filename || null,
     };
 
     const info = insertRegistration(data);
+    console.log(`Registration successful for ${email}, ID: ${info.lastInsertRowid}`);
+
     return res.status(201).json({ ok: true, id: info.lastInsertRowid });
   } catch (err: any) {
-    // Unique email constraint? Surface a helpful message.
-    if (
-      err &&
-      typeof err.message === "string" &&
-      err.message.includes("UNIQUE constraint failed: registrations.email")
-    ) {
-      return res.status(409).json({ ok: false, error: "Email already registered" });
-    }
-    console.error("Registration failed:", err);
-    return res.status(500).json({ ok: false, error: "Registration failed", details: err.message });
+    console.error("Registration failed:", err.message);
+    return res.status(500).json({ ok: false, error: "Registration failed due to a server error." });
   }
 });
 
