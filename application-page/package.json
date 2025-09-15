@@ -7,17 +7,19 @@
   "engines": {
     "node": ">=18.18.0"
   },
-  "scripts": {
-    "dev": "vite",
-    "server": "tsx server/index.ts",
-    "dev:full": "run-p server dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint \"**/*.{ts,tsx}\"",
-    "format": "prettier --write .",
-    "start": "node dist/server/index.js"
-  },
+"scripts": {
+  "dev": "vite",
+  "server": "tsx server/index.ts",
+  "dev:full": "run-p server dev",
+  "build:client": "vite build",
+  "build:server": "tsc -p tsconfig.server.json",
+  "build": "yarn build:client && yarn build:server",
+  "preview": "vite preview",
+  "typecheck": "tsc --noEmit",
+  "lint": "eslint \"**/*.{ts,tsx}\"",
+  "format": "prettier --write .",
+  "start": "node dist/server/index.js"
+},
   "dependencies": {
     "@types/better-sqlite3": "^7.6.11",
     "argon2": "^0.40.3",

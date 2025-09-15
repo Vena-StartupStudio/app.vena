@@ -1,13 +1,16 @@
-import React, { useState, useCallback } from 'react';
-// Change to default imports
-import type { FormData as RegistrationFormData, FormErrors as BaseFormErrors } from './types';
-
-import express from "express";
-import type { Request, Response } from "express";
+import express, { type Request, type Response, type RequestHandler } from "express";
 import cors from "cors";
 import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+import argon2 from "argon2";
+
+// ESM-friendly __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// DB helpers (compiled to .js in dist). Keep the .js extension for NodeNext/ESM.
 import {
   health,
   insertRegistration,
@@ -16,15 +19,18 @@ import {
   type RegistrationRecord,
   dbFile,
 } from "./sqlite.js";
-import argon2 from "argon2";
 
 // ------------ Config ------------
 const PORT = Number(process.env.PORT || 3001);
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN?.split(",") ?? "*";
+
+const rawAllowed =
+  process.env.ALLOWED_ORIGIN?.split(",").map((s) => s.trim()).filter(Boolean);
+const ALLOWED_ORIGIN: "*" | string[] =
+  rawAllowed && rawAllowed.length > 0 ? rawAllowed : "*";
+
 const UPLOADS_DIR = process.env.UPLOADS_DIR
   ? path.resolve(process.env.UPLOADS_DIR)
   : path.resolve(process.cwd(), "uploads");
-fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // Ensure directories exist
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -34,71 +40,90 @@ const app = express();
 const upload = multer({ dest: UPLOADS_DIR });
 
 // CORS + parsers
-app.use(cors({ origin: ALLOWED_ORIGIN }));
+app.use(
+  cors({
+    // If "*", let any origin access but disable credentials (browser restriction)
+    origin: ALLOWED_ORIGIN === "*" ? true : ALLOWED_ORIGIN,
+    credentials: ALLOWED_ORIGIN !== "*",
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files (optional)
+// Serve uploaded files
 app.use("/uploads", express.static(UPLOADS_DIR, { maxAge: "7d", index: false }));
+
+// Serve the built client (dist/) — needed in production on Render
+const clientDist = path.join(__dirname, ".."); // points to application-page/dist
+app.use(express.static(clientDist));
+
+// Multer wrapper: only run for multipart/form-data and cast to our Express types
+const maybeUpload: RequestHandler = (req, res, next) => {
+  if (req.is("multipart/form-data")) {
+    return (upload.single("logo") as unknown as RequestHandler)(req, res, next);
+  }
+  return next();
+};
 
 // ------------ Routes ------------
 
-// POST /api/register (accepts JSON body with optional multipart/form-data for logo)
-app.post("/api/register", upload.single("logo"), async (req: Request, res: Response) => {
+// POST /api/register (accepts JSON or multipart/form-data with "logo")
+app.post("/api/register", maybeUpload, async (req: Request, res: Response) => {
   try {
     const {
       businessName,
       firstName,
       lastName,
       email,
-      password, // Receive the plain-text password from the client
+      password, // plain-text from client; we hash it here
       socialMedia,
       businessNiche,
-    } = req.body;
+    } = req.body as Record<string, string>;
 
     // --- SERVER-SIDE VALIDATION ---
     if (!businessName || !email || !password || !businessNiche) {
       return res.status(400).json({ ok: false, error: "Missing required fields." });
     }
 
-    const existingUser = getRegistrationByEmail(email);
-    if (existingUser) {
+    const existing = getRegistrationByEmail(email);
+    if (existing) {
       return res.status(409).json({ ok: false, error: "Email already registered." });
     }
 
     // --- HASH THE PASSWORD ON THE SERVER ---
     const passwordHash = await argon2.hash(password);
 
-    const data: RegistrationRecord = {
+    const record: RegistrationRecord = {
       businessName,
       firstName: firstName || "",
       lastName: lastName || "",
       email,
-      passwordHash, // Save the hash, not the plain password
+      passwordHash,
       socialMedia: socialMedia || "",
       businessNiche,
       logoFilename: req.file?.filename || null,
     };
 
-    const info = insertRegistration(data);
+    const info = insertRegistration(record);
     console.log(`Registration successful for ${email}, ID: ${info.lastInsertRowid}`);
-
     return res.status(201).json({ ok: true, id: info.lastInsertRowid });
   } catch (err: any) {
-    console.error("Registration failed:", err.message);
-    return res.status(500).json({ ok: false, error: "Registration failed due to a server error." });
+    console.error("Registration failed:", err?.message || err);
+    return res
+      .status(500)
+      .json({ ok: false, error: "Registration failed due to a server error." });
   }
 });
 
-// GET list
-app.get(["/registrations", "/api/registrations"], (req: Request, res: Response) => {
+// List registrations
+app.get(["/api/registrations", "/registrations"], (req: Request, res: Response) => {
   const limit = Number(req.query.limit ?? 50);
   const rows = listRegistrations(Number.isFinite(limit) ? limit : 50);
   res.json({ ok: true, registrations: rows });
 });
 
-// GET by email (optional helper)
-app.get(["/registration", "/api/registration"], (req: Request, res: Response) => {
+// Get by email
+app.get(["/api/registration", "/registration"], (req: Request, res: Response) => {
   const email = String(req.query.email || "");
   if (!email) return res.status(400).json({ ok: false, error: "email query param is required" });
   const row = getRegistrationByEmail(email);
@@ -107,7 +132,7 @@ app.get(["/registration", "/api/registration"], (req: Request, res: Response) =>
 });
 
 // Health
-app.get(["/health", "/api/health"], (_req: Request, res: Response) => {
+app.get(["/api/health", "/health"], (_req: Request, res: Response) => {
   try {
     res.json({ ok: health() });
   } catch (err: any) {
@@ -115,9 +140,14 @@ app.get(["/health", "/api/health"], (_req: Request, res: Response) => {
   }
 });
 
+// SPA fallback to index.html
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(clientDist, "index.html"));
+});
+
 // ------------ Start ------------
 app.listen(PORT, () => {
-  console.log(`API listening on http://localhost:${PORT}`);
-  console.log(`Database file location: ${dbFile}`);
-  console.log(`Uploads: ${UPLOADS_DIR}`);
+  console.log(`API listening on :${PORT}`);
+  console.log(`Database file: ${dbFile}`);
+  console.log(`Uploads dir: ${UPLOADS_DIR}`);
 });
