@@ -10,6 +10,9 @@ fs.mkdirSync(path.dirname(dbFile), { recursive: true });
 
 const db = new Database(dbFile);
 db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
+db.pragma('synchronous = NORMAL');
+
 
 // Create table (extend as needed)
 db.exec(`

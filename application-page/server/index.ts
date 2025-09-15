@@ -16,7 +16,10 @@ import {
 // ------------ Config ------------
 const PORT = Number(process.env.PORT || 3001);
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN?.split(",") ?? "*";
-const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+const UPLOADS_DIR = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.resolve(process.cwd(), "uploads");
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // Ensure directories exist
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
