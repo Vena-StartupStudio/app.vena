@@ -40,8 +40,10 @@ export default function RegistrationForm({
     onSubmit(formData);
   };
 
-  // Enforce required fields before allowing submit
+  // Enforce required fields + password policy before allowing submit
+  const MIN_PWD = 8;
   const passwordsMatch = !!formData.password && formData.password === formData.confirmPassword;
+  const passwordLongEnough = formData.password.trim().length >= MIN_PWD;
   const allRequiredFilled = (
     formData.businessName.trim() !== '' &&
     formData.firstName.trim() !== '' &&
@@ -51,7 +53,7 @@ export default function RegistrationForm({
     formData.confirmPassword.trim() !== '' &&
     formData.businessNiche.trim() !== ''
   );
-  const canSubmit = allRequiredFilled && passwordsMatch;
+  const canSubmit = allRequiredFilled && passwordsMatch && passwordLongEnough;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="grid gap-3">
@@ -136,17 +138,22 @@ export default function RegistrationForm({
             aria-describedby="password-strength"
           />
           {/* Strength meter */}
-          <div className="mt-2" id="password-strength">
-            <div className="flex gap-1 mb-1" aria-hidden="true">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 flex-1 rounded ${i < passwordStrength ? 'bg-indigo-600' : 'bg-zinc-200'}`}
-                />
-              ))}
+          {formData.password && formData.password.length > 0 && (
+            <div className="mt-2" id="password-strength">
+              <div className="flex gap-1 mb-1" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-2 flex-1 rounded-md transition-colors duration-200 ${i < passwordStrength ? 'bg-indigo-600' : 'bg-zinc-300'}`}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-zinc-600">Strength: {strengthLabel}</p>
             </div>
-            <p className="text-xs text-zinc-500">Strength: {strengthLabel}</p>
-          </div>
+          )}
+          {formData.password && formData.password.length > 0 && formData.password.length < 8 && (
+            <p className="text-xs text-amber-600 mt-1">Minimum 8 characters required.</p>
+          )}
           {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
         </label>
         <label className="grid gap-1">

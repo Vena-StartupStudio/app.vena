@@ -64,10 +64,12 @@ const App: React.FC = () => {
     try {
       // password validations (client-side safeguard; server should also enforce)
       if (!payload.password || payload.password.length < 8) {
-        throw new Error('Password must be at least 8 characters.');
+        setErrors(prev => ({ ...prev, password: 'Password must be at least 8 characters.' }));
+        return;
       }
       if (payload.password !== payload.confirmPassword) {
-        throw new Error('Passwords do not match.');
+        setErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match.' }));
+        return;
       }
 
       // 1) optional upload
