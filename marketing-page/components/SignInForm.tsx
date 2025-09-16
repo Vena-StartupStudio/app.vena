@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
 
 interface Props {
   onSuccess?: (email: string) => void;
@@ -16,39 +15,25 @@ const SignInForm: React.FC<Props> = ({ onSuccess }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  setError(null);
-  setInfo(null);
+    setError(null);
+    setInfo(null);
     setLoading(true);
-    try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) throw signInError;
-      if (!data.user) throw new Error('No user returned');
-      onSuccess?.(email);
-      // redirect placeholder (adjust as needed)
-      window.location.href = '/';
-    } catch (err: any) {
-      setError(err.message || 'Sign in failed');
-    } finally {
+    
+    // Simulate loading
+    setTimeout(() => {
       setLoading(false);
-    }
+      setInfo('Sign in successful! (Frontend demo)');
+      onSuccess?.(email);
+    }, 1000);
   };
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = () => {
     if (!email) {
       setError('Enter your email first.');
       return;
     }
     setError(null);
-    setInfo(null);
-    try {
-      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/signin',
-      });
-      if (resetErr) throw resetErr;
-      setInfo('Password reset email sent (check your inbox).');
-    } catch (err: any) {
-      setError(err.message || 'Failed to send reset email');
-    }
+    setInfo('Password reset email sent (demo mode).');
   };
 
   return (
