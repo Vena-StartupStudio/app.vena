@@ -4,6 +4,7 @@ import { supabase } from "./lib/supabaseClient";
 import RegistrationForm from "./components/RegistrationForm";
 import ConfirmationMessage from "./components/ConfirmationMessage";
 import type { FormData as RegistrationFormData } from "./types";
+import VenaLogo from './components/icons/VenaLogo.png';
 
 const initialFormData: RegistrationFormData = {
   businessName: "",
@@ -108,9 +109,19 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-secondary flex items-start justify-center p-4 sm:p-6 lg:p-8">
       <main className="w-full max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 transition-all duration-500">
+        {/* Logo header */}
+        <header role="banner" className="w-full flex justify-center py-6">
+          <img
+            src={VenaLogo}
+            alt="Vena logo"
+            className="h-16 w-auto select-none"
+            draggable="false"
+          />
+        </header>
+
+        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
           {isSubmitted ? (
             // ✅ pass confirmation props
             <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
