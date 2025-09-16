@@ -114,8 +114,8 @@ export default function RegistrationForm({
         {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
       </label>
 
-      {/* Passwords (required) with show/hide & strength */}
-      <div className="grid md:grid-cols-2 gap-3">
+      {/* Password (required) with show/hide & strength */}
+      <div className="grid gap-3">
         <label className="grid gap-1">
           <span className="text-sm text-zinc-700 flex items-center justify-between">
             <span>Password *</span>
@@ -141,14 +141,31 @@ export default function RegistrationForm({
           {formData.password && formData.password.length > 0 && (
             <div className="mt-2" id="password-strength">
               <div className="flex gap-1 mb-1" aria-hidden="true">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`h-2 flex-1 rounded-md transition-colors duration-200 ${i < passwordStrength ? 'bg-indigo-600' : 'bg-zinc-300'}`}
-                  />
-                ))}
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const filled = i < passwordStrength;
+                  // color palette from weak->strong
+                  const colors = [
+                    'bg-red-500',        // very weak
+                    'bg-orange-500',     // weak
+                    'bg-yellow-500',     // fair
+                    'bg-lime-500',       // good
+                    'bg-green-500'       // strong/excellent
+                  ];
+                  const barColor = filled ? colors[Math.min(passwordStrength - 1, colors.length - 1)] : 'bg-zinc-300';
+                  return (
+                    <span
+                      key={i}
+                      className={`h-2 flex-1 rounded-md transition-colors duration-300 ${barColor}`}
+                    />
+                  );
+                })}
               </div>
-              <p className="text-xs text-zinc-600">Strength: {strengthLabel}</p>
+              <p className={`text-xs font-medium ${
+                passwordStrength <= 1 ? 'text-red-600' :
+                passwordStrength === 2 ? 'text-yellow-600' :
+                passwordStrength === 3 ? 'text-lime-600' :
+                'text-green-600'
+              }`}>Strength: {strengthLabel}</p>
             </div>
           )}
           {formData.password && formData.password.length > 0 && formData.password.length < 8 && (
