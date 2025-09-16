@@ -141,6 +141,16 @@ app.get(["/api/health", "/health"], (_req: Request, res: Response) => {
 });
 
 // SPA fallback to index.html
+// Explicit sign-in page (static HTML) served from the built dist folder.
+app.get(["/signin", "/signin.html"], (_req, res) => {
+  const signinPath = path.join(clientDist, "signin.html");
+  if (fs.existsSync(signinPath)) {
+    return res.sendFile(signinPath);
+  }
+  return res.status(404).send("signin.html not found in build");
+});
+
+// Fallback for other routes -> index.html
 app.get("*", (_req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
 });
