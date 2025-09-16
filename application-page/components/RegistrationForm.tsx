@@ -123,9 +123,21 @@ export default function RegistrationForm({
             <button
               type="button"
               onClick={() => setShowPassword(p => !p)}
-              className="text-xs text-indigo-600 hover:text-indigo-700 focus:outline-none"
+              className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 text-indigo-600 hover:text-indigo-700"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? 'Hide' : 'Show'}
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M3 3l18 18" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M10.58 10.58a2 2 0 002.84 2.84" />
+                  <path d="M9.88 5.51A9.64 9.64 0 0112 5c7 0 10 7 10 7a13.2 13.2 0 01-1.67 2.68m-2.71 2.3A9.86 9.86 0 0112 19c-7 0-10-7-10-7a18.7 18.7 0 013.95-4.94" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
             </button>
           </span>
           <input
@@ -180,9 +192,21 @@ export default function RegistrationForm({
             <button
               type="button"
               onClick={() => setShowConfirm(c => !c)}
-              className="text-xs text-indigo-600 hover:text-indigo-700 focus:outline-none"
+              className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 text-indigo-600 hover:text-indigo-700"
+              aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
             >
-              {showConfirm ? 'Hide' : 'Show'}
+              {showConfirm ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M3 3l18 18" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M10.58 10.58a2 2 0 002.84 2.84" />
+                  <path d="M9.88 5.51A9.64 9.64 0 0112 5c7 0 10 7 10 7a13.2 13.2 0 01-1.67 2.68m-2.71 2.3A9.86 9.86 0 0112 19c-7 0-10-7-10-7a18.7 18.7 0 013.95-4.94" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
             </button>
           </span>
           <input
@@ -194,6 +218,9 @@ export default function RegistrationForm({
             placeholder="********"
             required
           />
+          {formData.confirmPassword && formData.password && formData.confirmPassword !== formData.password && (
+            <p className="text-xs text-red-600 mt-1">Passwords do not match.</p>
+          )}
           {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword}</p>}
         </label>
       </div>
