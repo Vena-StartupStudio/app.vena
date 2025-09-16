@@ -1,6 +1,5 @@
 // application-page/App.tsx
 import React, { useState, useCallback } from "react";
-import bcrypt from 'bcryptjs';
 import { supabase } from "./lib/supabaseClient";
 import RegistrationForm from "./components/RegistrationForm";
 import ConfirmationMessage from "./components/ConfirmationMessage";
@@ -72,48 +71,68 @@ const App: React.FC = () => {
         return;
       }
 
-      // 1) optional upload
+      // 1. Sign up the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: payload.email,
+        password: payload.password,
+      });
+
+      if (authError) {
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error("Registration successful, but no user data returned. Please contact support.");
+      }
+
+      const user = authData.user;
+
+      // 2. Upload logo if it exists
       let logoPath: string | null = null;
       if (payload.logo) {
         const ext = payload.logo.name.split(".").pop() || "bin";
-        const fileName = `registrations/${crypto.randomUUID()}.${ext}`;
+        const fileName = `registrations/${user.id}.${ext}`; // Use user ID for filename
         const { data: up, error: upErr } = await supabase
           .storage
           .from("logos")
-          .upload(fileName, payload.logo, { contentType: payload.logo.type });
+          .upload(fileName, payload.logo, { 
+            contentType: payload.logo.type,
+            upsert: true, // Overwrite if a file with the same name exists
+          });
         if (upErr) throw upErr;
-        logoPath = up.path; // e.g. "registrations/uuid.png"
+        logoPath = up.path;
       }
 
-      // 2) hash password (client-side) – server-side hashing preferred
-      const password_hash = bcrypt.hashSync(payload.password, 10);
-
-      // 3) insert row including password hash
+      // 3. Insert public profile data into the 'registrations' table
       const { error: dbErr } = await supabase.from("registrations").insert({
+        id: user.id, // Link to the auth.users table
         business_name: payload.businessName,
         first_name: payload.firstName || "",
         last_name: payload.lastName || "",
         email: payload.email,
-        password_hash, // store hash
         social_media: payload.socialMedia || null,
         business_niche: payload.businessNiche,
         logo_filename: logoPath,
       });
+
       if (dbErr) {
+        // If there's a DB error, it's good practice to clean up the created user
+        // This is an advanced topic, but for now, we'll just log the error
+        console.error("Error saving profile, but user was created:", dbErr);
         if (/duplicate key value|unique/i.test(dbErr.message)) {
           throw new Error("This email is already registered.");
         }
         throw dbErr;
       }
 
-      // ✅ 3) compute public URL for the logo (only if the bucket is PUBLIC)
+      // 4. Get public URL for the logo to show on confirmation
       let publicLogoUrl: string | null = null;
       if (logoPath) {
         const { data } = supabase.storage.from("logos").getPublicUrl(logoPath);
         publicLogoUrl = data.publicUrl;
       }
 
-  setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
+      setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
       setIsSubmitted(true);
     } catch (err: any) {
       console.error("Registration failed:", err);
