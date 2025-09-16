@@ -64,15 +64,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   {/* Premium Profile Image Container */}
                   <div className="relative">
                     {/* Enhanced Profile Image with Better Placeholder */}
-                    <div 
-                      className="relative w-48 h-48 lg:w-60 lg:h-60 mx-auto cursor-pointer"
-                      onClick={() => {
-                        // Display story viewer modal when clicking on profile image
-                        console.log('Viewing stories from profile image...');
-                        alert('Story viewer would open here. Click here to view all your stories.');
-                      }}
-                      title="Click to view stories"
-                    >
+                    <div className="relative w-48 h-48 lg:w-60 lg:h-60 mx-auto">
                       {config.profileImage ? (
                         <img
                           src={config.profileImage}
@@ -82,8 +74,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             shadow-2xl shadow-slate-900/15 dark:shadow-slate-900/40
                             transition-all duration-500 ease-out
                             group-hover:scale-[1.01] group-hover:shadow-3xl 
-                            group-hover:border-white dark:group-hover:border-slate-600/90
-                            hover:brightness-95"
+                            group-hover:border-white dark:group-hover:border-slate-600/90"
                         />
                       ) : (
                         /* Professional Profile Image Placeholder */
@@ -96,7 +87,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             transition-all duration-500 ease-out
                             group-hover:scale-[1.01] group-hover:shadow-3xl 
                             group-hover:border-white dark:group-hover:border-slate-600/90
-                            opacity-60 group-hover:opacity-80 hover:brightness-95"
+                            opacity-60 group-hover:opacity-80"
                           onError={(e) => {
                             // Fallback to a different image if the first one fails
                             const target = e.target as HTMLImageElement;
@@ -105,7 +96,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                               // Final fallback to a simple div with icon
                               target.style.display = 'none';
                               const fallback = document.createElement('div');
-                              fallback.className = "w-full h-full rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 border-4 border-white/90 dark:border-slate-700/90 shadow-2xl flex items-center justify-center hover:brightness-95 transition-all duration-500";
+                              fallback.className = "w-full h-full rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 border-4 border-white/90 dark:border-slate-700/90 shadow-2xl flex items-center justify-center transition-all duration-500";
                               fallback.innerHTML = `
                                 <svg class="w-20 h-20 lg:w-24 lg:h-24 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -117,18 +108,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         />
                       )}
                       
-                      {/* Refined Upload Overlay - appears on double click */}
+                      {/* Refined Upload Overlay */}
                       <button 
-                        onDoubleClick={(e) => {
-                          e.stopPropagation();
-                          fileInputRef.current?.click();
-                        }}
+                        onClick={() => fileInputRef.current?.click()}
                         className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/60 to-slate-900/70 
                           rounded-full flex flex-col items-center justify-center text-white 
                           opacity-0 group-hover:opacity-100 transition-all duration-400 ease-out
                           hover:from-slate-800/80 hover:via-slate-700/70 hover:to-slate-800/80
-                          backdrop-blur-sm z-20"
-                        title="Double click to change profile photo"
+                          backdrop-blur-sm"
+                        title="Click to change profile photo"
                       >
                         <div className="text-center">
                           <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,45 +128,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                           <span className="text-lg font-medium tracking-wide">
                             {config.profileImage ? 'Change Photo' : 'Upload Photo'}
                           </span>
-                          <p className="text-sm opacity-80 mt-1">Double click to upload</p>
                         </div>
                       </button>
                       
                     </div>
                   </div>
 
-                  {/* Completely Flat Story Ring */}
-                  <button
-                    onClick={() => {
-                      // Display story viewer modal
-                      console.log('Viewing stories...');
-                      // You can add your story viewer logic here
-                      alert('Story viewer would open here. You can implement your own modal/overlay for viewing stories.');
-                    }}
-                    className="absolute -inset-1 cursor-pointer z-10"
-                    title="View Stories"
-                  >
-                    <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                      <defs>
-                        <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#a855f7" />
-                          <stop offset="33%" stopColor="#ec4899" />
-                          <stop offset="66%" stopColor="#f97316" />
-                          <stop offset="100%" stopColor="#a855f7" />
-                        </linearGradient>
-                      </defs>
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="48"
-                        fill="none"
-                        stroke="url(#storyGradient)"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        className="hover:stroke-[4] transition-all duration-200"
-                      />
-                    </svg>
-                  </button>
+
                 </div>
               </div>
               
@@ -190,40 +146,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 className="hidden" 
               />
 
-              {/* Story Actions */}
-              <div className="flex justify-center mt-6">
-                <button 
-                  onClick={() => {
-                    // Trigger file input for adding a story
-                    const storyInput = document.createElement('input');
-                    storyInput.type = 'file';
-                    storyInput.accept = 'image/*,video/*';
-                    storyInput.onchange = (e) => {
-                      const file = (e.target as HTMLInputElement).files?.[0];
-                      if (file) {
-                        // Handle story upload here
-                        console.log('Adding story:', file.name);
-                        // You can add your story upload logic here
-                      }
-                    };
-                    storyInput.click();
-                  }}
-                  className="group flex items-center gap-2 
-                    bg-gradient-to-r from-blue-500/10 to-indigo-500/10 
-                    hover:from-blue-500/20 hover:to-indigo-500/20
-                    border border-blue-200/50 dark:border-blue-700/50
-                    hover:border-blue-300/60 dark:hover:border-blue-600/60
-                    rounded-2xl px-4 py-2 
-                    transition-all duration-300 hover:scale-105"
-                >
-                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200">
-                    Add Story
-                  </span>
-                </button>
-              </div>
+
             </div>
 
             {/* Elite Profile Content */}
