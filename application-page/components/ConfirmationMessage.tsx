@@ -18,11 +18,7 @@ const ConfirmationMessage: React.FC<ConfirmationMessageProps> = ({ email, logoUr
       </div>
       <h2 className="text-3xl md:text-4xl font-bold text-zinc-800">Welcome to Vena!</h2>
       <p className="mt-4 text-zinc-600">
-        Your account has been created. A confirmation link has been sent to{' '}
-        <strong className="font-medium text-zinc-800">{email}</strong>.
-      </p>
-      <p className="mt-2 text-sm text-zinc-500">
-        Please check your inbox to complete your registration.
+        Your account has been created for <strong className="font-medium text-zinc-800">{email}</strong>.
       </p>
     </div>
   );
