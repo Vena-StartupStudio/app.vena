@@ -134,7 +134,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
 
             {/* Elite Profile Content */}
-            <div className="flex-1 text-center lg:text-left space-y-8">
+            <div className={`flex-1 text-center ${isRtl ? 'lg:text-right' : 'lg:text-left'} space-y-8`}>
               
               {/* Premium Name Section */}
               <div className="space-y-4">
@@ -144,19 +144,19 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                       type="text" 
                       value={config.name} 
                       onChange={e => onValueChange('name', e.target.value)} 
-                      className="bg-transparent focus:outline-none w-full text-center lg:text-left
+                      className={`bg-transparent focus:outline-none w-full text-center ${isRtl ? 'lg:text-right' : 'lg:text-left'}
                         text-slate-900 dark:text-slate-100
                         hover:bg-slate-50/20 dark:hover:bg-slate-800/20
                         focus:bg-slate-50/30 dark:focus:bg-slate-800/30
                         rounded-2xl px-4 py-3 transition-all duration-300
-                        placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                       placeholder="Your Name"
                       dir={isRtl ? 'rtl' : 'ltr'}
                     />
                   </h1>
                   
                   {/* Elegant Underline */}
-                  <div className="flex justify-center lg:justify-start mt-4">
+                  <div className={`flex justify-center ${isRtl ? 'lg:justify-end' : 'lg:justify-start'} mt-4`}>
                     <div className="h-0.5 w-20 bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 dark:from-slate-600 dark:via-slate-500 dark:to-slate-600 
                       rounded-full transition-all duration-500 hover:w-32 hover:via-slate-500 dark:hover:via-slate-400"></div>
                   </div>
@@ -170,11 +170,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                       type="text" 
                       value={config.title} 
                       onChange={e => onValueChange('title', e.target.value)} 
-                      className="bg-transparent focus:outline-none w-full text-center lg:text-left
+                      className={`bg-transparent focus:outline-none w-full text-center ${isRtl ? 'lg:text-right' : 'lg:text-left'}
                         hover:bg-slate-50/20 dark:hover:bg-slate-800/20
                         focus:bg-slate-50/30 dark:focus:bg-slate-800/30
                         rounded-2xl px-4 py-3 transition-all duration-300
-                        placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                       placeholder="Your Professional Title"
                       dir={isRtl ? 'rtl' : 'ltr'}
                     />
