@@ -41,10 +41,11 @@ serve(async (req) => {
 
     // Encrypt the key using pgsodium - FIXED WITH CORRECT SCHEMA NAME
       const { data: encryptedKey, error: encryptionError } = await adminSupabaseClient.rpc(
-          'pgsodium.crypto_secretbox',
+          'pgsodium.crypto_aead_det_encrypt',
         {
           message: apiKey,
-          key_id: Deno.env.get('SODIUM_KEY_ID')
+          additional: '{"service":"reservekit"}',
+          key_uuid: Deno.env.get('SODIUM_KEY_ID')
         }
       )
     if (encryptionError) {
