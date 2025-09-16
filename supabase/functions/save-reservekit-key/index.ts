@@ -39,14 +39,14 @@ serve(async (req) => {
       Deno.env.get('VENA_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Encrypt the key using pgsodium - FIXED WITH CORRECT SCHEMA NAME
+    // Encrypt the key using pgsodium - FIXED WITH CORRECT PARAMETER ORDER
       const { data: encryptedKey, error: encryptionError } = await adminSupabaseClient.rpc(
           'pgsodium.crypto_aead_det_encrypt',
-        {
-          message: apiKey,
-          additional: '{"service":"reservekit"}',
-          key_uuid: Deno.env.get('SODIUM_KEY_ID')
-        }
+        [
+          apiKey,  // message (first parameter)
+          '{"service":"reservekit"}',  // additional (second parameter) 
+          Deno.env.get('SODIUM_KEY_ID')  // key_uuid (third parameter)
+        ]
       )
     if (encryptionError) {
       console.error("Encryption error:", encryptionError);
