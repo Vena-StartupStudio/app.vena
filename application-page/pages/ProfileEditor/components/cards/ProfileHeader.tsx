@@ -22,177 +22,331 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const inlineInputStyles = "bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/30 rounded-md px-3 py-2 w-full text-center transition-all duration-200 hover:bg-white/10 dark:hover:bg-slate-700/30";
 
   return (
-    <BaseCard 
-      variant="glass" 
-      padding="xl" 
-      className="relative overflow-hidden"
-      hoverable={true}
-    >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div 
-          className="absolute inset-0 bg-gradient-to-br"
-          style={{
-            background: `
-              radial-gradient(circle at 20% 20%, ${config.styles.colorPrimary.replace('bg-', 'rgb(59 130 246)')} 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, ${config.styles.colorSecondary.replace('text-', 'rgb(168 85 247)')} 0%, transparent 50%),
-              radial-gradient(circle at 40% 60%, ${config.styles.colorPrimary.replace('bg-', 'rgb(34 197 94)')} 0%, transparent 50%)
-            `
-          }}
-        />
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }} />
-      </div>
+    <div className="relative">
+      {/* Sophisticated Background Layer */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50/80 to-gray-100/60 dark:from-slate-900 dark:via-slate-800/90 dark:to-gray-900/80 rounded-3xl"></div>
+      
+      {/* Premium Glass Card */}
+      <BaseCard 
+        variant="glass" 
+        padding="sm"
+        className="relative overflow-hidden border-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-slate-200/30 dark:shadow-slate-900/50"
+      >
+        {/* Ultra-Subtle Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Elegant Geometric Pattern */}
+          <div className="absolute top-0 right-0 w-96 h-96 opacity-[0.02] dark:opacity-[0.05]">
+            <div className="absolute inset-0 bg-gradient-to-bl from-slate-900 via-transparent to-transparent transform rotate-12"></div>
+          </div>
+          
+          {/* Subtle Grid Overlay */}
+          <div 
+            className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03]"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '32px 32px'
+            }}
+          />
+        </div>
 
-      {/* Main Content */}
-      <div className="relative z-10">
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
-          {/* Profile Image Section */}
-          <div className="flex-shrink-0">
-            <div className="relative group">
-              <div className="relative">
-                {/* Main Profile Image */}
+        {/* Premium Content Container */}
+        <div className="relative z-10 p-12 lg:p-16">
+          <div className="flex flex-col lg:flex-row items-center lg:items-center gap-12 lg:gap-16">
+            
+            {/* Elite Profile Image Section */}
+            <div className="flex-shrink-0">
+              <div className="relative group">
+                {/* Premium Image Container */}
                 <div className="relative">
-                  <img
-                    src={config.profileImage || initialPlaceholderImage}
-                    alt="Profile"
-                    className="w-40 h-40 lg:w-48 lg:h-48 rounded-full object-cover border-8 border-white/80 dark:border-slate-700/80 shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-3xl"
-                  />
-                  
-                  {/* Upload Overlay */}
-                  <button 
-                    onClick={() => fileInputRef.current?.click()} 
-                    className="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/70"
+                  {/* Premium Profile Image Container */}
+                  <div className="relative">
+                    {/* Enhanced Profile Image with Better Placeholder */}
+                    <div 
+                      className="relative w-48 h-48 lg:w-60 lg:h-60 mx-auto cursor-pointer"
+                      onClick={() => {
+                        // Display story viewer modal when clicking on profile image
+                        console.log('Viewing stories from profile image...');
+                        alert('Story viewer would open here. Click here to view all your stories.');
+                      }}
+                      title="Click to view stories"
+                    >
+                      {config.profileImage ? (
+                        <img
+                          src={config.profileImage}
+                          alt="Profile"
+                          className="w-full h-full rounded-full object-cover 
+                            border-4 border-white/90 dark:border-slate-700/90
+                            shadow-2xl shadow-slate-900/15 dark:shadow-slate-900/40
+                            transition-all duration-500 ease-out
+                            group-hover:scale-[1.01] group-hover:shadow-3xl 
+                            group-hover:border-white dark:group-hover:border-slate-600/90
+                            hover:brightness-95"
+                        />
+                      ) : (
+                        /* Professional Profile Image Placeholder */
+                        <img
+                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+                          alt="Profile placeholder"
+                          className="w-full h-full rounded-full object-cover 
+                            border-4 border-white/90 dark:border-slate-700/90
+                            shadow-2xl shadow-slate-900/15 dark:shadow-slate-900/40
+                            transition-all duration-500 ease-out
+                            group-hover:scale-[1.01] group-hover:shadow-3xl 
+                            group-hover:border-white dark:group-hover:border-slate-600/90
+                            opacity-60 group-hover:opacity-80 hover:brightness-95"
+                          onError={(e) => {
+                            // Fallback to a different image if the first one fails
+                            const target = e.target as HTMLImageElement;
+                            target.src = "https://avatar.iran.liara.run/public/45";
+                            target.onerror = () => {
+                              // Final fallback to a simple div with icon
+                              target.style.display = 'none';
+                              const fallback = document.createElement('div');
+                              fallback.className = "w-full h-full rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 border-4 border-white/90 dark:border-slate-700/90 shadow-2xl flex items-center justify-center hover:brightness-95 transition-all duration-500";
+                              fallback.innerHTML = `
+                                <svg class="w-20 h-20 lg:w-24 lg:h-24 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                              `;
+                              target.parentNode?.appendChild(fallback);
+                            };
+                          }}
+                        />
+                      )}
+                      
+                      {/* Refined Upload Overlay - appears on double click */}
+                      <button 
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          fileInputRef.current?.click();
+                        }}
+                        className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/60 to-slate-900/70 
+                          rounded-full flex flex-col items-center justify-center text-white 
+                          opacity-0 group-hover:opacity-100 transition-all duration-400 ease-out
+                          hover:from-slate-800/80 hover:via-slate-700/70 hover:to-slate-800/80
+                          backdrop-blur-sm z-20"
+                        title="Double click to change profile photo"
+                      >
+                        <div className="text-center">
+                          <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-lg font-medium tracking-wide">
+                            {config.profileImage ? 'Change Photo' : 'Upload Photo'}
+                          </span>
+                          <p className="text-sm opacity-80 mt-1">Double click to upload</p>
+                        </div>
+                      </button>
+                      
+                    </div>
+                  </div>
+
+                  {/* Completely Flat Story Ring */}
+                  <button
+                    onClick={() => {
+                      // Display story viewer modal
+                      console.log('Viewing stories...');
+                      // You can add your story viewer logic here
+                      alert('Story viewer would open here. You can implement your own modal/overlay for viewing stories.');
+                    }}
+                    className="absolute -inset-1 cursor-pointer z-10"
+                    title="View Stories"
                   >
-                    <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                      <defs>
+                        <linearGradient id="storyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#a855f7" />
+                          <stop offset="33%" stopColor="#ec4899" />
+                          <stop offset="66%" stopColor="#f97316" />
+                          <stop offset="100%" stopColor="#a855f7" />
+                        </linearGradient>
+                      </defs>
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="48"
+                        fill="none"
+                        stroke="url(#storyGradient)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        className="hover:stroke-[4] transition-all duration-200"
+                      />
                     </svg>
-                    <span className="text-sm font-medium">Change Photo</span>
                   </button>
+                </div>
+              </div>
+              
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={onImageUpload} 
+                accept="image/*" 
+                className="hidden" 
+              />
+
+              {/* Story Actions */}
+              <div className="flex justify-center mt-6">
+                <button 
+                  onClick={() => {
+                    // Trigger file input for adding a story
+                    const storyInput = document.createElement('input');
+                    storyInput.type = 'file';
+                    storyInput.accept = 'image/*,video/*';
+                    storyInput.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        // Handle story upload here
+                        console.log('Adding story:', file.name);
+                        // You can add your story upload logic here
+                      }
+                    };
+                    storyInput.click();
+                  }}
+                  className="group flex items-center gap-2 
+                    bg-gradient-to-r from-blue-500/10 to-indigo-500/10 
+                    hover:from-blue-500/20 hover:to-indigo-500/20
+                    border border-blue-200/50 dark:border-blue-700/50
+                    hover:border-blue-300/60 dark:hover:border-blue-600/60
+                    rounded-2xl px-4 py-2 
+                    transition-all duration-300 hover:scale-105"
+                >
+                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300 group-hover:text-blue-800 dark:group-hover:text-blue-200">
+                    Add Story
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Elite Profile Content */}
+            <div className="flex-1 text-center lg:text-left space-y-8">
+              
+              {/* Premium Name Section */}
+              <div className="space-y-4">
+                <div className="relative">
+                  <h1 className={`text-5xl md:text-6xl lg:text-7xl font-light ${config.styles.fontHeading} tracking-tight leading-none`}>
+                    <input 
+                      type="text" 
+                      value={config.name} 
+                      onChange={e => onValueChange('name', e.target.value)} 
+                      className="bg-transparent focus:outline-none w-full text-center lg:text-left
+                        text-slate-900 dark:text-slate-100
+                        hover:bg-slate-50/20 dark:hover:bg-slate-800/20
+                        focus:bg-slate-50/30 dark:focus:bg-slate-800/30
+                        rounded-2xl px-4 py-3 transition-all duration-300
+                        placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      placeholder="Your Name"
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    />
+                  </h1>
                   
-                  {/* Status Indicator */}
-                  <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full ${config.styles.colorPrimary} border-4 border-white dark:border-slate-800 shadow-lg flex items-center justify-center`}>
-                    <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                  {/* Elegant Underline */}
+                  <div className="flex justify-center lg:justify-start mt-4">
+                    <div className="h-0.5 w-20 bg-gradient-to-r from-slate-300 via-slate-400 to-slate-300 dark:from-slate-600 dark:via-slate-500 dark:to-slate-600 
+                      rounded-full transition-all duration-500 hover:w-32 hover:via-slate-500 dark:hover:via-slate-400"></div>
                   </div>
                 </div>
 
-                {/* Decorative Ring */}
-                <div 
-                  className="absolute -inset-3 border-2 opacity-20 rounded-full"
-                  style={{
-                    borderImage: `linear-gradient(45deg, ${config.styles.colorPrimary.replace('bg-', 'rgb(59 130 246)')}, ${config.styles.colorSecondary.replace('text-', 'rgb(168 85 247)')}, ${config.styles.colorPrimary.replace('bg-', 'rgb(59 130 246)')}) 1`,
-                    animation: 'spin 20s linear infinite'
-                  }}
-                ></div>
+                {/* Refined Title */}
+                <div className="relative">
+                  <p className={`text-2xl md:text-3xl lg:text-4xl font-light ${config.styles.fontBody} 
+                    text-slate-600 dark:text-slate-400 leading-relaxed tracking-wide`}>
+                    <input 
+                      type="text" 
+                      value={config.title} 
+                      onChange={e => onValueChange('title', e.target.value)} 
+                      className="bg-transparent focus:outline-none w-full text-center lg:text-left
+                        hover:bg-slate-50/20 dark:hover:bg-slate-800/20
+                        focus:bg-slate-50/30 dark:focus:bg-slate-800/30
+                        rounded-2xl px-4 py-3 transition-all duration-300
+                        placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      placeholder="Your Professional Title"
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    />
+                  </p>
+                </div>
+              </div>
+
+              {/* Sophisticated Contact Pills */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                <div className="group flex items-center gap-3 
+                  bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
+                  border border-slate-200/50 dark:border-slate-700/50
+                  rounded-2xl px-6 py-4 
+                  hover:bg-white/60 dark:hover:bg-slate-800/60
+                  hover:border-slate-300/60 dark:hover:border-slate-600/60
+                  hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
+                  transition-all duration-300 cursor-pointer">
+                  <div className="w-5 h-5 rounded-lg bg-blue-100 dark:bg-blue-900/40 
+                    flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/60 transition-colors duration-200">
+                    <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tracking-wide">Email</span>
+                </div>
+                
+                <div className="group flex items-center gap-3 
+                  bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
+                  border border-slate-200/50 dark:border-slate-700/50
+                  rounded-2xl px-6 py-4 
+                  hover:bg-white/60 dark:hover:bg-slate-800/60
+                  hover:border-slate-300/60 dark:hover:border-slate-600/60
+                  hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
+                  transition-all duration-300 cursor-pointer">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 
+                    flex items-center justify-center group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/60 transition-colors duration-200">
+                    <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tracking-wide">Phone</span>
+                </div>
+                
+                <div className="group flex items-center gap-3 
+                  bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
+                  border border-slate-200/50 dark:border-slate-700/50
+                  rounded-2xl px-6 py-4 
+                  hover:bg-white/60 dark:hover:bg-slate-800/60
+                  hover:border-slate-300/60 dark:hover:border-slate-600/60
+                  hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
+                  transition-all duration-300 cursor-pointer">
+                  <div className="w-5 h-5 rounded-lg bg-purple-100 dark:bg-purple-900/40 
+                    flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/60 transition-colors duration-200">
+                    <svg className="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tracking-wide">Location</span>
+                </div>
               </div>
             </div>
-            
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={onImageUpload} 
-              accept="image/*" 
-              className="hidden" 
-            />
           </div>
 
-          {/* Profile Info Section */}
-          <div className="flex-1 text-center lg:text-left space-y-6">
-            {/* Name */}
-            <div className="space-y-2">
-              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold ${config.styles.fontHeading} ${config.styles.colorPrimary} leading-tight`}>
-                <input 
-                  type="text" 
-                  value={config.name} 
-                  onChange={e => onValueChange('name', e.target.value)} 
-                  className={inlineInputStyles}
-                  placeholder="Your Name"
-                  dir={isRtl ? 'rtl' : 'ltr'}
-                />
-              </h1>
-              
-              {/* Animated Underline */}
-              <div className={`h-1 w-24 ${config.styles.colorPrimary} rounded-full mx-auto lg:mx-0 transition-all duration-300 hover:w-32`}></div>
-            </div>
 
-            {/* Title/Role */}
-            <p className={`text-xl md:text-2xl lg:text-3xl ${config.styles.fontBody} ${config.styles.colorSecondary} opacity-90 leading-relaxed`}>
-              <input 
-                type="text" 
-                value={config.title} 
-                onChange={e => onValueChange('title', e.target.value)} 
-                className={inlineInputStyles}
-                placeholder="Your Professional Title"
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </p>
 
-            {/* Contact Info Pills */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-4">
-              <div className="flex items-center space-x-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer group">
-                <svg className="w-4 h-4 text-slate-500 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>Email</span>
-              </div>
-              
-              <div className="flex items-center space-x-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer group">
-                <svg className="w-4 h-4 text-slate-500 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <span>Phone</span>
-              </div>
-              
-              <div className="flex items-center space-x-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-full px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-200 cursor-pointer group">
-                <svg className="w-4 h-4 text-slate-500 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Location</span>
-              </div>
-            </div>
-
-            {/* Social Links */}
-            <div className="flex justify-center lg:justify-start space-x-4 pt-2">
-              {[
-                { icon: "M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z", label: "Twitter", color: "hover:text-blue-400" },
-                { icon: "M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z", label: "LinkedIn", color: "hover:text-blue-600" },
-                { icon: "M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.719-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.097.118.112.221.083.342-.091.36-.293 1.146-.334 1.309-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.741-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.017 0z", label: "GitHub", color: "hover:text-gray-600" }
-              ].map((social, index) => (
-                <button
-                  key={index}
-                  className={`w-10 h-10 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm flex items-center justify-center text-slate-500 ${social.color} hover:scale-110 transition-all duration-200 hover:shadow-lg group`}
-                  title={social.label}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d={social.icon} />
-                  </svg>
-                </button>
-              ))}
+          {/* Refined Decorative Elements */}
+          <div className="absolute top-8 right-8 opacity-10 pointer-events-none">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600"></div>
+              <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 animate-pulse delay-100"></div>
+              <div className="w-1 h-1 rounded-full bg-slate-400 dark:bg-slate-600 animate-pulse delay-200"></div>
             </div>
           </div>
         </div>
+      </BaseCard>
 
-        {/* Availability Status */}
-        <div className="flex justify-center lg:justify-start mt-8">
-          <div className="flex items-center space-x-3 bg-green-100/80 dark:bg-green-900/30 backdrop-blur-sm rounded-full px-6 py-3 border border-green-200/50 dark:border-green-800/50">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-green-700 dark:text-green-300">Available for new projects</span>
-          </div>
-        </div>
-
-        {/* Decorative Elements */}
-        <div className="absolute top-4 right-4 opacity-20">
-          <div className="flex space-x-2">
-            <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} animate-bounce`}></div>
-            <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} animate-bounce delay-75`}></div>
-            <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} animate-bounce delay-150`}></div>
-          </div>
-        </div>
-      </div>
-    </BaseCard>
+      {/* Custom CSS Classes - using Tailwind's built-in animations instead */}
+    </div>
   );
 };
 
