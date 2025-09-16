@@ -19,8 +19,22 @@ export default function RegistrationForm({
   // ✅ Prevent native navigation; call App.tsx handler
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!canSubmit) return; // block submit if required fields not satisfied
     onSubmit(formData);
   };
+
+  // Enforce required fields before allowing submit
+  const passwordsMatch = !!formData.password && formData.password === formData.confirmPassword;
+  const allRequiredFilled = (
+    formData.businessName.trim() !== '' &&
+    formData.firstName.trim() !== '' &&
+    formData.lastName.trim() !== '' &&
+    formData.email.trim() !== '' &&
+    formData.password.trim() !== '' &&
+    formData.confirmPassword.trim() !== '' &&
+    formData.businessNiche.trim() !== ''
+  );
+  const canSubmit = allRequiredFilled && passwordsMatch;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="grid gap-3">
@@ -38,27 +52,31 @@ export default function RegistrationForm({
         {errors.businessName && <p className="text-red-600 text-sm">{errors.businessName}</p>}
       </label>
 
-      {/* First / Last */}
+      {/* First / Last (required) */}
       <div className="grid md:grid-cols-2 gap-3">
         <label className="grid gap-1">
-          <span className="text-sm text-zinc-700">First name</span>
+          <span className="text-sm text-zinc-700">First name *</span>
           <input
             className="border rounded px-3 py-2"
             name="firstName"
             value={formData.firstName}
             onChange={onInputChange}
             placeholder="First name"
+            required
           />
+          {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName}</p>}
         </label>
         <label className="grid gap-1">
-          <span className="text-sm text-zinc-700">Last name</span>
+          <span className="text-sm text-zinc-700">Last name *</span>
           <input
             className="border rounded px-3 py-2"
             name="lastName"
             value={formData.lastName}
             onChange={onInputChange}
             placeholder="Last name"
+            required
           />
+          {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName}</p>}
         </label>
       </div>
 
@@ -77,10 +95,10 @@ export default function RegistrationForm({
         {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
       </label>
 
-      {/* Passwords (client-only for now) */}
+      {/* Passwords (required) */}
       <div className="grid md:grid-cols-2 gap-3">
         <label className="grid gap-1">
-          <span className="text-sm text-zinc-700">Password</span>
+          <span className="text-sm text-zinc-700">Password *</span>
           <input
             className="border rounded px-3 py-2"
             type="password"
@@ -88,11 +106,12 @@ export default function RegistrationForm({
             value={formData.password}
             onChange={onInputChange}
             placeholder="********"
+            required
           />
           {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
         </label>
         <label className="grid gap-1">
-          <span className="text-sm text-zinc-700">Confirm password</span>
+          <span className="text-sm text-zinc-700">Confirm password *</span>
           <input
             className="border rounded px-3 py-2"
             type="password"
@@ -100,6 +119,7 @@ export default function RegistrationForm({
             value={formData.confirmPassword}
             onChange={onInputChange}
             placeholder="********"
+            required
           />
           {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword}</p>}
         </label>
@@ -139,8 +159,13 @@ export default function RegistrationForm({
       </label>
 
       {/* Submit */}
-      <button type="submit" className="mt-2 bg-black text-white rounded px-4 py-2">
-        Register
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className="mt-2 bg-black text-white rounded px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        aria-disabled={!canSubmit}
+      >
+        {canSubmit ? 'Register' : 'Complete required fields'}
       </button>
     </form>
   );
