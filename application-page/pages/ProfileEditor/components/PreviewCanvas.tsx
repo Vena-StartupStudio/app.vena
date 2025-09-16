@@ -1,10 +1,8 @@
 import React from 'react';
-import type { ProfileConfig, Service, Testimonial } from '../types';
+import type { ProfileConfig } from '../types';
 import { HEBREW_TRANSLATIONS, INITIAL_PLACEHOLDER_IMAGE } from '../constants/config';
 import AboutCard from './cards/AboutCard';
 import ServicesCard from './cards/ServicesCard';
-import TestimonialsCard from './cards/TestimonialsCard';
-import ContactCard from './cards/ContactCard';
 import ProfileHeader from './cards/ProfileHeader';
 
 interface PreviewCanvasProps {
@@ -63,28 +61,7 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
             t={t}
           />
         );
-      case 'testimonials':
-        return (
-          <TestimonialsCard
-            key="testimonials"
-            config={config}
-            testimonials={config.testimonials}
-            onTestimonialChange={(testimonials) => onValueChange('testimonials', testimonials)}
-            isRtl={isRtl}
-            t={t}
-          />
-        );
-      case 'contact':
-        return (
-          <ContactCard
-            key="contact"
-            config={config}
-            cta={config.cta}
-            onCtaChange={(cta) => onValueChange('cta', cta)}
-            isRtl={isRtl}
-            t={t}
-          />
-        );
+
       default: 
         return null;
     }

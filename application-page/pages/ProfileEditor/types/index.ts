@@ -1,18 +1,12 @@
 import { FONT_THEMES } from '../constants/themes';
 
-export type SectionId = 'about' | 'services' | 'testimonials' | 'contact';
+export type SectionId = 'about' | 'services';
 export type FontThemeKey = keyof typeof FONT_THEMES;
 
 export interface Service {
   id: number;
   title: string;
   description: string;
-}
-
-export interface Testimonial {
-  id: number;
-  quote: string;
-  author: string;
 }
 
 export interface ProfileConfig {
@@ -23,11 +17,7 @@ export interface ProfileConfig {
   profileImage: string;
   email: string;
   phone: string;
-  cta: {
-    label: string;
-  };
   services: Service[];
-  testimonials: Testimonial[];
   sections: SectionId[];
   sectionVisibility: Record<SectionId, boolean>;
   styles: {
