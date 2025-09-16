@@ -50,7 +50,7 @@ const Header: React.FC = () => {
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
             <a
-              href="/signin.html"
+              href="signin.html"
               className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
             >
               Sign In
@@ -104,7 +104,7 @@ const Header: React.FC = () => {
               {/* Mobile Auth Buttons */}
               <div className="w-full pt-4 space-y-3">
                 <a
-                  href="/signin.html"
+                  href="signin.html"
                   className="block w-full text-center border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
