@@ -47,20 +47,20 @@ const Header: React.FC = () => {
             </div>
           </nav>
 
-          {/* CTA Button - Refined Design */}
-          <div className="hidden md:block">
-            <a 
-              href="#cta" 
-              className="relative inline-flex items-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-light px-6 py-2.5 rounded-full hover:from-purple-500 hover:to-indigo-500 transition-all duration-400 shadow-sm hover:shadow-lg border border-white text-sm group overflow-hidden"
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            <a
+              href="/signin"
+              className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
             >
-              {/* Subtle shine effect */}
+              Sign In
+            </a>
+            <a
+              href="/signup"
+              className="relative inline-flex items-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium px-6 py-2.5 rounded-full hover:from-purple-500 hover:to-indigo-500 transition-all duration-400 shadow-sm hover:shadow-lg text-sm group overflow-hidden"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <span className="relative">Join Waitlist</span>
-              {/* Minimalist arrow */}
-              <div className="relative ml-2 w-4 h-4 flex items-center justify-center">
-                <div className="w-1 h-1 bg-white rounded-full transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300"></div>
-                <div className="absolute w-2 h-px bg-white rounded-full opacity-60"></div>
-              </div>
+              <span className="relative">Sign Up</span>
             </a>
           </div>
 
@@ -99,14 +99,21 @@ const Header: React.FC = () => {
                 </a>
               ))}
               
-              {/* Mobile CTA */}
-              <div className="w-full pt-4">
-                <a 
-                  href="#cta" 
-                  className="block w-full text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-light px-6 py-3 rounded-2xl hover:from-purple-500 hover:to-indigo-500 transition-all duration-400 shadow-sm"
+              {/* Mobile Auth Buttons */}
+              <div className="w-full pt-4 space-y-3">
+                <a
+                  href="/signin"
+                  className="block w-full text-center border border-slate-300 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Join Waitlist
+                  Sign In
+                </a>
+                <a
+                  href="/signup"
+                  className="block w-full text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium px-6 py-3 rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all duration-400 shadow-sm"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Up
                 </a>
               </div>
             </nav>
