@@ -2,7 +2,8 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
-// This function securely saves a user's ReserveKit API key by encrypting it first.
+console.log("New function version with detailed logging deployed.");
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -10,6 +11,11 @@ serve(async (req) => {
   }
 
   try {
+    // --- START NEW LOGGING ---
+    const requestBodyText = await req.text();
+    console.log("Received raw request body:", requestBodyText);
+    // --- END NEW LOGGING ---
+
     // Create a Supabase client with the user's auth token
     const userSupabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -21,9 +27,12 @@ serve(async (req) => {
     const { data: { user } } = await userSupabaseClient.auth.getUser()
     if (!user) throw new Error('User not found')
 
-    // Get the raw API key from the request body
-    const { apiKey } = await req.json()
-    if (!apiKey) throw new Error('API key is required')
+    // Parse the body text we logged earlier
+    const bodyJSON = JSON.parse(requestBodyText);
+    const apiKey = bodyJSON.apiKey;
+    console.log("Parsed API key:", apiKey ? "Key found" : "Key NOT found");
+
+    if (!apiKey) throw new Error('API key is required in the JSON body')
 
     // Create a service role client to perform the encryption and update
     const adminSupabaseClient = createClient(
@@ -36,11 +45,14 @@ serve(async (req) => {
       'pgsodium_crypto_aead_det_encrypt',
       {
         plaintext: apiKey,
-        additional: '{"service":"reservekit"}', // a.k.a. "additional authenticated data"
-        key_uuid: Deno.env.get('SODIUM_KEY_ID') // The UUID of your pgsodium key
+        additional: '{"service":"reservekit"}',
+        key_uuid: Deno.env.get('SODIUM_KEY_ID')
       }
     )
-    if (encryptionError) throw encryptionError
+    if (encryptionError) {
+      console.error("Encryption error:", encryptionError);
+      throw encryptionError;
+    }
 
     // Update the user's record with the encrypted key
     const { error: updateError } = await adminSupabaseClient
@@ -48,20 +60,20 @@ serve(async (req) => {
       .update({ encrypted_reservekit_api_key: encryptedKey })
       .eq('id', user.id)
 
-    if (updateError) throw updateError
+    if (updateError) {
+      console.error("Database update error:", updateError);
+      throw updateError;
+    }
 
     return new Response(JSON.stringify({ message: 'API key saved successfully' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
+    console.error("Caught an error:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 400, // Keep as 400 to see if it changes
     })
   }
 })
-
-await supabase.functions.invoke('save-reservekit-key', {
-  body: JSON.stringify({ apiKey }),
-});
