@@ -287,26 +287,27 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
         shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30`}
       style={{ width: isCollapsed ? 0 : panelWidth }}
     >
-      {/* Collapse/Expand Button */}
+      {/* Collapse/Expand Button - Top positioned and larger */}
       <button
         onClick={toggleCollapse}
-        className="absolute top-1/2 -right-4 z-20 w-8 h-12 
-          bg-gradient-to-r from-white/90 to-slate-100/80
-          dark:from-slate-800/90 dark:to-slate-700/80
-          border border-slate-200/60 dark:border-slate-600/50
-          rounded-r-lg shadow-lg shadow-slate-200/30 dark:shadow-slate-900/40
+        className="absolute top-4 -right-5 z-30 w-10 h-10 
+          bg-gradient-to-r from-white/95 to-slate-50/90
+          dark:from-slate-800/95 dark:to-slate-700/90
+          border-2 border-slate-200/70 dark:border-slate-600/60
+          rounded-full shadow-xl shadow-slate-200/40 dark:shadow-slate-900/50
           flex items-center justify-center 
-          hover:from-blue-50/90 hover:to-indigo-50/80
-          dark:hover:from-blue-900/40 dark:hover:to-indigo-900/30
-          hover:border-blue-200/60 dark:hover:border-blue-600/40
-          hover:shadow-blue-200/30 dark:hover:shadow-blue-900/40
-          transition-all duration-300 ease-out group backdrop-blur-sm"
+          hover:from-blue-50/95 hover:to-indigo-50/90
+          dark:hover:from-blue-900/50 dark:hover:to-indigo-900/40
+          hover:border-blue-300/70 dark:hover:border-blue-500/60
+          hover:shadow-blue-200/40 dark:hover:shadow-blue-900/50
+          hover:scale-110 active:scale-95
+          transition-all duration-200 ease-out group backdrop-blur-sm"
         title={isCollapsed ? "Expand Panel" : "Collapse Panel"}
       >
         {isCollapsed ? (
-          <ChevronRightIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
+          <ChevronRightIcon className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
         ) : (
-          <ChevronLeftIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
+          <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
         )}
       </button>
 
@@ -421,28 +422,33 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
         </div>
       </div>
       
-      {/* Enhanced Resize Handle */}
+      {/* Enhanced Resize Handle - More visible and accessible */}
       {!isCollapsed && (
         <div
-          className={`absolute top-0 right-0 w-3 h-full cursor-col-resize bg-transparent transition-all duration-300 group ${
+          className={`absolute top-0 right-0 w-4 h-full cursor-col-resize transition-all duration-300 group ${
             isDragging 
-              ? 'bg-gradient-to-r from-blue-200/60 to-indigo-200/40 dark:from-blue-800/40 dark:to-indigo-800/30' 
-              : 'hover:bg-gradient-to-r hover:from-blue-100/40 hover:to-indigo-100/20 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/10'
+              ? 'bg-gradient-to-r from-blue-200/80 to-indigo-200/60 dark:from-blue-800/60 dark:to-indigo-800/50' 
+              : 'bg-slate-100/30 dark:bg-slate-700/30 hover:bg-gradient-to-r hover:from-blue-100/60 hover:to-indigo-100/40 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/30'
           }`}
           onMouseDown={handleMouseDown}
           title="Drag to resize panel"
         >
-          <div className={`absolute top-1/2 right-1 transform -translate-y-1/2 w-1 h-12 rounded-full transition-all duration-300 ${
-            isDragging 
-              ? 'bg-gradient-to-b from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30' 
-              : 'bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 group-hover:from-blue-400 group-hover:to-indigo-500 dark:group-hover:from-blue-500 dark:group-hover:to-indigo-600'
-          }`}>
-            <DragHandleIcon className={`w-4 h-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+          {/* Multiple grip indicators for better visibility */}
+          <div className="absolute top-1/2 right-1 transform -translate-y-1/2 flex flex-col gap-1">
+            <div className={`w-0.5 h-4 rounded-full transition-all duration-300 ${
               isDragging 
-                ? 'text-white opacity-100' 
-                : 'text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 group-hover:text-white'
+                ? 'bg-blue-500 dark:bg-blue-400 shadow-md shadow-blue-500/40' 
+                : 'bg-slate-400/60 dark:bg-slate-500/60 group-hover:bg-blue-400 dark:group-hover:bg-blue-400'
+            }`} />
+            <div className={`w-0.5 h-4 rounded-full transition-all duration-300 ${
+              isDragging 
+                ? 'bg-blue-500 dark:bg-blue-400 shadow-md shadow-blue-500/40' 
+                : 'bg-slate-400/60 dark:bg-slate-500/60 group-hover:bg-blue-400 dark:group-hover:bg-blue-400'
             }`} />
           </div>
+          
+          {/* Larger invisible hit area */}
+          <div className="absolute inset-0 w-6 right-0" />
         </div>
       )}
       
