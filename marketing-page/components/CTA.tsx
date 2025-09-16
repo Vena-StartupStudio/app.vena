@@ -22,11 +22,6 @@ const CTA: React.FC = () => {
             
             <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
               <div className="flex-1">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email address"
-                  className="w-full px-6 py-4 rounded-2xl border border-purple-200/20 bg-white/95 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white text-gray-800 placeholder-gray-500 font-light text-base shadow-lg transition-all duration-300"
-                />
               </div>
               <a
                 href="https://app.vena.software/"
