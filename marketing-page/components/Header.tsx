@@ -56,7 +56,9 @@ const Header: React.FC = () => {
               Sign In
             </a>
             <a
-              href="/signup"
+              href="https://app.vena.software/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="relative inline-flex items-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium px-6 py-2.5 rounded-full hover:from-purple-500 hover:to-indigo-500 transition-all duration-400 shadow-sm hover:shadow-lg text-sm group overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -109,7 +111,9 @@ const Header: React.FC = () => {
                   Sign In
                 </a>
                 <a
-                  href="/signup"
+                  href="https://app.vena.software/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block w-full text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium px-6 py-3 rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all duration-400 shadow-sm"
                   onClick={() => setIsMenuOpen(false)}
                 >
