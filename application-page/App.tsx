@@ -111,17 +111,21 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-secondary flex items-start justify-center p-4 sm:p-6 lg:p-8">
       <main className="w-full max-w-2xl mx-auto">
-        {/* Logo header */}
-        <header role="banner" className="w-full flex justify-center py-6">
-          <img
-            src={VenaLogo}
-            alt="Vena logo"
-            className="h-16 w-auto select-none"
-            draggable="false"
-          />
-        </header>
-
         <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
+          <div className="flex flex-col items-center text-center mb-8">
+            <img
+              src={VenaLogo}
+              alt="Vena logo"
+              className="h-16 w-auto mb-4 select-none"
+              draggable="false"
+            />
+            <h1 className="text-2xl sm:text-3xl font-semibold text-zinc-800 tracking-tight">
+              Ready to take your Business to the next step?
+            </h1>
+            <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-md">
+              Start growing your wellness practice today – simplify scheduling, payments, and client engagement with Vena.
+            </p>
+          </div>
           {isSubmitted ? (
             // ✅ pass confirmation props
             <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
