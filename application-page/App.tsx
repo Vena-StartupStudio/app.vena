@@ -3,6 +3,7 @@ import React, { useState, useCallback } from "react";
 import { supabase } from "./lib/supabaseClient";
 import RegistrationForm from "./components/RegistrationForm";
 import ConfirmationMessage from "./components/ConfirmationMessage";
+import { IntegrationSettings } from "./components/IntegrationSettings";
 import type { FormData as RegistrationFormData } from "./types";
 import VenaLogo from './components/icons/VenaLogo.png';
 
@@ -166,7 +167,12 @@ const App: React.FC = () => {
           </div>
           {isSubmitted ? (
             // ✅ pass confirmation props
-            <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
+            <>
+              <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
+              <div className="mt-8 border-t pt-8">
+                <IntegrationSettings />
+              </div>
+            </>
           ) : (
             <RegistrationForm
               formData={formData}
