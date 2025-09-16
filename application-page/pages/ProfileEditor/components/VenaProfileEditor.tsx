@@ -10,6 +10,8 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
   const {
     config,
     setConfig,
+    status,
+    setStatus,
     handleTemplateChange,
     handleStyleChange,
     handleFontThemeChange,
@@ -37,6 +39,8 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         setConfig={setConfig}
         isRtl={isRtl}
         onValueChange={handleValueChange}
+        status={status}
+        setStatus={setStatus}
       />
     </div>
   );

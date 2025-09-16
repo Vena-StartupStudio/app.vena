@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ProfileConfig } from '../types';
 import { HEBREW_TRANSLATIONS, INITIAL_PLACEHOLDER_IMAGE } from '../constants/config';
 import AboutCard from './cards/AboutCard';
 import ServicesCard from './cards/ServicesCard';
 import ProfileHeader from './cards/ProfileHeader';
+import { supabase } from '../utils/supabase';
+import { DataStatus } from '../hooks/useProfileConfig';
 
 interface PreviewCanvasProps {
   isPreviewMode: boolean;
@@ -12,6 +14,8 @@ interface PreviewCanvasProps {
   setConfig: React.Dispatch<React.SetStateAction<ProfileConfig>>;
   isRtl: boolean;
   onValueChange: <K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) => void;
+  status: DataStatus;
+  setStatus: React.Dispatch<React.SetStateAction<DataStatus>>;
 }
 
 const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
@@ -21,15 +25,68 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
   setConfig,
   isRtl,
   onValueChange,
+  status,
+  setStatus,
 }) => {
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSave = async () => {
+    setStatus('saving');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert('You must be logged in to save your profile.');
+        setStatus('error');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('registrations')
+        .update({ profile_config: config })
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setStatus('success');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setStatus('error');
+    }
+  };
+
+  useEffect(() => {
+    if (status === 'success') {
+      const timer = setTimeout(() => setStatus('idle'), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, setStatus]);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onValueChange('profileImage', reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      return;
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('logos')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Error uploading image:', error);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('logos')
+      .getPublicUrl(data.path);
+
+    if (publicUrlData) {
+      onValueChange('profileImage', publicUrlData.publicUrl);
     }
   };
 
@@ -69,13 +126,43 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
   const inlineInputStyles = "bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md text-center w-full block";
 
+  const getSaveButtonText = () => {
+    switch (status) {
+      case 'saving':
+        return 'Saving...';
+      case 'success':
+        return 'Saved!';
+      case 'error':
+        return 'Retry Save';
+      default:
+        return 'Save';
+    }
+  };
+
   return (
     <main className="flex-1 h-full overflow-y-auto relative">
       <div className="absolute top-4 right-4 z-20 flex gap-2">
+        <button 
+          onClick={handleSave} 
+          className={`px-4 py-2 text-white rounded-md shadow-lg transition-colors ${
+            status === 'saving' ? 'bg-yellow-500 cursor-not-allowed' :
+            status === 'success' ? 'bg-green-500' :
+            status === 'error' ? 'bg-red-500 hover:bg-red-400' :
+            'bg-green-600 hover:bg-green-500'
+          }`}
+          disabled={status === 'saving'}
+        >
+          {getSaveButtonText()}
+        </button>
         <button onClick={() => setIsPreviewMode(!isPreviewMode)} className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-lg hover:bg-slate-700 transition-colors">
           {isPreviewMode ? 'Editor' : 'Preview'}
         </button>
       </div>
+      {status === 'loading' && (
+        <div className="absolute inset-0 bg-slate-200/50 dark:bg-slate-900/50 flex items-center justify-center z-30">
+          <div className="text-lg font-semibold text-slate-700 dark:text-slate-300">Loading Profile...</div>
+        </div>
+      )}
       <div dir={isRtl ? 'rtl' : 'ltr'} className={`max-w-7xl mx-auto p-6 md:p-8 lg:p-12 transition-all duration-300 ${config.styles.colorBackground} ${config.styles.backgroundOpacity} min-h-screen`}>
         {/* Professional Header */}
         <header className="mb-12">
