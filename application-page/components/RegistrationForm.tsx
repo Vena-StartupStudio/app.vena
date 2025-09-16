@@ -217,7 +217,7 @@ export default function RegistrationForm({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="mt-2 rounded px-4 py-2 font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-light focus-visible:ring-offset-2 transition-colors bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary"
+        className="mt-2 rounded px-4 py-2 font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed focus: outline-none focus-visible:ring-2 focus-visible:ring-primary-light focus-visible:ring-offset-2 transition-colors bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary"
         aria-disabled={!canSubmit}
       >
         {canSubmit ? 'Register' : 'Complete required fields'}
