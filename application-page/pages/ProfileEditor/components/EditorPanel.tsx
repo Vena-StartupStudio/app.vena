@@ -230,109 +230,49 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
     </div>
   );
 
-  // Custom Font Picker Component
+  // Word-Style Font Picker Component
   const FontPicker: React.FC<{
     fontThemes: Array<[string, any]>;
     selectedFont: string;
     onFontChange: (fontKey: FontThemeKey) => void;
     language: 'en' | 'he';
   }> = ({ fontThemes, selectedFont, onFontChange, language }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-          setIsOpen(false);
-        }
-      };
-
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const selectedTheme = fontThemes.find(([key]) => key === selectedFont)?.[1];
     
-    // Extract font families from the theme strings
+    // Extract main font family from the theme strings
     const getFontFamily = (fontString: string) => {
-      const match = fontString.match(/font-family:([^;]+)/);
-      return match ? match[1].replace(/'/g, '') : 'inherit';
+      const match = fontString.match(/font-family:([^;,]+)/);
+      return match ? match[1].replace(/['"]/g, '').trim() : 'inherit';
     };
 
     return (
-      <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full p-4 border rounded-xl bg-gradient-to-r from-white/80 to-slate-50/60 dark:from-slate-700/60 dark:to-slate-800/40 border-slate-200/60 dark:border-slate-600/50 text-slate-900 dark:text-slate-200 flex justify-between items-center hover:from-blue-50/60 hover:to-indigo-50/40 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:border-blue-200/60 dark:hover:border-blue-500/40 transition-all duration-300 ease-out backdrop-blur-sm shadow-sm group"
-        >
-          <div className="flex flex-col items-start">
-            <span className="text-base font-semibold tracking-tight">{selectedTheme?.name[language]}</span>
-            <div className="flex items-center gap-3 mt-2">
-              <span 
-                className="text-sm text-slate-600 dark:text-slate-400 font-medium"
-                style={{ fontFamily: getFontFamily(selectedTheme?.heading || '') }}
-              >
-                Heading
-              </span>
-              <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-              <span 
-                className="text-sm text-slate-500 dark:text-slate-500"
-                style={{ fontFamily: getFontFamily(selectedTheme?.body || '') }}
-              >
-                Body
-              </span>
-            </div>
-          </div>
-          <ChevronDownIcon className={`w-5 h-5 transition-all duration-300 ease-out text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/50 rounded-xl shadow-2xl shadow-slate-200/40 dark:shadow-slate-900/40 z-30 max-h-80 overflow-y-auto backdrop-blur-xl">
-            {fontThemes.map(([key, theme]) => (
-              <button
-                key={key}
-                onClick={() => {
-                  onFontChange(key as FontThemeKey);
-                  setIsOpen(false);
-                }}
-                className={`w-full p-4 text-left transition-all duration-200 ease-out border-b border-slate-100/60 dark:border-slate-700/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl
-                  ${selectedFont === key 
-                    ? 'bg-gradient-to-r from-blue-50/80 to-indigo-50/60 dark:from-blue-900/30 dark:to-indigo-900/20 text-blue-900 dark:text-blue-100' 
-                    : 'hover:bg-gradient-to-r hover:from-slate-50/60 hover:to-gray-50/40 dark:hover:from-slate-700/40 dark:hover:to-slate-800/30'
-                  }`}
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex flex-col">
-                    <span className="text-base font-semibold text-slate-900 dark:text-slate-200 tracking-tight">
-                      {theme.name[language]}
-                    </span>
-                    <div className="flex items-center gap-4 mt-3">
-                      <span 
-                        className="text-lg text-slate-700 dark:text-slate-300 font-medium"
-                        style={{ fontFamily: getFontFamily(theme.heading) }}
-                      >
-                        Heading Sample
-                      </span>
-                      <div className="w-px h-4 bg-slate-300 dark:bg-slate-600"></div>
-                      <span 
-                        className="text-sm text-slate-600 dark:text-slate-400"
-                        style={{ fontFamily: getFontFamily(theme.body) }}
-                      >
-                        Body text sample
-                      </span>
-                    </div>
-                  </div>
-                  {selectedFont === key && (
-                    <div className="w-8 h-8 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center">
-                      <CheckIcon className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+      <div className="border border-slate-200/60 dark:border-slate-600/50 rounded-lg bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm">
+        {fontThemes.map(([key, theme], index) => (
+          <button
+            key={key}
+            onClick={() => onFontChange(key as FontThemeKey)}
+            className={`w-full px-4 py-3 text-left transition-all duration-200 ease-out flex items-center justify-between group
+              ${selectedFont === key 
+                ? 'bg-blue-500 dark:bg-blue-600 text-white' 
+                : 'hover:bg-slate-50/80 dark:hover:bg-slate-700/60 text-slate-900 dark:text-slate-100'
+              }
+              ${index === 0 ? 'rounded-t-lg' : ''}
+              ${index === fontThemes.length - 1 ? 'rounded-b-lg' : 'border-b border-slate-200/40 dark:border-slate-600/40'}
+            `}
+          >
+            <span 
+              className="text-base font-normal tracking-normal"
+              style={{ 
+                fontFamily: getFontFamily(theme.heading),
+                fontSize: '16px'
+              }}
+            >
+              {theme.name[language]}
+            </span>
+            {selectedFont === key && (
+              <CheckIcon className="w-4 h-4 text-white flex-shrink-0" />
+            )}
+          </button>
+        ))}
       </div>
     );
   };
@@ -421,7 +361,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                 <div className="bg-white/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-100/60 dark:border-slate-700/40 backdrop-blur-sm shadow-sm">
                   <label className="flex items-center gap-3 text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-                    Font Pairing
+                    Font Selection
                   </label>
                   <FontPicker
                     fontThemes={languageFilteredFontThemes}
