@@ -11,12 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    // --- START NEW LOGGING ---
-    const requestBodyText = await req.text();
-    console.log("Received raw request body:", requestBodyText);
-    // --- END NEW LOGGING ---
-
-    // Create a Supabase client with the user's auth token
+    // Create a Supabase client with the user's auth token FIRST
     const userSupabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -26,6 +21,10 @@ serve(async (req) => {
     // Get the user from the token
     const { data: { user } } = await userSupabaseClient.auth.getUser()
     if (!user) throw new Error('User not found')
+
+    // NOW it is safe to read the request body
+    const requestBodyText = await req.text();
+    console.log("Received raw request body:", requestBodyText);
 
     // Parse the body text we logged earlier
     const bodyJSON = JSON.parse(requestBodyText);
@@ -40,9 +39,9 @@ serve(async (req) => {
       Deno.env.get('VENA_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Encrypt the key using pgsodium
+    // Encrypt the key using pgsodium - FIXED WITH CORRECT SCHEMA NAME
     const { data: encryptedKey, error: encryptionError } = await adminSupabaseClient.rpc(
-      'pgsodium_crypto_aead_det_encrypt',
+      'pgsodium.crypto_aead_det_encrypt',  // Changed from 'pgsodium_crypto_aead_det_encrypt'
       {
         plaintext: apiKey,
         additional: '{"service":"reservekit"}',
