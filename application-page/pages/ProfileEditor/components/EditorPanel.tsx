@@ -8,6 +8,7 @@ const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (<s
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>);
 const ChevronRightIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>);
 const DragHandleIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="currentColor" viewBox="0 0 16 16"><path d="M.5 1a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13A.5.5 0 0 1 .5 1zm15 0a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13a.5.5 0 0 1 .5-.5z"/></svg>);
+const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>);
 const LayoutIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -194,6 +195,109 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
     </div>
   );
 
+  // Custom Font Picker Component
+  const FontPicker: React.FC<{
+    fontThemes: Array<[string, any]>;
+    selectedFont: string;
+    onFontChange: (fontKey: FontThemeKey) => void;
+    language: 'en' | 'he';
+  }> = ({ fontThemes, selectedFont, onFontChange, language }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+          setIsOpen(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedTheme = fontThemes.find(([key]) => key === selectedFont)?.[1];
+    
+    // Extract font families from the theme strings
+    const getFontFamily = (fontString: string) => {
+      const match = fontString.match(/font-family:([^;]+)/);
+      return match ? match[1].replace(/'/g, '') : 'inherit';
+    };
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full p-3 border rounded-md bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+        >
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-medium">{selectedTheme?.name[language]}</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span 
+                className="text-xs text-slate-500"
+                style={{ fontFamily: getFontFamily(selectedTheme?.heading || '') }}
+              >
+                Heading
+              </span>
+              <span className="text-xs text-slate-400">•</span>
+              <span 
+                className="text-xs text-slate-500"
+                style={{ fontFamily: getFontFamily(selectedTheme?.body || '') }}
+              >
+                Body
+              </span>
+            </div>
+          </div>
+          <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-lg z-20 max-h-64 overflow-y-auto">
+            {fontThemes.map(([key, theme]) => (
+              <button
+                key={key}
+                onClick={() => {
+                  onFontChange(key as FontThemeKey);
+                  setIsOpen(false);
+                }}
+                className={`w-full p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors border-b border-slate-100 dark:border-slate-600 last:border-b-0 ${
+                  selectedFont === key ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-200">
+                      {theme.name[language]}
+                    </span>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span 
+                        className="text-sm text-slate-700 dark:text-slate-300"
+                        style={{ fontFamily: getFontFamily(theme.heading) }}
+                      >
+                        Heading Sample
+                      </span>
+                      <span className="text-xs text-slate-400">|</span>
+                      <span 
+                        className="text-sm text-slate-600 dark:text-slate-400"
+                        style={{ fontFamily: getFontFamily(theme.body) }}
+                      >
+                        Body text sample
+                      </span>
+                    </div>
+                  </div>
+                  {selectedFont === key && (
+                    <CheckIcon className="w-4 h-4 text-blue-600" />
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <aside 
       ref={panelRef}
@@ -233,10 +337,13 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
             >
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Font Pairing</label>
-                  <select value={config.styles.fontPairing} onChange={(e) => onFontThemeChange(e.target.value as FontThemeKey)} className="w-full p-2 border rounded-md bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200">
-                    {languageFilteredFontThemes.map(([key, theme]) => <option key={key} value={key}>{theme.name[language]}</option>)}
-                  </select>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Font Pairing</label>
+                  <FontPicker
+                    fontThemes={languageFilteredFontThemes}
+                    selectedFont={config.styles.fontPairing}
+                    onFontChange={onFontThemeChange}
+                    language={language}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Primary Color</label>
