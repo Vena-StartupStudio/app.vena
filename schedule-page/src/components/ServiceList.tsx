@@ -161,23 +161,45 @@ const ServiceList: React.FC = () => {
     console.log('API key (first 20 chars):', apiKey.substring(0, 20) + '...');
     console.log('Selected service:', selectedService);
 
-    // For now, let's try booking with the original time slot data
-    // instead of calculating future dates to see if that works
+    // Calculate the next occurrence of this time slot
+    const today = new Date();
+    const nextDate = new Date(today);
+    
+    // Get the day of week from the slot (0 = Sunday, 1 = Monday, etc.)
+    const slotDayOfWeek = slot.day_of_week;
+    const currentDayOfWeek = today.getDay();
+    
+    // Calculate days until next occurrence
+    let daysToAdd = slotDayOfWeek - currentDayOfWeek;
+    if (daysToAdd <= 0) {
+      daysToAdd += 7; // Next week if today or past
+    }
+    
+    nextDate.setDate(today.getDate() + daysToAdd);
+    
+    // Format date as YYYY-MM-DD as required by ReserveKit
+    const bookingDate = nextDate.toISOString().split('T')[0];
+
     const confirmBooking = window.confirm(
-      `Confirm booking for ${selectedService.name} at ${new Date(slot.start_time).toLocaleString()}?`
+      `Confirm booking for ${selectedService.name} on ${nextDate.toLocaleDateString()} at ${new Date(slot.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}?`
     );
 
     if (!confirmBooking) return;
 
     try {
-      // Try the simplest possible booking first
+      // Prepare booking data according to ReserveKit API spec
       const bookingData = {
-        service_id: selectedService.id
+        date: bookingDate,
+        time_slot_id: slot.id,
+        customer_name: "Walk-in Customer",
+        customer_email: "customer@example.com"
       };
 
-      console.log('Booking payload (minimal):', JSON.stringify(bookingData, null, 2));
+      console.log('Booking payload:', JSON.stringify(bookingData, null, 2));
+      console.log('Service ID (query param):', selectedService.id);
 
-      const response = await fetch('https://api.reservekit.io/v1/bookings', {
+      // service_id goes as query parameter, not in body
+      const response = await fetch(`https://api.reservekit.io/v1/bookings?service_id=${selectedService.id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -196,7 +218,14 @@ const ServiceList: React.FC = () => {
         throw new Error(`HTTP ${response.status}: ${responseText}`);
       }
 
-      alert('Booking request sent successfully!');
+      // Parse the successful response
+      const responseData = JSON.parse(responseText);
+      console.log('Booking created successfully:', responseData);
+
+      alert('Booking confirmed! You will receive a confirmation email shortly.');
+      
+      // Refresh time slots to show updated availability
+      handleSelectService(selectedService);
       
     } catch (error) {
       console.error('=== BOOKING ERROR ===');
