@@ -161,9 +161,11 @@ const getInitialConfig = (language: 'en' | 'he'): ProfileConfig => {
 };
 
 const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
-  minimalist: { templateId: 'minimalist', styles: { ...(getInitialConfig('en').styles), fontPairing: 'minimal', fontHeading: FONT_THEMES.minimal.heading, fontBody: FONT_THEMES.minimal.body, colorPrimary: 'bg-slate-800', colorSecondary: 'text-slate-600', colorBackground: 'bg-white' }, sections: ['about', 'services', 'contact'] },
-  vibrant: { templateId: 'vibrant', styles: { ...(getInitialConfig('en').styles), fontPairing: 'modern', fontHeading: FONT_THEMES.modern.heading, fontBody: FONT_THEMES.modern.body, colorPrimary: 'bg-emerald-600', colorSecondary: 'text-emerald-600', colorBackground: 'bg-slate-50' }, sections: ['about', 'testimonials', 'services', 'contact'] },
-  professional: { templateId: 'professional', styles: { ...(getInitialConfig('en').styles), fontPairing: 'serif', fontHeading: FONT_THEMES.serif.heading, fontBody: FONT_THEMES.serif.body, colorPrimary: 'bg-blue-600', colorSecondary: 'text-blue-600', colorBackground: 'bg-gray-100' }, sections: ['services', 'about', 'testimonials', 'contact'] },
+  warm: { templateId: 'warm', styles: { ...(getInitialConfig('en').styles), fontPairing: 'serif', fontHeading: FONT_THEMES.serif.heading, fontBody: FONT_THEMES.serif.body, colorPrimary: 'bg-amber-600', colorSecondary: 'text-amber-600', colorBackground: 'bg-amber-50' }, sections: ['about', 'services', 'contact'] },
+  nature: { templateId: 'nature', styles: { ...(getInitialConfig('en').styles), fontPairing: 'modern', fontHeading: FONT_THEMES.modern.heading, fontBody: FONT_THEMES.modern.body, colorPrimary: 'bg-emerald-600', colorSecondary: 'text-emerald-600', colorBackground: 'bg-green-50' }, sections: ['about', 'testimonials', 'services', 'contact'] },
+  ambient: { templateId: 'ambient', styles: { ...(getInitialConfig('en').styles), fontPairing: 'minimal', fontHeading: FONT_THEMES.minimal.heading, fontBody: FONT_THEMES.minimal.body, colorPrimary: 'bg-slate-600', colorSecondary: 'text-slate-500', colorBackground: 'bg-slate-50' }, sections: ['services', 'about', 'testimonials', 'contact'] },
+  tranquil: { templateId: 'tranquil', styles: { ...(getInitialConfig('en').styles), fontPairing: 'default', fontHeading: FONT_THEMES.default.heading, fontBody: FONT_THEMES.default.body, colorPrimary: 'bg-sky-500', colorSecondary: 'text-sky-500', colorBackground: 'bg-sky-50' }, sections: ['about', 'services', 'testimonials', 'contact'] },
+  serene: { templateId: 'serene', styles: { ...(getInitialConfig('en').styles), fontPairing: 'minimal', fontHeading: FONT_THEMES.minimal.heading, fontBody: FONT_THEMES.minimal.body, colorPrimary: 'bg-indigo-500', colorSecondary: 'text-indigo-500', colorBackground: 'bg-indigo-50' }, sections: ['about', 'contact', 'services'] },
 };
 
 // --- ICONS ---
