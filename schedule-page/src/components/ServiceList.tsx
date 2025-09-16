@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 // Define the structure of a Service object based on ReserveKit's API docs
 type Service = {
@@ -17,29 +18,101 @@ const ServiceList: React.FC = () => {
 
   useEffect(() => {
     const fetchServices = async () => {
-      // Retrieve the API key from environment variables
-      const apiKey = import.meta.env.VITE_RESERVEKIT_API_KEY;
-
-      if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-        setError('ReserveKit API key is not configured. Please add it to your .env file.');
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetch('https://api.reservekit.io/v1/services', {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        // 1. Get the current user's session from Supabase
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch services: ${response.statusText}`);
+        if (sessionError) {
+          throw new Error(`Supabase error: ${sessionError.message}`);
         }
 
-        const data = await response.json();
-        setServices(data.data); // The services are in the 'data' property of the response
+        if (!session) {
+          // This page is public, so we need a way to identify the user.
+          // For now, let's assume the user is identified by a URL parameter.
+          // Example: http://localhost:5173/?user_id=...
+          const params = new URLSearchParams(window.location.search);
+          const userId = params.get('user_id');
+
+          if (!userId) {
+            setError('No user specified. Please provide a user_id in the URL.');
+            setLoading(false);
+            return;
+          }
+          
+          // Fetch public registration data using the user_id
+          const { data: registration, error: registrationError } = await supabase
+            .from('registrations')
+            .select('encrypted_reservekit_api_key')
+            .eq('id', userId)
+            .single();
+          
+          if (registrationError || !registration) {
+            throw new Error('Could not fetch registration details for the specified user.');
+          }
+
+          const apiKey = registration.encrypted_reservekit_api_key;
+          
+          if (!apiKey) {
+            setError('ReserveKit API key is not set for this user.');
+            setLoading(false);
+            return;
+          }
+          
+          // 3. Fetch services from ReserveKit using the user's API key
+          const response = await fetch('https://api.reservekit.io/v1/services', {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Failed to fetch services: ${response.statusText} - ${errorBody}`);
+          }
+
+          const data = await response.json();
+          setServices(data.data);
+
+        } else {
+            // User is logged in, proceed as before
+            const user = session.user;
+
+            // 2. Fetch the user's registration data to get the API key
+            const { data: registration, error: registrationError } = await supabase
+              .from('registrations')
+              .select('encrypted_reservekit_api_key')
+              .eq('id', user.id)
+              .single();
+
+            if (registrationError || !registration) {
+              throw new Error('Could not fetch your registration details.');
+            }
+
+            const apiKey = registration.encrypted_reservekit_api_key;
+
+            if (!apiKey) {
+              setError('ReserveKit API key is not set for your account.');
+              setLoading(false);
+              return;
+            }
+
+            // 3. Fetch services from ReserveKit using the user's API key
+            const response = await fetch('https://api.reservekit.io/v1/services', {
+              headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (!response.ok) {
+              const errorBody = await response.text();
+              throw new Error(`Failed to fetch services: ${response.statusText} - ${errorBody}`);
+            }
+
+            const data = await response.json();
+            setServices(data.data); // The services are in the 'data' property of the response
+        }
       } catch (err: any) {
         setError(err.message);
       } finally {
