@@ -1,8 +1,6 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
-
-console.log("New function version with detailed logging deployed.");
+﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
+import { corsHeaders } from "../_shared/cors.ts"
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -11,68 +9,101 @@ serve(async (req) => {
   }
 
   try {
-    // Create a Supabase client with the user's auth token FIRST
-    const userSupabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    )
-
-    // Get the user from the token
-    const { data: { user } } = await userSupabaseClient.auth.getUser()
-    if (!user) throw new Error('User not found')
-
-    // NOW it is safe to read the request body
-    const requestBodyText = await req.text();
-    console.log("Received raw request body:", requestBodyText);
-
-    // Parse the body text we logged earlier
-    const bodyJSON = JSON.parse(requestBodyText);
-    const apiKey = bodyJSON.apiKey;
-    console.log("Parsed API key:", apiKey ? "Key found" : "Key NOT found");
-
-    if (!apiKey) throw new Error('API key is required in the JSON body')
-
-    // Create a service role client to perform the encryption and update
-    const adminSupabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('VENA_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    // Encrypt the key using pgsodium - FIXED WITH CORRECT PARAMETER ORDER
-      const { data: encryptedKey, error: encryptionError } = await adminSupabaseClient.rpc(
-          'pgsodium.crypto_aead_det_encrypt',
-        [
-          apiKey,  // message (first parameter)
-          '{"service":"reservekit"}',  // additional (second parameter) 
-          Deno.env.get('SODIUM_KEY_ID')  // key_uuid (third parameter)
-        ]
+    // Parse request body
+    const { apiKey } = await req.json()
+    
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: 'API key is required' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
       )
-    if (encryptionError) {
-      console.error("Encryption error:", encryptionError);
-      throw encryptionError;
     }
 
-    // Update the user's record with the encrypted key
-    const { error: updateError } = await adminSupabaseClient
+    // Get user from authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Create Supabase client with service role key
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseServiceRoleKey) {
+      return new Response(
+        JSON.stringify({ error: 'Service role key not configured' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      supabaseServiceRoleKey
+    )
+
+    // Get user from JWT token
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid token' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Store the API key (temporarily as plaintext)
+    const { error: updateError } = await supabase
       .from('registrations')
-      .update({ encrypted_reservekit_api_key: encryptedKey })
-      .eq('id', user.id)
+      .update({ 
+        reservekit_api_key: apiKey,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id)
 
     if (updateError) {
-      console.error("Database update error:", updateError);
-      throw updateError;
+      console.error('Database update error:', updateError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to save API key' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
-    return new Response(JSON.stringify({ message: 'API key saved successfully' }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    return new Response(
+      JSON.stringify({ 
+        message: 'API key saved successfully',
+        user_id: user.id
+      }),
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
+
   } catch (error) {
-    console.error("Caught an error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400, // Keep as 400 to see if it changes
-    })
+    console.error('Function error:', error)
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
   }
 })
