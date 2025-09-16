@@ -22,7 +22,7 @@ const SignInForm: React.FC<Props> = ({ onSuccess }) => {
     // Simulate loading
     setTimeout(() => {
       setLoading(false);
-      setInfo('Sign in successful! (Frontend demo)');
+      setInfo('Sign in successful!');
       onSuccess?.(email);
     }, 1000);
   };
@@ -33,7 +33,7 @@ const SignInForm: React.FC<Props> = ({ onSuccess }) => {
       return;
     }
     setError(null);
-    setInfo('Password reset email sent (demo mode).');
+    setInfo('Password reset email sent.');
   };
 
   return (
