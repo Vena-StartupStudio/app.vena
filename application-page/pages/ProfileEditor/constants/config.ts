@@ -6,7 +6,7 @@ export const INITIAL_PLACEHOLDER_IMAGE = 'https://i.imgur.com/rS42r8s.png';
 export const HEBREW_TRANSLATIONS = {
   aboutMe: 'עליי',
   myServices: 'השירותים שלי',
-  poweredBy: 'נוצר באמצעות Vena'
+  poweredBy: 'נוצר באמצעות'
 };
 
 const BASE_DEFAULT_CONFIG: Omit<ProfileConfig, 'styles'> = {
