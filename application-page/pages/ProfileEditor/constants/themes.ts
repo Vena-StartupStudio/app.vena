@@ -9,9 +9,37 @@ export const FONT_THEMES = {
 } as const;
 
 export const COLOR_PALETTE = {
-  primary: ['bg-blue-600', 'bg-emerald-600', 'bg-purple-600', 'bg-rose-600', 'bg-slate-800', 'bg-amber-600', 'bg-sky-500', 'bg-indigo-500'],
-  secondary: ['text-blue-600', 'text-emerald-600', 'text-purple-600', 'text-rose-600', 'text-slate-600', 'text-amber-600', 'text-sky-500', 'text-indigo-500'],
-  background: ['bg-white', 'bg-slate-50', 'bg-gray-100', 'bg-zinc-100', 'bg-stone-50', 'bg-amber-50', 'bg-green-50', 'bg-sky-50', 'bg-indigo-50'],
+  primary: [
+    { class: 'bg-blue-600', name: 'Ocean Blue', hex: '#2563EB' },
+    { class: 'bg-emerald-600', name: 'Emerald Green', hex: '#059669' },
+    { class: 'bg-purple-600', name: 'Royal Purple', hex: '#9333EA' },
+    { class: 'bg-rose-600', name: 'Warm Rose', hex: '#E11D48' },
+    { class: 'bg-slate-800', name: 'Charcoal', hex: '#1E293B' },
+    { class: 'bg-amber-600', name: 'Golden Amber', hex: '#D97706' },
+    { class: 'bg-sky-500', name: 'Sky Blue', hex: '#0EA5E9' },
+    { class: 'bg-indigo-500', name: 'Deep Indigo', hex: '#6366F1' },
+  ],
+  secondary: [
+    { class: 'text-blue-600', name: 'Ocean Blue', hex: '#2563EB' },
+    { class: 'text-emerald-600', name: 'Emerald Green', hex: '#059669' },
+    { class: 'text-purple-600', name: 'Royal Purple', hex: '#9333EA' },
+    { class: 'text-rose-600', name: 'Warm Rose', hex: '#E11D48' },
+    { class: 'text-slate-600', name: 'Charcoal', hex: '#475569' },
+    { class: 'text-amber-600', name: 'Golden Amber', hex: '#D97706' },
+    { class: 'text-sky-500', name: 'Sky Blue', hex: '#0EA5E9' },
+    { class: 'text-indigo-500', name: 'Deep Indigo', hex: '#6366F1' },
+  ],
+  background: [
+    { class: 'bg-white', name: 'Pure White', hex: '#FFFFFF' },
+    { class: 'bg-slate-50', name: 'Light Gray', hex: '#F8FAFC' },
+    { class: 'bg-gray-100', name: 'Soft Gray', hex: '#F3F4F6' },
+    { class: 'bg-zinc-100', name: 'Zinc Gray', hex: '#F4F4F5' },
+    { class: 'bg-stone-50', name: 'Stone White', hex: '#FAFAF9' },
+    { class: 'bg-amber-50', name: 'Warm Cream', hex: '#FFFBEB' },
+    { class: 'bg-green-50', name: 'Mint Fresh', hex: '#F0FDF4' },
+    { class: 'bg-sky-50', name: 'Cloud Blue', hex: '#F0F9FF' },
+    { class: 'bg-indigo-50', name: 'Lavender Mist', hex: '#EEF2FF' },
+  ],
 };
 
 export const OPACITY_OPTIONS = ['bg-opacity-100', 'bg-opacity-90', 'bg-opacity-80', 'bg-opacity-70'];

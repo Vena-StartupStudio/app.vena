@@ -44,8 +44,88 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   onSectionsOrderChange,
 }) => {
   const [activeAccordion, setActiveAccordion] = useState('Templates');
+  const [showCustomPrimary, setShowCustomPrimary] = useState(false);
+  const [showCustomSecondary, setShowCustomSecondary] = useState(false);
+  const [showCustomBackground, setShowCustomBackground] = useState(false);
+  
   const handleAccordionToggle = (title: string) => { setActiveAccordion(prev => (prev === title ? '' : title)); };
   const languageFilteredFontThemes = Object.entries(FONT_THEMES).filter(([, theme]) => (theme.lang as readonly string[]).includes(language));
+
+  // Enhanced Color Picker Component
+  const ColorPicker: React.FC<{
+    colors: Array<{ class: string; name: string; hex: string }>;
+    selectedColor: string;
+    onColorChange: (color: string) => void;
+    showCustom: boolean;
+    onToggleCustom: (show: boolean) => void;
+    type: 'primary' | 'secondary' | 'background';
+  }> = ({ colors, selectedColor, onColorChange, showCustom, onToggleCustom, type }) => (
+    <div className="space-y-2">
+      <div className="flex gap-2 flex-wrap">
+        {colors.map(({ class: colorClass, name, hex }) => (
+          <div key={colorClass} className="relative group">
+            <button
+              onClick={() => onColorChange(colorClass)}
+              className={`w-8 h-8 rounded-full ${colorClass} border-2 ${
+                selectedColor === colorClass ? 'border-blue-500' : 
+                type === 'background' ? 'border-slate-300' : 'border-transparent'
+              } hover:scale-110 transition-transform`}
+              title={`${name} (${hex})`}
+            >
+              {type === 'secondary' && (
+                <span className={`${colorClass} text-xs font-bold flex items-center justify-center h-full`}>
+                  Aa
+                </span>
+              )}
+            </button>
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+              {name}
+              <br />
+              <span className="font-mono">{hex}</span>
+            </div>
+          </div>
+        ))}
+        {/* Custom Color Button */}
+        <button
+          onClick={() => onToggleCustom(!showCustom)}
+          className="w-8 h-8 rounded-full border-2 border-dashed border-slate-400 hover:border-slate-600 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors"
+          title="Custom Color"
+        >
+          +
+        </button>
+      </div>
+      {/* Custom Color Input */}
+      {showCustom && (
+        <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-700 rounded-md">
+          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
+            Custom {type} color (CSS class or hex)
+          </label>
+          <input
+            type="text"
+            placeholder={type === 'primary' ? 'bg-red-500 or #FF0000' : type === 'secondary' ? 'text-red-500 or #FF0000' : 'bg-red-50 or #FFF0F0'}
+            className="w-full px-2 py-1 text-sm border rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const value = (e.target as HTMLInputElement).value.trim();
+                if (value) {
+                  onColorChange(value);
+                  onToggleCustom(false);
+                }
+              }
+            }}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              if (value) {
+                onColorChange(value);
+                onToggleCustom(false);
+              }
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <aside className={`w-96 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 transition-all duration-500 ease-in-out ${isPreviewMode ? 'ml-[-24rem]' : 'ml-0'}`}>
@@ -63,16 +143,37 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Primary Color</label>
-                <div className="flex gap-2">{COLOR_PALETTE.primary.map(c => <button key={c} onClick={() => onStyleChange('colorPrimary', c)} className={`w-8 h-8 rounded-full ${c} border-2 ${config.styles.colorPrimary === c ? 'border-blue-500' : 'border-transparent'}`}></button>)}</div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Primary Color</label>
+                <ColorPicker
+                  colors={COLOR_PALETTE.primary}
+                  selectedColor={config.styles.colorPrimary}
+                  onColorChange={(color) => onStyleChange('colorPrimary', color)}
+                  showCustom={showCustomPrimary}
+                  onToggleCustom={setShowCustomPrimary}
+                  type="primary"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Secondary Color</label>
-                <div className="flex gap-2">{COLOR_PALETTE.secondary.map(c => <div key={c} onClick={() => onStyleChange('colorSecondary', c)} className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer border-2 ${config.styles.colorSecondary === c ? 'border-blue-500' : 'border-transparent'}`}><span className={`${c} text-lg`}>Aa</span></div>)}</div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Secondary Color</label>
+                <ColorPicker
+                  colors={COLOR_PALETTE.secondary}
+                  selectedColor={config.styles.colorSecondary}
+                  onColorChange={(color) => onStyleChange('colorSecondary', color)}
+                  showCustom={showCustomSecondary}
+                  onToggleCustom={setShowCustomSecondary}
+                  type="secondary"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Background Color</label>
-                <div className="flex gap-2">{COLOR_PALETTE.background.map(c => <button key={c} onClick={() => onStyleChange('colorBackground', c)} className={`w-8 h-8 rounded-full ${c} border-2 ${config.styles.colorBackground === c ? 'border-blue-500' : 'border-slate-300'}`}></button>)}</div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Background Color</label>
+                <ColorPicker
+                  colors={COLOR_PALETTE.background}
+                  selectedColor={config.styles.colorBackground}
+                  onColorChange={(color) => onStyleChange('colorBackground', color)}
+                  showCustom={showCustomBackground}
+                  onToggleCustom={setShowCustomBackground}
+                  type="background"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Background Opacity</label>
