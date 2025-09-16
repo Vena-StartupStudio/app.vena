@@ -20,18 +20,16 @@ const CTA: React.FC = () => {
               Join thousands of wellness professionals who are already growing their business with Vena.
             </p>
             
-            <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-              <div className="flex-1">
-              </div>
+            <div className="flex justify-center">
               <a
                 href="https://app.vena.software/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white text-purple-700 font-medium px-8 py-4 rounded-2xl hover:bg-purple-50 hover:text-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex-shrink-0 border border-white/20 inline-block text-center"
+                className="bg-white text-purple-700 font-medium px-8 py-4 rounded-2xl hover:bg-purple-50 hover:text-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 border border-white/20 inline-block text-center"
               >
                 Sign Up Now
               </a>
-            </form>
+            </div>
           </div>
         </div>
       </div>
