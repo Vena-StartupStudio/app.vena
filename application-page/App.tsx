@@ -1,88 +1,37 @@
 // application-page/App.tsx
 import React, { useState, useCallback } from "react";
-import RegistrationForm from "./components/RegistrationForm";      
-import ConfirmationMessage from "./components/ConfirmationMessage"; 
+import { supabase } from "./lib/supabaseClient";
+import RegistrationForm from "./components/RegistrationForm";
+import ConfirmationMessage from "./components/ConfirmationMessage";
+import type { FormData as RegistrationFormData } from "./types";
 
-type FormData = {
-  businessName: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  socialMedia: string;
-  password: string;
-  confirmPassword: string;
-  businessNiche: string;
-  logo: File | null;
-};
-
-const initialFormData: FormData = {
+const initialFormData: RegistrationFormData = {
   businessName: "",
-  firstName: "",        // If not used in your UI, can be left blank or removed
-  lastName: "",         // Same as above
+  firstName: "",
+  lastName: "",
   email: "",
   password: "",
   confirmPassword: "",
   socialMedia: "",
-  businessNiche: "",    // empty means "Choose your business niche"
+  businessNiche: "",
   logo: null,
 };
 
-type FormErrors = Partial<Record<keyof FormData, string>> & { submit?: string };
+type FormErrors = Partial<Record<keyof RegistrationFormData, string>> & { submit?: string };
 
 const App: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [formData, setFormData] = useState<RegistrationFormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const validate = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.businessName.trim()) {
-      newErrors.businessName = "Business name is required";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = "Enter a valid email";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Minimum 8 characters";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    if (!formData.businessNiche) {
-      newErrors.businessNiche = "Please choose your business niche";
-    }
-
-    if (formData.socialMedia) {
-      try {
-        // Basic URL validation
-        // eslint-disable-next-line no-new
-        new URL(formData.socialMedia);
-      } catch {
-        newErrors.socialMedia = "Enter a valid URL (e.g., https://instagram.com/yourbusiness)";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
+  // ✅ new: keep what to show on the success screen
+  const [confirmation, setConfirmation] = useState<{ email: string; logoUrl?: string | null } | null>(null);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
       setFormData((prev) => ({ ...prev, [name]: value }));
-      // Clear field error on change
       if (errors[name as keyof FormErrors]) {
         setErrors((prev) => {
           const copy = { ...prev };
@@ -94,51 +43,65 @@ const App: React.FC = () => {
     [errors]
   );
 
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files ? e.target.files[0] : null;
-      setFormData((prev) => ({ ...prev, logo: file }));
-      // Clear logo error on change (if you ever set one)
-      if (errors.logo) {
-        setErrors((prev) => {
-          const copy = { ...prev };
-          delete copy.logo;
-          return copy;
-        });
-      }
-    },
-    [errors]
-  );
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    setFormData((prev) => ({ ...prev, logo: file }));
+    if (errors.logo) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.logo;
+        return copy;
+      });
+    }
+  }, [errors]);
 
-  const handleSubmit = async (payload: FormData) => {
+  const handleSubmit = async (payload: RegistrationFormData) => {
     setSubmitting(true);
     setErrors({});
 
     try {
-      // Note: If you later want to actually upload the logo file,
-      // use FormData() and multipart/form-data, not JSON.
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // ⚠️ Consider excluding `logo` from JSON if it might be a File.
-        body: JSON.stringify({ ...payload, logo: null }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Registration failed:", data);
-        setErrors((prev) => ({
-          ...prev,
-          submit: `Registration failed: ${data.message || "Unknown error"}`,
-        }));
-        return;
+      // 1) optional upload
+      let logoPath: string | null = null;
+      if (payload.logo) {
+        const ext = payload.logo.name.split(".").pop() || "bin";
+        const fileName = `registrations/${crypto.randomUUID()}.${ext}`;
+        const { data: up, error: upErr } = await supabase
+          .storage
+          .from("logos")
+          .upload(fileName, payload.logo, { contentType: payload.logo.type });
+        if (upErr) throw upErr;
+        logoPath = up.path; // e.g. "registrations/uuid.png"
       }
 
+      // 2) insert row
+      const { error: dbErr } = await supabase.from("registrations").insert({
+        business_name: payload.businessName,
+        first_name: payload.firstName || "",
+        last_name: payload.lastName || "",
+        email: payload.email,
+        social_media: payload.socialMedia || null,
+        business_niche: payload.businessNiche,
+        logo_filename: logoPath,
+      });
+      if (dbErr) {
+        if (/duplicate key value|unique/i.test(dbErr.message)) {
+          throw new Error("This email is already registered.");
+        }
+        throw dbErr;
+      }
+
+      // ✅ 3) compute public URL for the logo (only if the bucket is PUBLIC)
+      let publicLogoUrl: string | null = null;
+      if (logoPath) {
+        const { data } = supabase.storage.from("logos").getPublicUrl(logoPath);
+        publicLogoUrl = data.publicUrl;
+      }
+
+      setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
       setIsSubmitted(true);
-    } catch (err) {
-      console.error("Network error:", err);
-      setErrors((prev) => ({ ...prev, submit: "Unexpected error. Try again." }));
+    } catch (err: any) {
+      console.error("Registration failed:", err);
+      setErrors((prev) => ({ ...prev, submit: err.message || "Unexpected error. Try again." }));
     } finally {
       setSubmitting(false);
     }
@@ -149,7 +112,8 @@ const App: React.FC = () => {
       <main className="w-full max-w-2xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 transition-all duration-500">
           {isSubmitted ? (
-            <ConfirmationMessage />
+            // ✅ pass confirmation props
+            <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
           ) : (
             <RegistrationForm
               formData={formData}

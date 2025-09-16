@@ -1,155 +1,147 @@
-import React from 'react';
-import type { FormData, FormErrors } from '../types.ts';
-import { BUSINESS_NICHES } from '../constants.js';
-import InputField from './InputField.js';
-import PasswordField from './PasswordField.js';
-import SelectField from './SelectField.js';
-import FileUploadField from './FileUploadField.js';
+import React from "react";
+import type { FormData as RegistrationFormData } from "../types";
 
-interface RegistrationFormProps {
-  formData: FormData;
-  errors: FormErrors;
+type Props = {
+  formData: RegistrationFormData;
+  errors: Partial<Record<keyof RegistrationFormData, string>> & { submit?: string };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-}
+  onSubmit: (payload: RegistrationFormData) => void;
+};
 
-const RegistrationForm: React.FC<RegistrationFormProps> = ({
+export default function RegistrationForm({
   formData,
   errors,
   onInputChange,
   onFileChange,
   onSubmit,
-}) => {
-  // Custom validation for business niche
-  const isBusinessNicheValid = formData.businessNiche !== '';
+}: Props) {
+  // ✅ Prevent native navigation; call App.tsx handler
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
-  // Ensure default value is '' for businessNiche
-  if (formData.businessNiche === undefined) {
-    formData.businessNiche = '';
-  }
   return (
-    <>
-      <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-zinc-800">Ready to take your Business to the next step?</h1>
-        <p className="mt-3 text-base text-zinc-600">
-          Start growing your wellness practice today - simplify scheduling, payments, and client engagement with Vena.
-        </p>
-      </div>
-      <form onSubmit={onSubmit} noValidate className="space-y-6">
-        <InputField
-          label="Business Name"
-          id="businessName"
+    <form onSubmit={handleSubmit} noValidate className="grid gap-3">
+      {/* Business name */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Business name *</span>
+        <input
+          className="border rounded px-3 py-2"
           name="businessName"
           value={formData.businessName}
           onChange={onInputChange}
-          error={errors.businessName ?? ''}
+          placeholder="Acme Wellness"
           required
         />
+        {errors.businessName && <p className="text-red-600 text-sm">{errors.businessName}</p>}
+      </label>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InputField
-            label="First Name"
-            id="firstName"
+      {/* First / Last */}
+      <div className="grid md:grid-cols-2 gap-3">
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700">First name</span>
+          <input
+            className="border rounded px-3 py-2"
             name="firstName"
             value={formData.firstName}
             onChange={onInputChange}
-            error={errors.firstName ?? ''}
-            required
+            placeholder="First name"
           />
-          <InputField
-            label="Last Name"
-            id="lastName"
+        </label>
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700">Last name</span>
+          <input
+            className="border rounded px-3 py-2"
             name="lastName"
             value={formData.lastName}
             onChange={onInputChange}
-            error={errors.lastName ?? ''}
-            required
+            placeholder="Last name"
           />
-        </div>
+        </label>
+      </div>
 
-        <InputField
-          label="Email"
-          id="email"
-          name="email"
+      {/* Email */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Email *</span>
+        <input
+          className="border rounded px-3 py-2"
           type="email"
+          name="email"
           value={formData.email}
           onChange={onInputChange}
-          error={errors.email ?? ''}
+          placeholder="you@example.com"
           required
         />
+        {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
+      </label>
 
-        <PasswordField
-          label="Password"
-          id="password"
-          name="password"
-          value={(formData as any).password || ''}
-          onChange={onInputChange}
-          error={errors.password ?? ''}
-          required
-        />
-        <PasswordField
-          label="Confirm Password"
-          id="confirmPassword"
-          name="confirmPassword"
-          value={(formData as any).confirmPassword || ''}
-          onChange={onInputChange}
-          error={errors.confirmPassword ?? ''}
-          required
-        />
+      {/* Passwords (client-only for now) */}
+      <div className="grid md:grid-cols-2 gap-3">
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700">Password</span>
+          <input
+            className="border rounded px-3 py-2"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={onInputChange}
+            placeholder="********"
+          />
+          {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
+        </label>
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700">Confirm password</span>
+          <input
+            className="border rounded px-3 py-2"
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={onInputChange}
+            placeholder="********"
+          />
+          {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword}</p>}
+        </label>
+      </div>
 
-        <InputField
-          label="Link to Social Media Page (Optional)"
-          id="socialMedia"
+      {/* Social + Niche */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Social media (optional)</span>
+        <input
+          className="border rounded px-3 py-2"
           name="socialMedia"
-          value={formData.socialMedia || ''}
+          value={formData.socialMedia}
           onChange={onInputChange}
           placeholder="https://instagram.com/yourbusiness"
-          error={errors.socialMedia ?? ''}
         />
+        {errors.socialMedia && <p className="text-red-600 text-sm">{errors.socialMedia}</p>}
+      </label>
 
-        <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
-          <div className="w-full md:w-1/2">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">What's your business niche? <span className="text-red-500">*</span></label>
-            <div className="border border-zinc-300 rounded-lg p-0">
-              <SelectField
-                label=""
-                id="businessNiche"
-                name="businessNiche"
-                value={formData.businessNiche}
-                onChange={onInputChange}
-                options={BUSINESS_NICHES}
-                error={errors.businessNiche ?? ''}
-                required
-              />
-            </div>
-            <p className="text-xs text-zinc-500 mt-2">Tap to select your business niche.</p>
-          </div>
-          <div className="w-full md:w-1/2 flex justify-center">
-            <FileUploadField
-              label="Add your logo"
-              id="logo"
-              name="logo"
-              fileName={formData.logo?.name ?? ''}
-              onChange={onFileChange}
-              error={errors.logo ?? ''}
-              //required
-            />
-          </div>
-        </div>
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Business niche *</span>
+        <input
+          className="border rounded px-3 py-2"
+          name="businessNiche"
+          value={formData.businessNiche}
+          onChange={onInputChange}
+          placeholder="Physiotherapy, Yoga, Nutrition…"
+          required
+        />
+        {errors.businessNiche && <p className="text-red-600 text-sm">{errors.businessNiche}</p>}
+      </label>
 
-        <div>
-          <button
-            type="submit"
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light transition-colors duration-300 disabled:opacity-50"
-            disabled={!isBusinessNicheValid}
-          >
-            Create My Vena Account
-          </button>
-        </div>
-      </form>
-    </>
+      {/* Logo (optional) */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Logo (optional)</span>
+        <input className="border rounded px-3 py-2" type="file" accept="image/*" onChange={onFileChange} />
+        {errors.logo && <p className="text-red-600 text-sm">{errors.logo}</p>}
+      </label>
+
+      {/* Submit */}
+      <button type="submit" className="mt-2 bg-black text-white rounded px-4 py-2">
+        Register
+      </button>
+    </form>
   );
-};
-
-export default RegistrationForm;
+}
