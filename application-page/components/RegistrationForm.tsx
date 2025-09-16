@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import type { FormData as RegistrationFormData } from "../types";
+import { BUSINESS_NICHES } from "../constants";
 
 type Props = {
   formData: RegistrationFormData;
@@ -212,14 +213,19 @@ export default function RegistrationForm({
 
       <label className="grid gap-1">
         <span className="text-sm text-zinc-700">Business niche *</span>
-        <input
-          className="border rounded px-3 py-2"
+        <select
+          className="border rounded px-3 py-2 bg-white"
           name="businessNiche"
           value={formData.businessNiche}
           onChange={onInputChange}
-          placeholder="Physiotherapy, Yoga, Nutrition…"
           required
-        />
+        >
+          {BUSINESS_NICHES.map(opt => (
+            <option key={opt.value || 'placeholder'} value={opt.value} disabled={opt.value === ''}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
         {errors.businessNiche && <p className="text-red-600 text-sm">{errors.businessNiche}</p>}
       </label>
 
