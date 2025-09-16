@@ -72,7 +72,7 @@ serve(async (req) => {
         encrypted_reservekit_api_key: apiKey,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', user.id)
+      .eq('id', user.id)
 
     if (updateError) {
       console.error('Database update error:', updateError)
