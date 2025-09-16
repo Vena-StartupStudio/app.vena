@@ -14,7 +14,7 @@ const BASE_DEFAULT_CONFIG: Omit<ProfileConfig, 'styles'> = {
   name: 'Your Name',
   title: 'Wellness Professional',
   bio: 'Welcome to my wellness space. Here, I share my passion for helping others achieve balance and health through personalized programs and guidance.',
-  profileImage: INITIAL_PLACEHOLDER_IMAGE,
+  profileImage: '',
   email: '',
   phone: '',
   services: [

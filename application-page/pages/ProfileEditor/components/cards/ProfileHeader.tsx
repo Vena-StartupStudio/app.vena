@@ -77,35 +77,19 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             group-hover:border-white dark:group-hover:border-slate-600/90"
                         />
                       ) : (
-                        /* Professional Profile Image Placeholder */
-                        <img
-                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                          alt="Profile placeholder"
-                          className="w-full h-full rounded-full object-cover 
-                            border-4 border-white/90 dark:border-slate-700/90
-                            shadow-2xl shadow-slate-900/15 dark:shadow-slate-900/40
-                            transition-all duration-500 ease-out
-                            group-hover:scale-[1.01] group-hover:shadow-3xl 
-                            group-hover:border-white dark:group-hover:border-slate-600/90
-                            opacity-60 group-hover:opacity-80"
-                          onError={(e) => {
-                            // Fallback to a different image if the first one fails
-                            const target = e.target as HTMLImageElement;
-                            target.src = "https://avatar.iran.liara.run/public/45";
-                            target.onerror = () => {
-                              // Final fallback to a simple div with icon
-                              target.style.display = 'none';
-                              const fallback = document.createElement('div');
-                              fallback.className = "w-full h-full rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 border-4 border-white/90 dark:border-slate-700/90 shadow-2xl flex items-center justify-center transition-all duration-500";
-                              fallback.innerHTML = `
-                                <svg class="w-20 h-20 lg:w-24 lg:h-24 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                              `;
-                              target.parentNode?.appendChild(fallback);
-                            };
-                          }}
-                        />
+                        /* Clean Profile Image Placeholder */
+                        <div className="w-full h-full rounded-full 
+                          bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800
+                          border-4 border-white/90 dark:border-slate-700/90
+                          shadow-2xl shadow-slate-900/15 dark:shadow-slate-900/40
+                          transition-all duration-500 ease-out
+                          group-hover:scale-[1.01] group-hover:shadow-3xl 
+                          group-hover:border-white dark:group-hover:border-slate-600/90
+                          flex items-center justify-center">
+                          <svg className="w-20 h-20 lg:w-24 lg:h-24 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                        </div>
                       )}
                       
                       {/* Refined Upload Overlay */}
