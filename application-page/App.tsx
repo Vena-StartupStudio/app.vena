@@ -119,7 +119,7 @@ const App: React.FC = () => {
               className="h-16 w-auto mb-4 select-none"
               draggable="false"
             />
-            <h1 className="text-2xl sm:text-3xl font-semibold text-zinc-800 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-zinc-800 tracking-tight leading-tight">
               Ready to take your Business to the next step?
             </h1>
             <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-md">
