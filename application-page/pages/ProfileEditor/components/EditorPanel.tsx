@@ -30,15 +30,43 @@ interface AccordionItemProps {
 }
 
 const AccordionItem: React.FC<AccordionItemProps> = ({ title, isOpen, onToggle, children, icon }) => (
-    <div className={`border-b border-slate-200 dark:border-slate-700 ${isOpen ? 'bg-slate-50 dark:bg-slate-900/50' : ''}`}>
-      <button onClick={onToggle} className="w-full flex justify-between items-center p-4 text-left font-semibold text-slate-800 dark:text-slate-200">
-        <div className="flex items-center gap-3">
-          {icon}
-          {title}
+    <div>
+      <button 
+        onClick={onToggle} 
+        className={`w-full flex justify-between items-center p-6 text-left transition-all duration-300 ease-out group
+          ${isOpen 
+            ? 'bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-950/30 dark:to-indigo-950/30' 
+            : 'hover:bg-gradient-to-r hover:from-slate-50/50 hover:to-gray-50/50 dark:hover:from-slate-800/30 dark:hover:to-gray-800/30'
+          }
+          border-b border-slate-100/60 dark:border-slate-700/60 backdrop-blur-sm`}
+      >
+        <div className="flex items-center gap-4">
+          <div className={`p-2 rounded-lg transition-all duration-300 ${
+            isOpen 
+              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' 
+              : 'bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-600/50'
+          }`}>
+            {icon}
+          </div>
+          <span className={`font-medium text-lg tracking-tight transition-colors duration-200 ${
+            isOpen 
+              ? 'text-slate-900 dark:text-slate-100' 
+              : 'text-slate-700 dark:text-slate-300'
+          }`}>
+            {title}
+          </span>
         </div>
-        <ChevronDownIcon className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDownIcon className={`w-5 h-5 transform transition-all duration-300 ease-out ${
+          isOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
+        }`} />
       </button>
-      {isOpen && <div className="p-4">{children}</div>}
+      {isOpen && (
+        <div className="px-6 pb-6 pt-2 bg-gradient-to-b from-white/50 to-slate-50/30 dark:from-slate-800/20 dark:to-slate-900/10 backdrop-blur-sm">
+          <div className="animate-fadeIn">
+            {children}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -128,51 +156,58 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
     onToggleCustom: (show: boolean) => void;
     type: 'primary' | 'secondary' | 'background';
   }> = ({ colors, selectedColor, onColorChange, showCustom, onToggleCustom, type }) => (
-    <div className="space-y-2">
-      <div className="flex gap-2 flex-wrap">
+    <div className="space-y-4">
+      <div className="grid grid-cols-6 gap-3">
         {colors.map(({ class: colorClass, name, hex }) => (
           <div key={colorClass} className="relative group">
             <button
               onClick={() => onColorChange(colorClass)}
-              className={`w-8 h-8 rounded-full ${colorClass} border-2 ${
-                selectedColor === colorClass ? 'border-blue-500' : 
-                type === 'background' ? 'border-slate-300' : 'border-transparent'
-              } hover:scale-110 transition-transform`}
+              className={`w-10 h-10 rounded-xl ${colorClass} border-2 transition-all duration-300 ease-out
+                ${selectedColor === colorClass 
+                  ? 'border-blue-500 shadow-lg shadow-blue-500/30 scale-110 ring-2 ring-blue-200/50 dark:ring-blue-500/30' 
+                  : type === 'background' 
+                    ? 'border-slate-200/60 dark:border-slate-600/50 hover:border-slate-300/80 dark:hover:border-slate-500/70' 
+                    : 'border-transparent hover:border-slate-200/60 dark:hover:border-slate-600/50'
+                } hover:scale-105 hover:shadow-md`}
               title={`${name} (${hex})`}
             >
               {type === 'secondary' && (
-                <span className={`${colorClass} text-xs font-bold flex items-center justify-center h-full`}>
+                <span className={`${colorClass} text-xs font-bold flex items-center justify-center h-full rounded-xl`}>
                   Aa
                 </span>
               )}
             </button>
-            {/* Tooltip */}
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-              {name}
-              <br />
-              <span className="font-mono">{hex}</span>
+            {/* Enhanced Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-3 py-2 bg-slate-900/95 dark:bg-slate-800/95 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-20 backdrop-blur-sm shadow-xl">
+              <div className="font-medium">{name}</div>
+              <div className="font-mono text-slate-300 dark:text-slate-400">{hex}</div>
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900/95 dark:bg-slate-800/95 rotate-45"></div>
             </div>
           </div>
         ))}
-        {/* Custom Color Button */}
+        {/* Enhanced Custom Color Button */}
         <button
           onClick={() => onToggleCustom(!showCustom)}
-          className="w-8 h-8 rounded-full border-2 border-dashed border-slate-400 hover:border-slate-600 flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors"
+          className={`w-10 h-10 rounded-xl border-2 border-dashed transition-all duration-300 ease-out flex items-center justify-center text-lg font-light
+            ${showCustom 
+              ? 'border-blue-400 dark:border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20' 
+              : 'border-slate-300/60 dark:border-slate-600/50 text-slate-400 dark:text-slate-500 hover:border-slate-400/80 dark:hover:border-slate-500/70 hover:text-slate-600 dark:hover:text-slate-400 hover:bg-slate-50/50 dark:hover:bg-slate-700/30'
+            }`}
           title="Custom Color"
         >
           +
         </button>
       </div>
-      {/* Custom Color Input */}
+      {/* Enhanced Custom Color Input */}
       {showCustom && (
-        <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-700 rounded-md">
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
-            Custom {type} color (CSS class or hex)
+        <div className="mt-4 p-4 bg-gradient-to-r from-slate-50/80 to-white/60 dark:from-slate-700/60 dark:to-slate-800/40 rounded-xl border border-slate-200/60 dark:border-slate-600/40 backdrop-blur-sm">
+          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+            Custom {type} color
           </label>
           <input
             type="text"
             placeholder={type === 'primary' ? 'bg-red-500 or #FF0000' : type === 'secondary' ? 'text-red-500 or #FF0000' : 'bg-red-50 or #FFF0F0'}
-            className="w-full px-2 py-1 text-sm border rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
+            className="w-full px-4 py-3 text-sm border border-slate-200/60 dark:border-slate-600/50 rounded-lg bg-white/80 dark:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-300/60 dark:focus:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 const value = (e.target as HTMLInputElement).value.trim();
@@ -229,31 +264,31 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full p-3 border rounded-md bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+          className="w-full p-4 border rounded-xl bg-gradient-to-r from-white/80 to-slate-50/60 dark:from-slate-700/60 dark:to-slate-800/40 border-slate-200/60 dark:border-slate-600/50 text-slate-900 dark:text-slate-200 flex justify-between items-center hover:from-blue-50/60 hover:to-indigo-50/40 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:border-blue-200/60 dark:hover:border-blue-500/40 transition-all duration-300 ease-out backdrop-blur-sm shadow-sm group"
         >
           <div className="flex flex-col items-start">
-            <span className="text-sm font-medium">{selectedTheme?.name[language]}</span>
-            <div className="flex items-center gap-2 mt-1">
+            <span className="text-base font-semibold tracking-tight">{selectedTheme?.name[language]}</span>
+            <div className="flex items-center gap-3 mt-2">
               <span 
-                className="text-xs text-slate-500"
+                className="text-sm text-slate-600 dark:text-slate-400 font-medium"
                 style={{ fontFamily: getFontFamily(selectedTheme?.heading || '') }}
               >
                 Heading
               </span>
-              <span className="text-xs text-slate-400">•</span>
+              <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
               <span 
-                className="text-xs text-slate-500"
+                className="text-sm text-slate-500 dark:text-slate-500"
                 style={{ fontFamily: getFontFamily(selectedTheme?.body || '') }}
               >
                 Body
               </span>
             </div>
           </div>
-          <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDownIcon className={`w-5 h-5 transition-all duration-300 ease-out text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-lg z-20 max-h-64 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/50 rounded-xl shadow-2xl shadow-slate-200/40 dark:shadow-slate-900/40 z-30 max-h-80 overflow-y-auto backdrop-blur-xl">
             {fontThemes.map(([key, theme]) => (
               <button
                 key={key}
@@ -261,23 +296,25 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                   onFontChange(key as FontThemeKey);
                   setIsOpen(false);
                 }}
-                className={`w-full p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors border-b border-slate-100 dark:border-slate-600 last:border-b-0 ${
-                  selectedFont === key ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                }`}
+                className={`w-full p-4 text-left transition-all duration-200 ease-out border-b border-slate-100/60 dark:border-slate-700/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl
+                  ${selectedFont === key 
+                    ? 'bg-gradient-to-r from-blue-50/80 to-indigo-50/60 dark:from-blue-900/30 dark:to-indigo-900/20 text-blue-900 dark:text-blue-100' 
+                    : 'hover:bg-gradient-to-r hover:from-slate-50/60 hover:to-gray-50/40 dark:hover:from-slate-700/40 dark:hover:to-slate-800/30'
+                  }`}
               >
                 <div className="flex justify-between items-center">
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-200">
+                    <span className="text-base font-semibold text-slate-900 dark:text-slate-200 tracking-tight">
                       {theme.name[language]}
                     </span>
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-4 mt-3">
                       <span 
-                        className="text-sm text-slate-700 dark:text-slate-300"
+                        className="text-lg text-slate-700 dark:text-slate-300 font-medium"
                         style={{ fontFamily: getFontFamily(theme.heading) }}
                       >
                         Heading Sample
                       </span>
-                      <span className="text-xs text-slate-400">|</span>
+                      <div className="w-px h-4 bg-slate-300 dark:bg-slate-600"></div>
                       <span 
                         className="text-sm text-slate-600 dark:text-slate-400"
                         style={{ fontFamily: getFontFamily(theme.body) }}
@@ -287,7 +324,9 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                     </div>
                   </div>
                   {selectedFont === key && (
-                    <CheckIcon className="w-4 h-4 text-blue-600" />
+                    <div className="w-8 h-8 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center">
+                      <CheckIcon className="w-4 h-4 text-white" />
+                    </div>
                   )}
                 </div>
               </button>
@@ -301,43 +340,89 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   return (
     <aside 
       ref={panelRef}
-      className={`relative flex-shrink-0 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 transition-all duration-300 ease-in-out ${isPreviewMode ? 'ml-[-' + panelWidth + 'px]' : 'ml-0'}`}
+      className={`relative flex-shrink-0 transition-all duration-500 ease-out ${isPreviewMode ? 'ml-[-' + panelWidth + 'px]' : 'ml-0'}
+        bg-gradient-to-br from-white via-slate-50/80 to-gray-50/60
+        dark:from-slate-900 dark:via-slate-800/90 dark:to-gray-900/80
+        backdrop-blur-xl border-r border-slate-200/60 dark:border-slate-700/50
+        shadow-xl shadow-slate-200/20 dark:shadow-slate-900/30`}
       style={{ width: isCollapsed ? 0 : panelWidth }}
     >
       {/* Collapse/Expand Button */}
       <button
         onClick={toggleCollapse}
-        className="absolute top-1/2 -right-3 z-20 w-6 h-10 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-r-md flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+        className="absolute top-1/2 -right-4 z-20 w-8 h-12 
+          bg-gradient-to-r from-white/90 to-slate-100/80
+          dark:from-slate-800/90 dark:to-slate-700/80
+          border border-slate-200/60 dark:border-slate-600/50
+          rounded-r-lg shadow-lg shadow-slate-200/30 dark:shadow-slate-900/40
+          flex items-center justify-center 
+          hover:from-blue-50/90 hover:to-indigo-50/80
+          dark:hover:from-blue-900/40 dark:hover:to-indigo-900/30
+          hover:border-blue-200/60 dark:hover:border-blue-600/40
+          hover:shadow-blue-200/30 dark:hover:shadow-blue-900/40
+          transition-all duration-300 ease-out group backdrop-blur-sm"
         title={isCollapsed ? "Expand Panel" : "Collapse Panel"}
       >
         {isCollapsed ? (
-          <ChevronRightIcon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+          <ChevronRightIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
         ) : (
-          <ChevronLeftIcon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+          <ChevronLeftIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
         )}
       </button>
 
       {/* Panel Content */}
       <div className={`h-full ${isCollapsed ? 'hidden' : 'block'}`}>
-        <div className="p-4 h-full overflow-y-auto">
-          <div className="space-y-2">
+        {/* Header */}
+        <div className="px-8 py-6 border-b border-slate-100/60 dark:border-slate-700/50 bg-gradient-to-r from-white/60 to-slate-50/40 dark:from-slate-800/60 dark:to-slate-900/40 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">Editor</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Customize your profile</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 h-full overflow-y-auto custom-scrollbar">
+          <div className="space-y-1">
             <AccordionItem 
               title="Templates" 
               isOpen={openAccordions.includes('Templates')} 
               onToggle={() => handleAccordionToggle('Templates')}
-              icon={<LayoutIcon className="w-5 h-5 text-slate-500" />}
+              icon={<LayoutIcon className="w-5 h-5" />}
             >
-              <div className="flex gap-2 flex-wrap">{['scratch', ...Object.keys(TEMPLATES)].map(t => (<button key={t} onClick={() => onTemplateChange(t)} className={`px-3 py-1 text-sm rounded-full border-2 capitalize transition-colors ${config.templateId === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-blue-500'}`}>{t}</button>))}</div>
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {['scratch', ...Object.keys(TEMPLATES)].map(t => (
+                  <button 
+                    key={t} 
+                    onClick={() => onTemplateChange(t)} 
+                    className={`px-4 py-3 text-sm font-medium capitalize rounded-xl border transition-all duration-300 ease-out
+                      ${config.templateId === t 
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-lg shadow-blue-500/30 transform scale-105' 
+                        : 'bg-white/80 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 border-slate-200/60 dark:border-slate-600/50 hover:border-blue-300/60 dark:hover:border-blue-500/50 hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/60 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:shadow-md hover:shadow-blue-200/20 dark:hover:shadow-blue-900/20 backdrop-blur-sm'
+                      }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </AccordionItem>
             <AccordionItem 
               title="Appearance" 
               isOpen={openAccordions.includes('Appearance')} 
               onToggle={() => handleAccordionToggle('Appearance')}
-              icon={<PaletteIcon className="w-5 h-5 text-slate-500" />}
+              icon={<PaletteIcon className="w-5 h-5" />}
             >
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Font Pairing</label>
+              <div className="space-y-8 mt-6">
+                <div className="bg-white/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-100/60 dark:border-slate-700/40 backdrop-blur-sm shadow-sm">
+                  <label className="flex items-center gap-3 text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                    Font Pairing
+                  </label>
                   <FontPicker
                     fontThemes={languageFilteredFontThemes}
                     selectedFont={config.styles.fontPairing}
@@ -345,8 +430,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                     language={language}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Primary Color</label>
+                
+                <div className="bg-white/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-100/60 dark:border-slate-700/40 backdrop-blur-sm shadow-sm">
+                  <label className="flex items-center gap-3 text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+                    Primary Color
+                  </label>
                   <ColorPicker
                     colors={COLOR_PALETTE.primary}
                     selectedColor={config.styles.colorPrimary}
@@ -356,8 +445,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                     type="primary"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Secondary Color</label>
+                
+                <div className="bg-white/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-100/60 dark:border-slate-700/40 backdrop-blur-sm shadow-sm">
+                  <label className="flex items-center gap-3 text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                    Secondary Color
+                  </label>
                   <ColorPicker
                     colors={COLOR_PALETTE.secondary}
                     selectedColor={config.styles.colorSecondary}
@@ -367,8 +460,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                     type="secondary"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Background Color</label>
+                
+                <div className="bg-white/60 dark:bg-slate-800/40 p-6 rounded-2xl border border-slate-100/60 dark:border-slate-700/40 backdrop-blur-sm shadow-sm">
+                  <label className="flex items-center gap-3 text-base font-semibold text-slate-800 dark:text-slate-200 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"></div>
+                    Background Color
+                  </label>
                   <ColorPicker
                     colors={COLOR_PALETTE.background}
                     selectedColor={config.styles.colorBackground}
@@ -378,30 +475,76 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                     type="background"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Background Opacity</label>
-                  <div className="flex gap-2">{OPACITY_OPTIONS.map(o => <button key={o} onClick={() => onStyleChange('backgroundOpacity', o)} className={`w-8 h-8 rounded-full bg-slate-400 border-2 ${o} ${config.styles.backgroundOpacity === o ? 'border-blue-500' : 'border-transparent'}`}></button>)}</div>
-                </div>
               </div>
             </AccordionItem>
           </div>
         </div>
       </div>
       
-      {/* Resize Handle */}
+      {/* Enhanced Resize Handle */}
       {!isCollapsed && (
         <div
-          className={`absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-200 dark:hover:bg-blue-900 transition-colors group ${
-            isDragging ? 'bg-blue-300 dark:bg-blue-800' : ''
+          className={`absolute top-0 right-0 w-3 h-full cursor-col-resize bg-transparent transition-all duration-300 group ${
+            isDragging 
+              ? 'bg-gradient-to-r from-blue-200/60 to-indigo-200/40 dark:from-blue-800/40 dark:to-indigo-800/30' 
+              : 'hover:bg-gradient-to-r hover:from-blue-100/40 hover:to-indigo-100/20 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/10'
           }`}
           onMouseDown={handleMouseDown}
           title="Drag to resize panel"
         >
-          <div className="absolute top-1/2 right-0 transform -translate-y-1/2 w-1 h-8 bg-slate-400 dark:bg-slate-500 group-hover:bg-blue-500 dark:group-hover:bg-blue-400 rounded-l-sm transition-colors">
-            <DragHandleIcon className="w-3 h-3 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className={`absolute top-1/2 right-1 transform -translate-y-1/2 w-1 h-12 rounded-full transition-all duration-300 ${
+            isDragging 
+              ? 'bg-gradient-to-b from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30' 
+              : 'bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 group-hover:from-blue-400 group-hover:to-indigo-500 dark:group-hover:from-blue-500 dark:group-hover:to-indigo-600'
+          }`}>
+            <DragHandleIcon className={`w-4 h-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+              isDragging 
+                ? 'text-white opacity-100' 
+                : 'text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 group-hover:text-white'
+            }`} />
           </div>
         </div>
       )}
+      
+      {/* Custom Styles */}
+      <style>{`
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgb(148 163 184 / 0.5) transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, rgb(148 163 184 / 0.3), rgb(100 116 139 / 0.5));
+          border-radius: 9999px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, rgb(59 130 246 / 0.5), rgb(99 102 241 / 0.7));
+        }
+      `}</style>
     </aside>
   );
 };
