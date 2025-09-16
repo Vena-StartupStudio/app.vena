@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import type { FormData as RegistrationFormData } from "../types";
 
 type Props = {
@@ -16,6 +16,23 @@ export default function RegistrationForm({
   onFileChange,
   onSubmit,
 }: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Simple strength scoring: length + character variety
+  const passwordStrength = useMemo(() => {
+    const pwd = formData.password || '';
+    if (!pwd) return 0;
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (pwd.length >= 12) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return Math.min(score, 5);
+  }, [formData.password]);
+
+  const strengthLabel = ["Very Weak", "Weak", "Fair", "Good", "Strong", "Excellent"][passwordStrength];
   // ✅ Prevent native navigation; call App.tsx handler
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -95,26 +112,57 @@ export default function RegistrationForm({
         {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
       </label>
 
-      {/* Passwords (required) */}
+      {/* Passwords (required) with show/hide & strength */}
       <div className="grid md:grid-cols-2 gap-3">
         <label className="grid gap-1">
-          <span className="text-sm text-zinc-700">Password *</span>
+          <span className="text-sm text-zinc-700 flex items-center justify-between">
+            <span>Password *</span>
+            <button
+              type="button"
+              onClick={() => setShowPassword(p => !p)}
+              className="text-xs text-indigo-600 hover:text-indigo-700 focus:outline-none"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </span>
           <input
             className="border rounded px-3 py-2"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={onInputChange}
             placeholder="********"
             required
+            aria-describedby="password-strength"
           />
+          {/* Strength meter */}
+          <div className="mt-2" id="password-strength">
+            <div className="flex gap-1 mb-1" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 flex-1 rounded ${i < passwordStrength ? 'bg-indigo-600' : 'bg-zinc-200'}`}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-zinc-500">Strength: {strengthLabel}</p>
+          </div>
           {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
         </label>
         <label className="grid gap-1">
-          <span className="text-sm text-zinc-700">Confirm password *</span>
+          <span className="text-sm text-zinc-700 flex items-center justify-between">
+            <span>Confirm password *</span>
+            <button
+              type="button"
+              onClick={() => setShowConfirm(c => !c)}
+              className="text-xs text-indigo-600 hover:text-indigo-700 focus:outline-none"
+            >
+              {showConfirm ? 'Hide' : 'Show'}
+            </button>
+          </span>
           <input
             className="border rounded px-3 py-2"
-            type="password"
+            type={showConfirm ? 'text' : 'password'}
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={onInputChange}

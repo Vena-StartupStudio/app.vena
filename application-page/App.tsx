@@ -1,5 +1,6 @@
 // application-page/App.tsx
 import React, { useState, useCallback } from "react";
+import bcrypt from 'bcryptjs';
 import { supabase } from "./lib/supabaseClient";
 import RegistrationForm from "./components/RegistrationForm";
 import ConfirmationMessage from "./components/ConfirmationMessage";
@@ -61,6 +62,14 @@ const App: React.FC = () => {
     setErrors({});
 
     try {
+      // password validations (client-side safeguard; server should also enforce)
+      if (!payload.password || payload.password.length < 8) {
+        throw new Error('Password must be at least 8 characters.');
+      }
+      if (payload.password !== payload.confirmPassword) {
+        throw new Error('Passwords do not match.');
+      }
+
       // 1) optional upload
       let logoPath: string | null = null;
       if (payload.logo) {
@@ -74,12 +83,16 @@ const App: React.FC = () => {
         logoPath = up.path; // e.g. "registrations/uuid.png"
       }
 
-      // 2) insert row
+      // 2) hash password (client-side) – server-side hashing preferred
+      const password_hash = bcrypt.hashSync(payload.password, 10);
+
+      // 3) insert row including password hash
       const { error: dbErr } = await supabase.from("registrations").insert({
         business_name: payload.businessName,
         first_name: payload.firstName || "",
         last_name: payload.lastName || "",
         email: payload.email,
+        password_hash, // store hash
         social_media: payload.socialMedia || null,
         business_niche: payload.businessNiche,
         logo_filename: logoPath,
@@ -98,7 +111,7 @@ const App: React.FC = () => {
         publicLogoUrl = data.publicUrl;
       }
 
-      setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
+  setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
       setIsSubmitted(true);
     } catch (err: any) {
       console.error("Registration failed:", err);
