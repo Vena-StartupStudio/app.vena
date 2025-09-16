@@ -198,58 +198,74 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 </div>
               </div>
 
-              {/* Sophisticated Contact Pills */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                <div className="group flex items-center gap-3 
-                  bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
-                  border border-slate-200/50 dark:border-slate-700/50
-                  rounded-2xl px-6 py-4 
-                  hover:bg-white/60 dark:hover:bg-slate-800/60
-                  hover:border-slate-300/60 dark:hover:border-slate-600/60
-                  hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
-                  transition-all duration-300 cursor-pointer">
-                  <div className="w-5 h-5 rounded-lg bg-blue-100 dark:bg-blue-900/40 
-                    flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/60 transition-colors duration-200">
-                    <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+              {/* Contact Information Fields */}
+              <div className="space-y-6">
+                {/* Email Field */}
+                <div className="relative group">
+                  <div className="flex items-center gap-4 
+                    bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
+                    border border-slate-200/50 dark:border-slate-700/50
+                    rounded-2xl px-6 py-4 
+                    hover:bg-white/60 dark:hover:bg-slate-800/60
+                    hover:border-slate-300/60 dark:hover:border-slate-600/60
+                    focus-within:bg-white/70 dark:focus-within:bg-slate-800/70
+                    focus-within:border-blue-300/60 dark:focus-within:border-blue-600/60
+                    hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
+                    transition-all duration-300">
+                    
+                    <div className="w-5 h-5 rounded-lg bg-blue-100 dark:bg-blue-900/40 
+                      flex items-center justify-center group-focus-within:bg-blue-200 dark:group-focus-within:bg-blue-800/60 transition-colors duration-200">
+                      <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    
+                    <input
+                      type="email"
+                      value={config.email || ''}
+                      onChange={e => onValueChange('email', e.target.value)}
+                      className="flex-1 bg-transparent focus:outline-none 
+                        text-slate-700 dark:text-slate-300 
+                        placeholder:text-slate-400 dark:placeholder:text-slate-500
+                        text-sm font-medium tracking-wide"
+                      placeholder="Enter your email address"
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    />
                   </div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tracking-wide">Email</span>
                 </div>
-                
-                <div className="group flex items-center gap-3 
-                  bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
-                  border border-slate-200/50 dark:border-slate-700/50
-                  rounded-2xl px-6 py-4 
-                  hover:bg-white/60 dark:hover:bg-slate-800/60
-                  hover:border-slate-300/60 dark:hover:border-slate-600/60
-                  hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
-                  transition-all duration-300 cursor-pointer">
-                  <div className="w-5 h-5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 
-                    flex items-center justify-center group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/60 transition-colors duration-200">
-                    <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
+
+                {/* Phone Field */}
+                <div className="relative group">
+                  <div className="flex items-center gap-4 
+                    bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
+                    border border-slate-200/50 dark:border-slate-700/50
+                    rounded-2xl px-6 py-4 
+                    hover:bg-white/60 dark:hover:bg-slate-800/60
+                    hover:border-slate-300/60 dark:hover:border-slate-600/60
+                    focus-within:bg-white/70 dark:focus-within:bg-slate-800/70
+                    focus-within:border-emerald-300/60 dark:focus-within:border-emerald-600/60
+                    hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
+                    transition-all duration-300">
+                    
+                    <div className="w-5 h-5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 
+                      flex items-center justify-center group-focus-within:bg-emerald-200 dark:group-focus-within:bg-emerald-800/60 transition-colors duration-200">
+                      <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    </div>
+                    
+                    <input
+                      type="tel"
+                      value={config.phone || ''}
+                      onChange={e => onValueChange('phone', e.target.value)}
+                      className="flex-1 bg-transparent focus:outline-none 
+                        text-slate-700 dark:text-slate-300 
+                        placeholder:text-slate-400 dark:placeholder:text-slate-500
+                        text-sm font-medium tracking-wide"
+                      placeholder="Enter your phone number"
+                      dir={isRtl ? 'rtl' : 'ltr'}
+                    />
                   </div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tracking-wide">Phone</span>
-                </div>
-                
-                <div className="group flex items-center gap-3 
-                  bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl 
-                  border border-slate-200/50 dark:border-slate-700/50
-                  rounded-2xl px-6 py-4 
-                  hover:bg-white/60 dark:hover:bg-slate-800/60
-                  hover:border-slate-300/60 dark:hover:border-slate-600/60
-                  hover:shadow-lg hover:shadow-slate-200/20 dark:hover:shadow-slate-900/30
-                  transition-all duration-300 cursor-pointer">
-                  <div className="w-5 h-5 rounded-lg bg-purple-100 dark:bg-purple-900/40 
-                    flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-800/60 transition-colors duration-200">
-                    <svg className="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tracking-wide">Location</span>
                 </div>
               </div>
             </div>

@@ -21,6 +21,8 @@ export interface ProfileConfig {
   title: string;
   bio: string;
   profileImage: string;
+  email: string;
+  phone: string;
   cta: {
     label: string;
   };

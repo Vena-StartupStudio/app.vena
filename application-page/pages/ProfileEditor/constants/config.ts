@@ -17,6 +17,8 @@ const BASE_DEFAULT_CONFIG: Omit<ProfileConfig, 'styles'> = {
   title: 'Wellness Professional',
   bio: 'Welcome to my wellness space. Here, I share my passion for helping others achieve balance and health through personalized programs and guidance.',
   profileImage: INITIAL_PLACEHOLDER_IMAGE,
+  email: '',
+  phone: '',
   cta: { label: 'Book a Session' },
   services: [
     { id: 1, title: '1-on-1 Physiotherapy', description: 'Personalized sessions to address your specific needs and goals.' },
