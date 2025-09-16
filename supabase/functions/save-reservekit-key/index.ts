@@ -77,7 +77,3 @@ serve(async (req) => {
     })
   }
 })
-
-await supabase.functions.invoke('save-reservekit-key', {
-  body: JSON.stringify({ apiKey }),
-});
