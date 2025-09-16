@@ -8,23 +8,38 @@ const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (<s
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>);
 const ChevronRightIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>);
 const DragHandleIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="currentColor" viewBox="0 0 16 16"><path d="M.5 1a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13A.5.5 0 0 1 .5 1zm15 0a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13a.5.5 0 0 1 .5-.5z"/></svg>);
+const LayoutIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+    </svg>
+  );
+  
+  const PaletteIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+    </svg>
+  );
 
 interface AccordionItemProps {
   title: string;
   isOpen: boolean;
   onToggle: () => void;
   children: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
-const AccordionItem: React.FC<AccordionItemProps> = ({ title, isOpen, onToggle, children }) => (
-  <div className="border-b border-slate-200 dark:border-slate-700">
-    <button onClick={onToggle} className="w-full flex justify-between items-center p-4 text-left font-semibold text-slate-800 dark:text-slate-200">
-      {title}
-      <ChevronDownIcon className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-    </button>
-    {isOpen && <div className="p-4">{children}</div>}
-  </div>
-);
+const AccordionItem: React.FC<AccordionItemProps> = ({ title, isOpen, onToggle, children, icon }) => (
+    <div className={`border-b border-slate-200 dark:border-slate-700 ${isOpen ? 'bg-slate-50 dark:bg-slate-900/50' : ''}`}>
+      <button onClick={onToggle} className="w-full flex justify-between items-center p-4 text-left font-semibold text-slate-800 dark:text-slate-200">
+        <div className="flex items-center gap-3">
+          {icon}
+          {title}
+        </div>
+        <ChevronDownIcon className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && <div className="p-4">{children}</div>}
+    </div>
+  );
 
 interface EditorPanelProps {
   isPreviewMode: boolean;
@@ -47,7 +62,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   onSectionVisibilityChange,
   onSectionsOrderChange,
 }) => {
-  const [activeAccordion, setActiveAccordion] = useState('Templates');
+  const [openAccordions, setOpenAccordions] = useState(['Templates']);
   const [showCustomPrimary, setShowCustomPrimary] = useState(false);
   const [showCustomSecondary, setShowCustomSecondary] = useState(false);
   const [showCustomBackground, setShowCustomBackground] = useState(false);
@@ -94,7 +109,13 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
     setPanelWidth(isCollapsed ? 384 : 0);
   };
   
-  const handleAccordionToggle = (title: string) => { setActiveAccordion(prev => (prev === title ? '' : title)); };
+  const handleAccordionToggle = (title: string) => {
+    setOpenAccordions(prev => 
+      prev.includes(title) 
+        ? prev.filter(item => item !== title) 
+        : [...prev, title]
+    );
+  };
   const languageFilteredFontThemes = Object.entries(FONT_THEMES).filter(([, theme]) => (theme.lang as readonly string[]).includes(language));
 
   // Enhanced Color Picker Component
@@ -196,10 +217,20 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
       <div className={`h-full ${isCollapsed ? 'hidden' : 'block'}`}>
         <div className="p-4 h-full overflow-y-auto">
           <div className="space-y-2">
-            <AccordionItem title="Templates" isOpen={activeAccordion === 'Templates'} onToggle={() => handleAccordionToggle('Templates')}>
+            <AccordionItem 
+              title="Templates" 
+              isOpen={openAccordions.includes('Templates')} 
+              onToggle={() => handleAccordionToggle('Templates')}
+              icon={<LayoutIcon className="w-5 h-5 text-slate-500" />}
+            >
               <div className="flex gap-2 flex-wrap">{['scratch', ...Object.keys(TEMPLATES)].map(t => (<button key={t} onClick={() => onTemplateChange(t)} className={`px-3 py-1 text-sm rounded-full border-2 capitalize transition-colors ${config.templateId === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-blue-500'}`}>{t}</button>))}</div>
             </AccordionItem>
-            <AccordionItem title="Appearance" isOpen={activeAccordion === 'Appearance'} onToggle={() => handleAccordionToggle('Appearance')}>
+            <AccordionItem 
+              title="Appearance" 
+              isOpen={openAccordions.includes('Appearance')} 
+              onToggle={() => handleAccordionToggle('Appearance')}
+              icon={<PaletteIcon className="w-5 h-5 text-slate-500" />}
+            >
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Font Pairing</label>
