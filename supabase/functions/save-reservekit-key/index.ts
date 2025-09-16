@@ -69,7 +69,7 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from('registrations')
       .update({ 
-        reservekit_api_key: apiKey,
+        encrypted_reservekit_api_key: apiKey,
         updated_at: new Date().toISOString()
       })
       .eq('user_id', user.id)
