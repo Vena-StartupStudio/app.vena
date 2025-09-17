@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
 import { FONT_THEMES, FontThemeKey } from '../constants/themes';
-import { supabase } from '../lib/supabaseClient'; 
+import { supabase } from '../lib/supabaseClient';
 import { ProfileConfig, SectionId } from '../types';
 
 export type DataStatus = 'idle' | 'loading' | 'saving' | 'success' | 'error';
@@ -10,21 +10,17 @@ export const useProfileConfig = (language: 'en' | 'he') => {
   const [config, setConfig] = useState<ProfileConfig>(() => getInitialConfig(language));
   const [status, setStatus] = useState<DataStatus>('loading');
 
+  // Fetching logic
   useEffect(() => {
     const fetchProfile = async () => {
       setStatus('loading');
-      console.log('DIAGNOSTIC: Attempting to fetch profile...');
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          console.error("DIAGNOSTIC: No user is logged in. Cannot fetch profile. Using initial config.");
           setConfig(getInitialConfig(language));
           setStatus('idle');
           return;
         }
-
-        console.log('DIAGNOSTIC: Logged in user ID:', user.id);
-        console.log('DIAGNOSTIC: Querying "registrations" table for user profile...');
 
         const { data, error } = await supabase
           .from('registrations')
@@ -32,54 +28,64 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           .eq('id', user.id)
           .single();
 
-        // This error is expected for new users who don't have a profile yet.
-        if (error && error.code === 'PGRST116') {
-            console.warn('DIAGNOSTIC: Supabase query returned no rows (PGRST116). This is normal for a new user.');
-        } else if (error) {
-          // Any other error is a real problem.
-          console.error('DIAGNOSTIC: Supabase fetch error:', error);
-          throw error;
-        }
+        if (error && error.code !== 'PGRST116') throw error;
 
         if (data && data.profile_config) {
-          console.log('DIAGNOSTIC: Profile data found and received from Supabase:', data.profile_config);
           const dbConfig = data.profile_config as Partial<ProfileConfig>;
-          
-          // Deep merge fetched config with the initial config to ensure new properties are not missing
-          setConfig(prevConfig => {
-            const newConfig = {
-              ...prevConfig,
-              ...dbConfig,
-              styles: {
-                ...prevConfig.styles,
-                ...(dbConfig.styles || {}),
-              },
-              sectionVisibility: {
-                ...prevConfig.sectionVisibility,
-                ...(dbConfig.sectionVisibility || {}),
-              },
-              sections: dbConfig.sections && dbConfig.sections.length > 0 ? dbConfig.sections : prevConfig.sections,
-              services: dbConfig.services && dbConfig.services.length > 0 ? dbConfig.services : prevConfig.services,
-            };
-            return newConfig;
-          });
+          setConfig(prevConfig => ({
+            ...prevConfig,
+            ...dbConfig,
+            styles: { ...prevConfig.styles, ...(dbConfig.styles || {}) },
+            sectionVisibility: { ...prevConfig.sectionVisibility, ...(dbConfig.sectionVisibility || {}) },
+            sections: dbConfig.sections && dbConfig.sections.length > 0 ? dbConfig.sections : prevConfig.sections,
+            services: dbConfig.services && dbConfig.services.length > 0 ? dbConfig.services : prevConfig.services,
+          }));
         } else {
-          // If no config is found in DB, ensure we're using the correct initial config
-          console.log('DIAGNOSTIC: No profile_config found in DB for this user. Using initial config.');
           setConfig(getInitialConfig(language));
         }
         setStatus('idle');
       } catch (error) {
         console.error('DIAGNOSTIC: An unexpected error occurred in fetchProfile:', error);
         setStatus('error');
-        // Fallback to initial config on error
         setConfig(getInitialConfig(language));
       }
     };
 
     fetchProfile();
-  }, [language, setStatus]); // Rerun if language changes
+  }, [language]);
 
+  // Corrected save function
+  const saveProfile = useCallback(async (currentConfig: ProfileConfig) => {
+    setStatus('saving');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { error } = await supabase
+        .from('registrations')
+        .update({ profile_config: currentConfig })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setStatus('success');
+    } catch (error) {
+      console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
+      setStatus('error');
+    }
+  }, []); // Dependency array is empty because setStatus is stable
+
+  // New effect to handle resetting the status after save
+  useEffect(() => {
+    if (status === 'success' || status === 'error') {
+      const timer = setTimeout(() => {
+        setStatus('idle');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  // --- All other handler functions remain the same ---
   const handleTemplateChange = (templateKey: string) => {
     if (templateKey === 'scratch') {
       setConfig(getInitialConfig(language));
@@ -89,10 +95,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
         setConfig(prev => ({
           ...prev,
           ...template,
-          styles: {
-            ...prev.styles,
-            ...(template.styles || {}),
-          },
+          styles: { ...prev.styles, ...(template.styles || {}) },
           templateId: templateKey,
         }));
       }
@@ -129,42 +132,11 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     setConfig(prev => ({ ...prev, sections }));
   };
 
-  // --- NEW FUNCTION TO SAVE DATA ---
-  const saveProfile = useCallback(async () => {
-    setStatus('saving');
-    console.log('DIAGNOSTIC: Attempting to save profile...');
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error("DIAGNOSTIC: No user is logged in. Cannot save profile.");
-        throw new Error("User not authenticated");
-      }
-
-      const { error } = await supabase
-        .from('registrations')
-        .update({ profile_config: config })
-        .eq('id', user.id);
-
-      if (error) {
-        console.error('DIAGNOSTIC: Supabase save error:', error);
-        throw error;
-      }
-
-      console.log('DIAGNOSTIC: Profile saved successfully!');
-      setStatus('success');
-      setTimeout(() => setStatus('idle'), 2000);
-    } catch (error) {
-      console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
-      setStatus('error');
-    }
-  }, [config, setStatus]); // Add `setStatus` to the dependency array
-
   return {
     config,
     setConfig,
     status,
-    setStatus,
-    saveProfile, // --- EXPORT THE NEW SAVE FUNCTION ---
+    saveProfile,
     handleTemplateChange,
     handleStyleChange,
     handleFontThemeChange,
