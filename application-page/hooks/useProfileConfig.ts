@@ -75,15 +75,19 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     fetchProfile();
   }, [language]);
 
-  // SIMPLE save function - no setTimeout, no complications
-  const saveProfile = async () => {
-    setStatus('saving');
+  // Replace just this part in your useProfileConfig.ts file:
+const saveProfile = () => {
+  // Use a local reference to setStatus
+  const updateStatus = setStatus;
+  
+  const doSave = async () => {
+    updateStatus('saving');
     console.log('DIAGNOSTIC: Attempting to save profile...');
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error("DIAGNOSTIC: No user is logged in. Cannot save profile.");
-        setStatus('error');
+        updateStatus('error');
         return;
       }
 
@@ -94,36 +98,20 @@ export const useProfileConfig = (language: 'en' | 'he') => {
 
       if (error) {
         console.error('DIAGNOSTIC: Supabase save error:', error);
-        setStatus('error');
+        updateStatus('error');
         return;
       }
 
       console.log('DIAGNOSTIC: Profile saved successfully!');
-      setStatus('success');
+      updateStatus('success');
     } catch (error) {
       console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
-      setStatus('error');
+      updateStatus('error');
     }
   };
-
-  const handleTemplateChange = (templateKey: string) => {
-    if (templateKey === 'scratch') {
-      setConfig(getInitialConfig(language));
-    } else {
-      const template = TEMPLATES[templateKey];
-      if (template) {
-        setConfig(prev => ({
-          ...prev,
-          ...template,
-          styles: {
-            ...prev.styles,
-            ...(template.styles || {}),
-          },
-          templateId: templateKey,
-        }));
-      }
-    }
-  };
+  
+  doSave();
+};
 
   const handleStyleChange = <K extends keyof ProfileConfig['styles']>(
     key: K,
