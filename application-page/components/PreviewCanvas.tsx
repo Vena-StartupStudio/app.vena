@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import type { ProfileConfig } from '../types';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { ProfileConfig } from '../types';
 import { HEBREW_TRANSLATIONS, INITIAL_PLACEHOLDER_IMAGE } from '../constants/config';
 import AboutCard from './cards/AboutCard';
 import ServicesCard from './cards/ServicesCard';
 import ProfileHeader from './cards/ProfileHeader';
-import { supabase } from '../utils/supabase';
 import { DataStatus } from '../hooks/useProfileConfig';
 
 interface PreviewCanvasProps {
