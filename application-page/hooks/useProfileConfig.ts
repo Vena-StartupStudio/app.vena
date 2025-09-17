@@ -142,8 +142,8 @@ export const useProfileConfig = (language: 'en' | 'he') => {
 
       const { error } = await supabase
         .from('registrations')
-        .update({ profile_config: config }) // Save the entire current config object
-        .eq('id', user.id); // For the currently logged-in user
+        .update({ profile_config: config })
+        .eq('id', user.id);
 
       if (error) {
         console.error('DIAGNOSTIC: Supabase save error:', error);
@@ -152,13 +152,12 @@ export const useProfileConfig = (language: 'en' | 'he') => {
 
       console.log('DIAGNOSTIC: Profile saved successfully!');
       setStatus('success');
-      // Set status back to idle after a short delay
       setTimeout(() => setStatus('idle'), 2000);
     } catch (error) {
       console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
       setStatus('error');
     }
-  }, [config]); // This function depends on the current config state
+  }, [config, setStatus]); // Add `setStatus` to the dependency array
 
   return {
     config,
