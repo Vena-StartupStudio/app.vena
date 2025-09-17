@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
 import { FONT_THEMES } from '../constants/themes';
-import { supabase } from '../utils/supabase';
-import type { ProfileConfig, SectionId, FontThemeKey } from '../types';
+import { supabase } from '../lib/supabaseClient'; 
+import { ProfileConfig } from '../types';
 
 export type DataStatus = 'idle' | 'loading' | 'saving' | 'success' | 'error';
 
