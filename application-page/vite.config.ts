@@ -1,5 +1,7 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -7,5 +9,14 @@ export default defineConfig({
       '/api': 'http://localhost:3001'
     }
 
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        signin: resolve(__dirname, 'signin.html'),
+        dashboard: resolve(__dirname, 'dashboard.html')
+      }
+    }
   }
-});
+})

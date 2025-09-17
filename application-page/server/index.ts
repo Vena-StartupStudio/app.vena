@@ -140,23 +140,18 @@ app.get(["/api/health", "/health"], (_req: Request, res: Response) => {
   }
 });
 
-// SPA fallback to index.html
-// Explicit sign-in page (static HTML) served from the built dist folder.
-app.get(["/signin", "/signin.html"], (_req, res) => {
-  const signinPath = path.join(clientDist, "signin.html");
-  if (fs.existsSync(signinPath)) {
-    return res.sendFile(signinPath);
-  }
-  return res.status(404).send("signin.html not found in build");
+// Serve signin page
+app.get('/signin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/signin.html'));
 });
 
-// Add this route before the catch-all
+// Serve dashboard page (ProfileEditor)
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../pages/ProfileEditor/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../dist/dashboard.html'));
 });
 
-// Also serve ProfileEditor assets
-app.use('/dashboard', express.static(path.join(__dirname, '../pages/ProfileEditor/dist')));
+// Serve ProfileEditor assets
+app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
 
 // Fallback for other routes -> index.html
 app.get("*", (_req, res) => {
