@@ -79,6 +79,8 @@ interface EditorPanelProps {
   onFontThemeChange: (themeKey: FontThemeKey) => void;
   onSectionVisibilityChange: (sectionId: SectionId, isVisible: boolean) => void;
   onSectionsOrderChange: (sections: SectionId[]) => void;
+  saveProfile: () => Promise<void>;
+  status: 'idle' | 'loading' | 'saving' | 'success' | 'error';
 }
 
 const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -90,6 +92,8 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   onFontThemeChange,
   onSectionVisibilityChange,
   onSectionsOrderChange,
+  saveProfile,
+  status
 }) => {
   const [openAccordions, setOpenAccordions] = useState(['Templates']);
   const [showCustomPrimary, setShowCustomPrimary] = useState(false);
@@ -275,6 +279,19 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
         ))}
       </div>
     );
+  };
+
+  const getButtonText = () => {
+    switch (status) {
+      case 'saving':
+        return 'Saving...';
+      case 'success':
+        return 'Saved!';
+      case 'error':
+        return 'Save Failed';
+      default:
+        return 'Save Changes';
+    }
   };
 
   return (

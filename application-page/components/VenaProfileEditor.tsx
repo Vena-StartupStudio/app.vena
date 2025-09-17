@@ -11,7 +11,7 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
     config,
     setConfig,
     status,
-    setStatus,
+    saveProfile,
     handleTemplateChange,
     handleStyleChange,
     handleFontThemeChange,
@@ -26,6 +26,8 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         isPreviewMode={isPreviewMode}
         config={config}
         language={language}
+        status={status}
+        saveProfile={saveProfile}
         onTemplateChange={handleTemplateChange}
         onStyleChange={handleStyleChange}
         onFontThemeChange={handleFontThemeChange}

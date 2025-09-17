@@ -129,11 +129,43 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     setConfig(prev => ({ ...prev, sections }));
   };
 
+  // --- NEW FUNCTION TO SAVE DATA ---
+  const saveProfile = useCallback(async () => {
+    setStatus('saving');
+    console.log('DIAGNOSTIC: Attempting to save profile...');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("DIAGNOSTIC: No user is logged in. Cannot save profile.");
+        throw new Error("User not authenticated");
+      }
+
+      const { error } = await supabase
+        .from('registrations')
+        .update({ profile_config: config }) // Save the entire current config object
+        .eq('id', user.id); // For the currently logged-in user
+
+      if (error) {
+        console.error('DIAGNOSTIC: Supabase save error:', error);
+        throw error;
+      }
+
+      console.log('DIAGNOSTIC: Profile saved successfully!');
+      setStatus('success');
+      // Set status back to idle after a short delay
+      setTimeout(() => setStatus('idle'), 2000);
+    } catch (error) {
+      console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
+      setStatus('error');
+    }
+  }, [config]); // This function depends on the current config state
+
   return {
     config,
     setConfig,
     status,
     setStatus,
+    saveProfile, // --- EXPORT THE NEW SAVE FUNCTION ---
     handleTemplateChange,
     handleStyleChange,
     handleFontThemeChange,
