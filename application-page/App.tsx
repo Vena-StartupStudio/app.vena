@@ -1,88 +1,43 @@
-import React, { useState, useCallback } from 'react';
-import RegistrationForm from './components/RegistrationForm.js';
-import ConfirmationMessage from './components/ConfirmationMessage.js';
-import bcrypt from 'bcryptjs';
-import type { FormData as RegistrationFormData, FormErrors as BaseFormErrors } from './types.js';
+// application-page/App.tsx
+import React, { useState, useCallback } from "react";
+import { supabase } from "./lib/supabaseClient";
+import RegistrationForm from "./components/RegistrationForm";
+import ConfirmationMessage from "./components/ConfirmationMessage";
+import { IntegrationSettings } from "./components/IntegrationSettings";
+import type { FormData as RegistrationFormData } from "./types";
+import VenaLogo from './components/icons/VenaLogo.png';
 
-type FormErrors = BaseFormErrors & { submit?: string };
-
-// If your types.ts does not define these fields, ensure it matches what is used here.
-const initialFormData: RegistrationFormData & {
-  password: string;
-  confirmPassword: string;
-  businessNiche: string;
-  logo: File | null;
-} = {
-  businessName: '',
-  firstName: '',        // If not used in your UI, can be left blank or removed
-  lastName: '',         // Same as above
-  email: '',
-  password: '',
-  confirmPassword: '',
-  socialMedia: '',
-  businessNiche: '',    // empty means "Choose your business niche"
-  logo: null
+const initialFormData: RegistrationFormData = {
+  businessName: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  socialMedia: "",
+  businessNiche: "",
+  logo: null,
 };
 
+type FormErrors = Partial<Record<keyof RegistrationFormData, string>> & { submit?: string };
+
 const App: React.FC = () => {
-  const [formData, setFormData] = useState<typeof initialFormData>(initialFormData);
+  const [formData, setFormData] = useState<RegistrationFormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const validate = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.businessName.trim()) {
-      newErrors.businessName = 'Business name is required';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = 'Enter a valid email';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Minimum 8 characters';
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    if (!formData.businessNiche) {
-      newErrors.businessNiche = 'Please choose your business niche';
-    }
-
-    // Optional: validate social media URL if provided
-    if (formData.socialMedia) {
-      try {
-        // Basic URL validation
-        // eslint-disable-next-line no-new
-        new URL(formData.socialMedia);
-      } catch {
-        newErrors.socialMedia = 'Enter a valid URL (e.g., https://instagram.com/yourbusiness)';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
+  // ✅ new: keep what to show on the success screen
+  const [confirmation, setConfirmation] = useState<{ email: string; logoUrl?: string | null } | null>(null);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
-      setFormData(prev => ({ ...prev, [name]: value }));
-      // Clear field error on change
+      setFormData((prev) => ({ ...prev, [name]: value }));
       if (errors[name as keyof FormErrors]) {
-        setErrors(prev => {
+        setErrors((prev) => {
           const copy = { ...prev };
-            delete copy[name as keyof FormErrors];
+          delete copy[name as keyof FormErrors];
           return copy;
         });
       }
@@ -91,63 +46,133 @@ const App: React.FC = () => {
   );
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
-    setFormData(prev => ({ ...prev, logo: file as File | null }));
-  }, []);
-
-  // VERSION B: client-side hashing (NOTE: Prefer hashing on the server in production)
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (submitting) return;
-    if (!validate()) return;
-
-    setSubmitting(true);
-    try {
-      // Hash password locally (sync). For better UX / performance, use async hashing or hash on server.
-      const passwordHash = bcrypt.hashSync(formData.password, 10);
-
-      const payload = {
-        businessName: formData.businessName,
-        firstName: formData.firstName || null,
-        lastName: formData.lastName || null,
-        email: formData.email,
-        passwordHash, // IMPORTANT: sending hash, not plain password
-        socialMedia: formData.socialMedia || null,
-        businessNiche: formData.businessNiche,
-        logoFilename: formData.logo ? formData.logo.name : null
-      };
-
-      console.log('Submitting registration (hashed password only):', payload);
-
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    const file = e.target.files ? e.target.files[0] : null;
+    setFormData((prev) => ({ ...prev, logo: file }));
+    if (errors.logo) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.logo;
+        return copy;
       });
+    }
+  }, [errors]);
 
-      if (!res.ok) {
-        const txt = await res.text();
-        console.error('Registration failed:', txt);
-        // Show backend error reason to user
-        setErrors(prev => ({ ...prev, submit: `Registration failed: ${txt}` }));
+  const handleSubmit = async (payload: RegistrationFormData) => {
+    setSubmitting(true);
+    setErrors({});
+
+    try {
+      // password validations (client-side safeguard; server should also enforce)
+      if (!payload.password || payload.password.length < 8) {
+        setErrors(prev => ({ ...prev, password: 'Password must be at least 8 characters.' }));
+        return;
+      }
+      if (payload.password !== payload.confirmPassword) {
+        setErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match.' }));
         return;
       }
 
+      // 1. Sign up the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: payload.email,
+        password: payload.password,
+      });
+
+      if (authError) {
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error("Registration successful, but no user data returned. Please contact support.");
+      }
+
+      const user = authData.user;
+
+      // 2. Upload logo if it exists
+      let logoPath: string | null = null;
+      if (payload.logo) {
+        const ext = payload.logo.name.split(".").pop() || "bin";
+        const fileName = `registrations/${user.id}.${ext}`; // Use user ID for filename
+        const { data: up, error: upErr } = await supabase
+          .storage
+          .from("logos")
+          .upload(fileName, payload.logo, { 
+            contentType: payload.logo.type,
+            upsert: true, // Overwrite if a file with the same name exists
+          });
+        if (upErr) throw upErr;
+        logoPath = up.path;
+      }
+
+      // 3. Insert public profile data into the 'registrations' table
+      const { error: dbErr } = await supabase.from("registrations").insert({
+        id: user.id, // Link to the auth.users table
+        business_name: payload.businessName,
+        first_name: payload.firstName || "",
+        last_name: payload.lastName || "",
+        email: payload.email,
+        social_media: payload.socialMedia || null,
+        business_niche: payload.businessNiche,
+        logo_filename: logoPath,
+      });
+
+      if (dbErr) {
+        // If there's a DB error, it's good practice to clean up the created user
+        // This is an advanced topic, but for now, we'll just log the error
+        console.error("Error saving profile, but user was created:", dbErr);
+        if (/duplicate key value|unique/i.test(dbErr.message)) {
+          throw new Error("This email is already registered.");
+        }
+        throw dbErr;
+      }
+
+      // 4. Get public URL for the logo to show on confirmation
+      let publicLogoUrl: string | null = null;
+      if (logoPath) {
+        const { data } = supabase.storage.from("logos").getPublicUrl(logoPath);
+        publicLogoUrl = data.publicUrl;
+      }
+
+      setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
       setIsSubmitted(true);
-    } catch (err) {
-      console.error('Network or hashing error:', err);
-      setErrors(prev => ({ ...prev, submit: 'Unexpected error. Try again.' }));
+    } catch (err: any) {
+      console.error("Registration failed:", err);
+      setErrors((prev) => ({ ...prev, submit: err.message || "Unexpected error. Try again." }));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-secondary flex items-start justify-center p-4 sm:p-6 lg:p-8">
       <main className="w-full max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 transition-all duration-500">
+        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
+          <div className="flex flex-col items-center text-center mb-8">
+            <img
+              src={VenaLogo}
+              alt="Vena logo"
+              className="h-16 w-auto mb-4 select-none"
+              draggable="false"
+            />
+            {!isSubmitted && (
+              <>
+                <h1 className="text-3xl sm:text-4xl font-bold text-zinc-800 tracking-tight leading-tight">
+                  Ready to take your Business to the next step?
+                </h1>
+                <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-md">
+                  Start growing your wellness practice today – simplify scheduling, payments, and client engagement with Vena.
+                </p>
+              </>
+            )}
+          </div>
           {isSubmitted ? (
-            <ConfirmationMessage />
+            // ✅ pass confirmation props
+            <>
+              <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
+              <div className="mt-8 border-t pt-8">
+                <IntegrationSettings />
+              </div>
+            </>
           ) : (
             <RegistrationForm
               formData={formData}

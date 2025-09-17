@@ -1,155 +1,277 @@
-import React from 'react';
-import type { FormData, FormErrors } from '../types.ts';
-import { BUSINESS_NICHES } from '../constants.js';
-import InputField from './InputField.js';
-import PasswordField from './PasswordField.js';
-import SelectField from './SelectField.js';
-import FileUploadField from './FileUploadField.js';
+import React, { useState, useMemo } from "react";
+import type { FormData as RegistrationFormData } from "../types";
+import { BUSINESS_NICHES } from "../constants";
 
-interface RegistrationFormProps {
-  formData: FormData;
-  errors: FormErrors;
+type Props = {
+  formData: RegistrationFormData;
+  errors: Partial<Record<keyof RegistrationFormData, string>> & { submit?: string };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-}
+  onSubmit: (payload: RegistrationFormData) => void;
+};
 
-const RegistrationForm: React.FC<RegistrationFormProps> = ({
+export default function RegistrationForm({
   formData,
   errors,
   onInputChange,
   onFileChange,
   onSubmit,
-}) => {
-  // Custom validation for business niche
-  const isBusinessNicheValid = formData.businessNiche !== '';
+}: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // Ensure default value is '' for businessNiche
-  if (formData.businessNiche === undefined) {
-    formData.businessNiche = '';
-  }
+  // Simple strength scoring: length + character variety
+  const passwordStrength = useMemo(() => {
+    const pwd = formData.password || '';
+    if (!pwd) return 0;
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (pwd.length >= 12) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return Math.min(score, 5);
+  }, [formData.password]);
+
+  const strengthLabel = ["Very Weak", "Weak", "Fair", "Good", "Strong", "Excellent"][passwordStrength];
+  // ✅ Prevent native navigation; call App.tsx handler
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!canSubmit) return; // block submit if required fields not satisfied
+    onSubmit(formData);
+  };
+
+  // Enforce required fields + password policy before allowing submit
+  const MIN_PWD = 8;
+  const passwordsMatch = !!formData.password && formData.password === formData.confirmPassword;
+  const passwordLongEnough = formData.password.trim().length >= MIN_PWD;
+  const allRequiredFilled = (
+    formData.businessName.trim() !== '' &&
+    formData.firstName.trim() !== '' &&
+    formData.lastName.trim() !== '' &&
+    formData.email.trim() !== '' &&
+    formData.password.trim() !== '' &&
+    formData.confirmPassword.trim() !== '' &&
+    formData.businessNiche.trim() !== ''
+  );
+  const canSubmit = allRequiredFilled && passwordsMatch && passwordLongEnough;
+
   return (
-    <>
-      <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-zinc-800">Ready to take your Business to the next step?</h1>
-        <p className="mt-3 text-base text-zinc-600">
-          Start growing your wellness practice today - simplify scheduling, payments, and client engagement with Vena.
-        </p>
-      </div>
-      <form onSubmit={onSubmit} noValidate className="space-y-6">
-        <InputField
-          label="Business Name"
-          id="businessName"
+    <form onSubmit={handleSubmit} noValidate className="grid gap-3">
+      {/* Business name */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Business name *</span>
+        <input
+          className="border rounded px-3 py-2"
           name="businessName"
           value={formData.businessName}
           onChange={onInputChange}
-          error={errors.businessName ?? ''}
+          placeholder="Acme Wellness"
           required
         />
+        {errors.businessName && <p className="text-red-600 text-sm">{errors.businessName}</p>}
+      </label>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InputField
-            label="First Name"
-            id="firstName"
+      {/* First / Last (required) */}
+      <div className="grid md:grid-cols-2 gap-3">
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700">First name *</span>
+          <input
+            className="border rounded px-3 py-2"
             name="firstName"
             value={formData.firstName}
             onChange={onInputChange}
-            error={errors.firstName ?? ''}
+            placeholder="First name"
             required
           />
-          <InputField
-            label="Last Name"
-            id="lastName"
+          {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName}</p>}
+        </label>
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700">Last name *</span>
+          <input
+            className="border rounded px-3 py-2"
             name="lastName"
             value={formData.lastName}
             onChange={onInputChange}
-            error={errors.lastName ?? ''}
+            placeholder="Last name"
             required
           />
-        </div>
+          {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName}</p>}
+        </label>
+      </div>
 
-        <InputField
-          label="Email"
-          id="email"
-          name="email"
+      {/* Email */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Email *</span>
+        <input
+          className="border rounded px-3 py-2"
           type="email"
+          name="email"
           value={formData.email}
           onChange={onInputChange}
-          error={errors.email ?? ''}
+          placeholder="you@example.com"
           required
         />
+        {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
+      </label>
 
-        <PasswordField
-          label="Password"
-          id="password"
-          name="password"
-          value={(formData as any).password || ''}
-          onChange={onInputChange}
-          error={errors.password ?? ''}
-          required
-        />
-        <PasswordField
-          label="Confirm Password"
-          id="confirmPassword"
-          name="confirmPassword"
-          value={(formData as any).confirmPassword || ''}
-          onChange={onInputChange}
-          error={errors.confirmPassword ?? ''}
-          required
-        />
+      {/* Password (required) with show/hide & strength */}
+      <div className="grid gap-3">
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700 flex items-center justify-between">
+            <span>Password *</span>
+            <button
+              type="button"
+              onClick={() => setShowPassword(p => !p)}
+              className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 text-indigo-600 hover:text-indigo-700"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M3 3l18 18" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M10.58 10.58a2 2 0 002.84 2.84" />
+                  <path d="M9.88 5.51A9.64 9.64 0 0112 5c7 0 10 7 10 7a13.2 13.2 0 01-1.67 2.68m-2.71 2.3A9.86 9.86 0 0112 19c-7 0-10-7-10-7a18.7 18.7 0 013.95-4.94" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </span>
+          <input
+            className="border rounded px-3 py-2"
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            value={formData.password}
+            onChange={onInputChange}
+            placeholder="********"
+            required
+            aria-describedby="password-strength"
+          />
+          {/* Strength meter */}
+          {formData.password && formData.password.length > 0 && (
+            <div className="mt-2" id="password-strength">
+              <div className="flex gap-1 mb-1" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const filled = i < passwordStrength;
+                  // color palette from weak->strong
+                  const colors = [
+                    'bg-red-500',        // very weak
+                    'bg-orange-500',     // weak
+                    'bg-yellow-500',     // fair
+                    'bg-lime-500',       // good
+                    'bg-green-500'       // strong/excellent
+                  ];
+                  const barColor = filled ? colors[Math.min(passwordStrength - 1, colors.length - 1)] : 'bg-zinc-300';
+                  return (
+                    <span
+                      key={i}
+                      className={`h-2 flex-1 rounded-md transition-colors duration-300 ${barColor}`}
+                    />
+                  );
+                })}
+              </div>
+              <p className={`text-xs font-medium ${
+                passwordStrength <= 1 ? 'text-red-600' :
+                passwordStrength === 2 ? 'text-yellow-600' :
+                passwordStrength === 3 ? 'text-lime-600' :
+                'text-green-600'
+              }`}>Strength: {strengthLabel}</p>
+            </div>
+          )}
+          {formData.password && formData.password.length > 0 && formData.password.length < 8 && (
+            <p className="text-xs text-amber-600 mt-1">Minimum 8 characters required.</p>
+          )}
+          {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
+        </label>
+        <label className="grid gap-1">
+          <span className="text-sm text-zinc-700 flex items-center justify-between">
+            <span>Confirm password *</span>
+            <button
+              type="button"
+              onClick={() => setShowConfirm(c => !c)}
+              className="p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 text-indigo-600 hover:text-indigo-700"
+              aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+            >
+              {showConfirm ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M3 3l18 18" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M10.58 10.58a2 2 0 002.84 2.84" />
+                  <path d="M9.88 5.51A9.64 9.64 0 0112 5c7 0 10 7 10 7a13.2 13.2 0 01-1.67 2.68m-2.71 2.3A9.86 9.86 0 0112 19c-7 0-10-7-10-7a18.7 18.7 0 013.95-4.94" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </span>
+          <input
+            className="border rounded px-3 py-2"
+            type={showConfirm ? 'text' : 'password'}
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={onInputChange}
+            placeholder="********"
+            required
+          />
+          {formData.confirmPassword && formData.password && formData.confirmPassword !== formData.password && (
+            <p className="text-xs text-red-600 mt-1">Passwords do not match.</p>
+          )}
+          {errors.confirmPassword && <p className="text-red-600 text-sm">{errors.confirmPassword}</p>}
+        </label>
+      </div>
 
-        <InputField
-          label="Link to Social Media Page (Optional)"
-          id="socialMedia"
+      {/* Social + Niche */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Social media (optional)</span>
+        <input
+          className="border rounded px-3 py-2"
           name="socialMedia"
-          value={formData.socialMedia || ''}
+          value={formData.socialMedia}
           onChange={onInputChange}
           placeholder="https://instagram.com/yourbusiness"
-          error={errors.socialMedia ?? ''}
         />
+        {errors.socialMedia && <p className="text-red-600 text-sm">{errors.socialMedia}</p>}
+      </label>
 
-        <div className="flex flex-col md:flex-row gap-6 items-start justify-between w-full">
-          <div className="w-full md:w-1/2">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">What's your business niche? <span className="text-red-500">*</span></label>
-            <div className="border border-zinc-300 rounded-lg p-0">
-              <SelectField
-                label=""
-                id="businessNiche"
-                name="businessNiche"
-                value={formData.businessNiche}
-                onChange={onInputChange}
-                options={BUSINESS_NICHES}
-                error={errors.businessNiche ?? ''}
-                required
-              />
-            </div>
-            <p className="text-xs text-zinc-500 mt-2">Tap to select your business niche.</p>
-          </div>
-          <div className="w-full md:w-1/2 flex justify-center">
-            <FileUploadField
-              label="Add your logo"
-              id="logo"
-              name="logo"
-              fileName={formData.logo?.name ?? ''}
-              onChange={onFileChange}
-              error={errors.logo ?? ''}
-              //required
-            />
-          </div>
-        </div>
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Business niche *</span>
+        <select
+          className="border rounded px-3 py-2 bg-white"
+          name="businessNiche"
+          value={formData.businessNiche}
+          onChange={onInputChange}
+          required
+        >
+          {BUSINESS_NICHES.map(opt => (
+            <option key={opt.value || 'placeholder'} value={opt.value} disabled={opt.value === ''}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        {errors.businessNiche && <p className="text-red-600 text-sm">{errors.businessNiche}</p>}
+      </label>
 
-        <div>
-          <button
-            type="submit"
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light transition-colors duration-300 disabled:opacity-50"
-            disabled={!isBusinessNicheValid}
-          >
-            Create My Vena Account
-          </button>
-        </div>
-      </form>
-    </>
+      {/* Logo (optional) */}
+      <label className="grid gap-1">
+        <span className="text-sm text-zinc-700">Logo (optional)</span>
+        <input className="border rounded px-3 py-2" type="file" accept="image/*" onChange={onFileChange} />
+        {errors.logo && <p className="text-red-600 text-sm">{errors.logo}</p>}
+      </label>
+
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className="mt-2 rounded px-4 py-2 font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed focus: outline-none focus-visible:ring-2 focus-visible:ring-primary-light focus-visible:ring-offset-2 transition-colors bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary"
+        aria-disabled={!canSubmit}
+      >
+        {canSubmit ? 'Register' : 'Complete required fields'}
+      </button>
+    </form>
   );
-};
-
-export default RegistrationForm;
+}
