@@ -142,11 +142,13 @@ app.get(["/api/health", "/health"], (_req: Request, res: Response) => {
 
 // Serve signin page
 app.get('/signin', (req, res) => {
+  console.log('LOG: Request received for /signin. Sending signin.html.');
   res.sendFile(path.join(__dirname, '../dist/signin.html'));
 });
 
 // Serve dashboard page (ProfileEditor)
 app.get('/dashboard', (req, res) => {
+  console.log('LOG: Request received for /dashboard. Sending dashboard.html.');
   res.sendFile(path.join(__dirname, '../dist/dashboard.html'));
 });
 
@@ -154,7 +156,8 @@ app.get('/dashboard', (req, res) => {
 app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
 
 // Fallback for other routes -> index.html
-app.get("*", (_req, res) => {
+app.get("*", (req, res) => {
+  console.log(`LOG: Catch-all triggered for path: ${req.path}. Sending index.html.`);
   res.sendFile(path.join(clientDist, "../dist/index.html"));
 });
 
