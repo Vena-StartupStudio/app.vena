@@ -78,7 +78,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     };
 
     fetchProfile();
-  }, [language]); // Rerun if language changes
+  }, [language, setStatus]); // Rerun if language changes
 
   const handleTemplateChange = (templateKey: string) => {
     if (templateKey === 'scratch') {
