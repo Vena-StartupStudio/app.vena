@@ -8,7 +8,12 @@ import argon2 from "argon2";
 
 // ESM-friendly __dirname
 const __filename = fileURLToPath(import.meta.url);
+// This __dirname will point to `dist/server` when running
 const __dirname = path.dirname(__filename);
+
+// --- THIS IS THE KEY CHANGE ---
+// Go up ONE directory from `dist/server` to get to `dist`
+const clientDistPath = path.join(__dirname, '..');
 
 // DB helpers (compiled to .js in dist). Keep the .js extension for NodeNext/ESM.
 import {
@@ -54,8 +59,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(UPLOADS_DIR, { maxAge: "7d", index: false }));
 
 // Serve the built client (dist/) — needed in production on Render
-const clientDist = path.join(__dirname, ".."); // points to application-page/dist
-app.use(express.static(clientDist));
+app.use(express.static(clientDistPath));
 
 // Multer wrapper: only run for multipart/form-data and cast to our Express types
 const maybeUpload: RequestHandler = (req, res, next) => {
@@ -143,13 +147,13 @@ app.get(["/api/health", "/health"], (_req: Request, res: Response) => {
 // Serve signin page
 app.get('/signin', (req, res) => {
   console.log('LOG: Request received for /signin. Sending signin.html.');
-  res.sendFile(path.join(__dirname, '../dist/signin.html'));
+  res.sendFile(path.join(clientDistPath, 'signin.html'));
 });
 
 // Serve dashboard page (ProfileEditor)
 app.get('/dashboard', (req, res) => {
   console.log('LOG: Request received for /dashboard. Sending dashboard.html.');
-  res.sendFile(path.join(__dirname, '../dist/dashboard.html'));
+  res.sendFile(path.join(clientDistPath, 'dashboard.html'));
 });
 
 // Serve ProfileEditor assets
@@ -158,7 +162,7 @@ app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
 // Fallback for other routes -> index.html
 app.get("*", (req, res) => {
   console.log(`LOG: Catch-all triggered for path: ${req.path}. Sending index.html.`);
-  res.sendFile(path.join(clientDist, "../dist/index.html"));
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 // ------------ Start ------------
