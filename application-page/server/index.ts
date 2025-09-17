@@ -155,7 +155,7 @@ app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
 
 // Fallback for other routes -> index.html
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(clientDist, "index.html"));
+  res.sendFile(path.join(clientDist, "../dist/index.html"));
 });
 
 // ------------ Start ------------
