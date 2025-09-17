@@ -27,10 +27,7 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         config={config}
         language={language}
         status={status}
-        // --- THIS IS THE IMPORTANT CHANGE ---
-        // Pass an arrow function that calls saveProfile with the current config
-        saveProfile={() => saveProfile(config)}
-        // --- The rest of your props remain the same ---
+        saveProfile={saveProfile} // Pass it directly - no arrow function needed
         onTemplateChange={handleTemplateChange}
         onStyleChange={handleStyleChange}
         onFontThemeChange={handleFontThemeChange}

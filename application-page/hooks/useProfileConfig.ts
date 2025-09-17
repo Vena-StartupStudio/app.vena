@@ -10,17 +10,21 @@ export const useProfileConfig = (language: 'en' | 'he') => {
   const [config, setConfig] = useState<ProfileConfig>(() => getInitialConfig(language));
   const [status, setStatus] = useState<DataStatus>('loading');
 
-  // Fetching logic
   useEffect(() => {
     const fetchProfile = async () => {
       setStatus('loading');
+      console.log('DIAGNOSTIC: Attempting to fetch profile...');
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
+          console.error("DIAGNOSTIC: No user is logged in. Cannot fetch profile. Using initial config.");
           setConfig(getInitialConfig(language));
           setStatus('idle');
           return;
         }
+
+        console.log('DIAGNOSTIC: Logged in user ID:', user.id);
+        console.log('DIAGNOSTIC: Querying "registrations" table for user profile...');
 
         const { data, error } = await supabase
           .from('registrations')
@@ -28,19 +32,36 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           .eq('id', user.id)
           .single();
 
-        if (error && error.code !== 'PGRST116') throw error;
+        if (error && error.code === 'PGRST116') {
+            console.warn('DIAGNOSTIC: Supabase query returned no rows (PGRST116). This is normal for a new user.');
+        } else if (error) {
+          console.error('DIAGNOSTIC: Supabase fetch error:', error);
+          throw error;
+        }
 
         if (data && data.profile_config) {
+          console.log('DIAGNOSTIC: Profile data found and received from Supabase:', data.profile_config);
           const dbConfig = data.profile_config as Partial<ProfileConfig>;
-          setConfig(prevConfig => ({
-            ...prevConfig,
-            ...dbConfig,
-            styles: { ...prevConfig.styles, ...(dbConfig.styles || {}) },
-            sectionVisibility: { ...prevConfig.sectionVisibility, ...(dbConfig.sectionVisibility || {}) },
-            sections: dbConfig.sections && dbConfig.sections.length > 0 ? dbConfig.sections : prevConfig.sections,
-            services: dbConfig.services && dbConfig.services.length > 0 ? dbConfig.services : prevConfig.services,
-          }));
+          
+          setConfig(prevConfig => {
+            const newConfig = {
+              ...prevConfig,
+              ...dbConfig,
+              styles: {
+                ...prevConfig.styles,
+                ...(dbConfig.styles || {}),
+              },
+              sectionVisibility: {
+                ...prevConfig.sectionVisibility,
+                ...(dbConfig.sectionVisibility || {}),
+              },
+              sections: dbConfig.sections && dbConfig.sections.length > 0 ? dbConfig.sections : prevConfig.sections,
+              services: dbConfig.services && dbConfig.services.length > 0 ? dbConfig.services : prevConfig.services,
+            };
+            return newConfig;
+          });
         } else {
+          console.log('DIAGNOSTIC: No profile_config found in DB for this user. Using initial config.');
           setConfig(getInitialConfig(language));
         }
         setStatus('idle');
@@ -54,38 +75,37 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     fetchProfile();
   }, [language]);
 
-  // Corrected save function
-  const saveProfile = useCallback(async (currentConfig: ProfileConfig) => {
+  // SIMPLE save function - no setTimeout, no complications
+  const saveProfile = async () => {
     setStatus('saving');
+    console.log('DIAGNOSTIC: Attempting to save profile...');
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        console.error("DIAGNOSTIC: No user is logged in. Cannot save profile.");
+        setStatus('error');
+        return;
+      }
 
       const { error } = await supabase
         .from('registrations')
-        .update({ profile_config: currentConfig })
+        .update({ profile_config: config })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('DIAGNOSTIC: Supabase save error:', error);
+        setStatus('error');
+        return;
+      }
 
+      console.log('DIAGNOSTIC: Profile saved successfully!');
       setStatus('success');
     } catch (error) {
       console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
       setStatus('error');
     }
-  }, []); // Dependency array is empty because setStatus is stable
+  };
 
-  // New effect to handle resetting the status after save
-  useEffect(() => {
-    if (status === 'success' || status === 'error') {
-      const timer = setTimeout(() => {
-        setStatus('idle');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [status]);
-
-  // --- All other handler functions remain the same ---
   const handleTemplateChange = (templateKey: string) => {
     if (templateKey === 'scratch') {
       setConfig(getInitialConfig(language));
@@ -95,7 +115,10 @@ export const useProfileConfig = (language: 'en' | 'he') => {
         setConfig(prev => ({
           ...prev,
           ...template,
-          styles: { ...prev.styles, ...(template.styles || {}) },
+          styles: {
+            ...prev.styles,
+            ...(template.styles || {}),
+          },
           templateId: templateKey,
         }));
       }
@@ -136,6 +159,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     config,
     setConfig,
     status,
+    setStatus,
     saveProfile,
     handleTemplateChange,
     handleStyleChange,
