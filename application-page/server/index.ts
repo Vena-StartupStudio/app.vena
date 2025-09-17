@@ -1,9 +1,9 @@
 import express, { type Request, type Response, type RequestHandler } from "express";
 import cors from "cors";
 import multer from "multer";
-import path from "node:path";
-import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import argon2 from "argon2";
 
 // ESM-friendly __dirname
