@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
-import { FONT_THEMES } from '../constants/themes';
+import { FONT_THEMES, FontThemeKey } from '../constants/themes';
 import { supabase } from '../lib/supabaseClient'; 
-import { ProfileConfig } from '../types';
+import { ProfileConfig, SectionId } from '../types';
 
 export type DataStatus = 'idle' | 'loading' | 'saving' | 'success' | 'error';
 
@@ -13,14 +13,18 @@ export const useProfileConfig = (language: 'en' | 'he') => {
   useEffect(() => {
     const fetchProfile = async () => {
       setStatus('loading');
+      console.log('DIAGNOSTIC: Attempting to fetch profile...');
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          console.log("No user logged in, using initial config.");
+          console.error("DIAGNOSTIC: No user is logged in. Cannot fetch profile. Using initial config.");
           setConfig(getInitialConfig(language));
           setStatus('idle');
           return;
         }
+
+        console.log('DIAGNOSTIC: Logged in user ID:', user.id);
+        console.log('DIAGNOSTIC: Querying "registrations" table for user profile...');
 
         const { data, error } = await supabase
           .from('registrations')
@@ -28,12 +32,17 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           .eq('id', user.id)
           .single();
 
-        // Ignore error if no row is found, that's expected for new users
-        if (error && error.code !== 'PGRST116') {
+        // This error is expected for new users who don't have a profile yet.
+        if (error && error.code === 'PGRST116') {
+            console.warn('DIAGNOSTIC: Supabase query returned no rows (PGRST116). This is normal for a new user.');
+        } else if (error) {
+          // Any other error is a real problem.
+          console.error('DIAGNOSTIC: Supabase fetch error:', error);
           throw error;
         }
 
         if (data && data.profile_config) {
+          console.log('DIAGNOSTIC: Profile data found and received from Supabase:', data.profile_config);
           const dbConfig = data.profile_config as Partial<ProfileConfig>;
           
           // Deep merge fetched config with the initial config to ensure new properties are not missing
@@ -56,11 +65,12 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           });
         } else {
           // If no config is found in DB, ensure we're using the correct initial config
+          console.log('DIAGNOSTIC: No profile_config found in DB for this user. Using initial config.');
           setConfig(getInitialConfig(language));
         }
         setStatus('idle');
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('DIAGNOSTIC: An unexpected error occurred in fetchProfile:', error);
         setStatus('error');
         // Fallback to initial config on error
         setConfig(getInitialConfig(language));
