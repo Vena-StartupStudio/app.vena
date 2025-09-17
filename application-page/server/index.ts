@@ -150,6 +150,14 @@ app.get(["/signin", "/signin.html"], (_req, res) => {
   return res.status(404).send("signin.html not found in build");
 });
 
+// Add this route before the catch-all
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../pages/ProfileEditor/dist/index.html'));
+});
+
+// Also serve ProfileEditor assets
+app.use('/dashboard', express.static(path.join(__dirname, '../pages/ProfileEditor/dist')));
+
 // Fallback for other routes -> index.html
 app.get("*", (_req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
