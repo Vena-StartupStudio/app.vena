@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 const VenaLogo: React.FC = () => (
   <img 
@@ -10,12 +11,21 @@ const VenaLogo: React.FC = () => (
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   const navLinks = [
     { href: '#features', label: 'Features' },
     { href: '#value', label: 'Why Vena?' },
     { href: '#cta', label: 'Contact' },
   ];
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, []);
 
   return (
     <header className="bg-white sticky top-0 z-50 border-b border-purple-100 shadow-sm">
@@ -49,14 +59,23 @@ const Header: React.FC = () => {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <a
-              href="signin.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
-            >
-              Sign In
-            </a>
+            {user ? (
+              <a
+                href="/application-page/dashboard.html"
+                className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
+              >
+                Go to Dashboard
+              </a>
+            ) : (
+              <a
+                href="signin.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
+              >
+                Sign In
+              </a>
+            )}
             <a
               href="https://app.vena.software/"
               target="_blank"

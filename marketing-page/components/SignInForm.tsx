@@ -32,7 +32,7 @@ const SignInForm: React.FC = () => {
         
         // Redirect to your app after successful sign in
         setTimeout(() => {
-          window.location.href = 'https://app.vena.software/dashboard'; // CHANGE TO OUR APP URL
+          window.location.href = '/application-page/dashboard.html';
         }, 1500);
       }
     } catch (err: any) {
