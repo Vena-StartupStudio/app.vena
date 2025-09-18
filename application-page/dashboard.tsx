@@ -64,7 +64,7 @@ const Dashboard: React.FC = () => {
         setIsAuthenticated(true);
       } else {
         // Redirect to marketing sign-in if not authenticated
-        window.location.href = '/signin.html';
+        window.location.href = 'https://vena.software/signin';  // Marketing sign-in
       }
     };
 
@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = '/signin.html';
+    window.location.href = 'https://vena.software/signin';  // Back to marketing sign-in
   };
 
   if (isAuthenticated === null) {
