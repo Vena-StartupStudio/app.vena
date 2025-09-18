@@ -60,11 +60,8 @@ const Dashboard: React.FC = () => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (user) {
-        setIsAuthenticated(true);
-      } else {
-        // Redirect to marketing sign-in if not authenticated
-        window.location.href = 'https://vena.software/signin';  // Marketing sign-in
+      if (!user) {
+        window.location.href = 'https://vena.software/signin.html';
       }
     };
 
@@ -73,7 +70,7 @@ const Dashboard: React.FC = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = 'https://vena.software/signin';  // Back to marketing sign-in
+    window.location.href = 'https://vena.software/signin.html';  // Make sure it's this URL
   };
 
   if (isAuthenticated === null) {
