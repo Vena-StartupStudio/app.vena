@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { supabase } from './lib/supabaseClient';
 import VenaProfileEditor from './components/VenaProfileEditor';
@@ -7,68 +7,87 @@ import VenaProfileEditor from './components/VenaProfileEditor';
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
+  const isBootstrappingRef = useRef(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      console.log('🔍 Dashboard: Checking authentication...');
-      
-      // First check if there are tokens in the URL hash
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      
-      if (accessToken && refreshToken) {
-        console.log('🔑 Dashboard: Found tokens in URL, setting session...');
-        
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        
-        if (error) {
-          console.error('❌ Dashboard: Error setting session:', error);
-        } else {
-          console.log('✅ Dashboard: Session set successfully:', data.user);
-          setIsAuthenticated(true);
-          setUser(data.user);
-          
-          // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+    let isMounted = true;
+
+    const bootstrapSession = async () => {
+      isBootstrappingRef.current = true;
+
+      try {
+        console.log('Dashboard: Checking authentication...');
+
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          console.log('Dashboard: Found tokens in URL, setting session...');
+
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error('Dashboard: Error setting session from URL tokens:', error);
+          } else if (data.session?.user && isMounted) {
+            console.log('Dashboard: Session established from URL tokens');
+            setIsAuthenticated(true);
+            setUser(data.session.user);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          }
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!isMounted) {
           return;
         }
-      }
-      
-      // Fallback to normal session check
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      console.log('👤 Dashboard: User check result:', user);
-      
-      if (user) {
-        console.log('✅ Dashboard: User authenticated, setting state...');
-        setIsAuthenticated(true);
-        setUser(user);
-      } else {
-        console.log('❌ Dashboard: No user found, redirecting to sign-in...');
-        window.location.href = 'https://vena.software/signin.html';
+
+        if (user) {
+          console.log('Dashboard: Existing session found');
+          setIsAuthenticated(true);
+          setUser(user);
+        } else {
+          console.log('Dashboard: No session found, redirecting to sign-in');
+          setIsAuthenticated(false);
+          window.location.href = 'https://vena.software/signin.html';
+        }
+      } finally {
+        isBootstrappingRef.current = false;
       }
     };
 
-    checkAuth();
+    bootstrapSession();
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 Dashboard: Auth state change:', event, session?.user);
-      if (event === 'SIGNED_OUT' || !session?.user) {
-        console.log('❌ Dashboard: User signed out, redirecting...');
+      console.log('Dashboard: Auth state change:', event, session?.user);
+
+      if (event === 'SIGNED_OUT') {
+        if (isBootstrappingRef.current) {
+          console.log('Dashboard: Ignoring SIGNED_OUT event during bootstrap');
+          return;
+        }
+
+        setIsAuthenticated(false);
+        setUser(null);
         window.location.href = 'https://vena.software/signin.html';
-      } else if (session?.user) {
-        console.log('✅ Dashboard: User signed in via state change');
+        return;
+      }
+
+      if (session?.user) {
         setIsAuthenticated(true);
         setUser(session.user);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSignOut = async () => {
