@@ -59,23 +59,12 @@ const Header: React.FC = () => {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            {user ? (
-              <a
-                href="/application-page/dashboard.html"
-                className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
-              >
-                Go to Dashboard
-              </a>
-            ) : (
-              <a
-                href="signin.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
-              >
-                Sign In
-              </a>
-            )}
+            <a
+              href="/signin.html"
+              className="text-sm px-5 py-2 rounded-full border border-slate-300 text-slate-700 hover:bg-white/60 hover:border-slate-400 transition-colors"
+            >
+              Sign In
+            </a>
             <a
               href="https://app.vena.software/"
               target="_blank"
