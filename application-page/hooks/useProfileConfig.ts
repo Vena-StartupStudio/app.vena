@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useState, useEffect } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
 import { FONT_THEMES } from '../constants/themes';
 import { supabase } from '../lib/supabaseClient';
@@ -151,25 +150,6 @@ const saveProfile = async () => {
   } catch (error) {
     console.error('Error saving profile:', error);
     setStatus('error');
-  }
-};
-
-const handleTemplateChange = (templateKey: string) => {
-  if (templateKey === 'scratch') {
-    setConfig(getInitialConfig(language));
-  } else {
-    const template = TEMPLATES[templateKey];
-    if (template) {
-      setConfig((prev: ProfileConfig) => ({
-        ...prev,
-        ...template,
-        styles: {
-          ...prev.styles,
-          ...(template.styles || {}),
-        },
-        templateId: templateKey,
-      }));
-    }
   }
 };
 
