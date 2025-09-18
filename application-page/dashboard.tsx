@@ -13,9 +13,9 @@ const AuthGuard: React.FC = () => {
       setSession(session);
       setLoading(false);
 
-      // If no session is found on initial load, redirect immediately.
+      // CHANGE this line:
       if (!session) {
-        window.location.href = '/signin';
+        window.location.href = 'https://vena.software/signin.html';  // Changed from '/signin'
       }
     };
 
@@ -23,9 +23,9 @@ const AuthGuard: React.FC = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      // Also check here in case the user signs out.
+      // CHANGE this line too:
       if (!session) {
-        window.location.href = '/signin';
+        window.location.href = 'https://vena.software/signin.html';  // Changed from '/signin'
       }
     });
 
