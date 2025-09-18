@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { supabase } from './lib/supabaseClient';
 import VenaProfileEditor from './components/VenaProfileEditor';
 
+
 // Dashboard component with authentication check and sign out button
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -89,6 +90,30 @@ const Dashboard: React.FC = () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+  const script = document.createElement("script");
+  script.src = "https://do.featurebase.app/js/sdk.js";
+  script.id = "featurebase-sdk";
+  script.async = true;
+  document.body.appendChild(script);
+
+  script.onload = () => {
+    // @ts-ignore
+    window.Featurebase("initialize_feedback_widget", {
+      organization: "vena",
+      theme: "light",
+      placement: "right",
+      defaultBoard: "Feature Request",
+      locale: "en",
+      metadata: null,
+    });
+  };
+
+  return () => {
+    document.getElementById("featurebase-sdk")?.remove();
+  };
+}, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
