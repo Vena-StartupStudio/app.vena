@@ -3,6 +3,12 @@ import ReactDOM from 'react-dom/client';
 import { supabase } from './lib/supabaseClient';
 import VenaProfileEditor from './components/VenaProfileEditor';
 
+declare global {
+  interface Window {
+    Featurebase?: (...args: any[]) => void;
+  }
+}
+
 
 // Dashboard component with authentication check and sign out button
 const Dashboard: React.FC = () => {
@@ -91,29 +97,100 @@ const Dashboard: React.FC = () => {
     };
   }, []);
 
+
   useEffect(() => {
-  const script = document.createElement("script");
-  script.src = "https://do.featurebase.app/js/sdk.js";
-  script.id = "featurebase-sdk";
-  script.async = true;
-  document.body.appendChild(script);
+    if (typeof window === 'undefined') {
+      return;
+    }
 
-  script.onload = () => {
-    // @ts-ignore
-    window.Featurebase("initialize_feedback_widget", {
-      organization: "vena",
-      theme: "light",
-      placement: "right",
-      defaultBoard: "Feature Request",
-      locale: "en",
+    let isActive = true;
+    let retries = 0;
+    let retryTimeout: number | undefined;
+    const maxRetries = 10;
+    const retryDelayMs = 200;
+    const scriptId = 'featurebase-sdk';
+
+    const widgetOptions = {
+      organization: 'vena',
+      theme: 'light',
+      placement: 'right',
+      defaultBoard: 'Feature Request',
+      locale: 'en',
       metadata: null,
-    });
-  };
+    } as const;
 
-  return () => {
-    document.getElementById("featurebase-sdk")?.remove();
-  };
-}, []);
+    const initializeWidget = () => {
+      if (!isActive) {
+        return;
+      }
+
+      const featurebase = window.Featurebase;
+
+      if (typeof featurebase !== 'function') {
+        if (retries < maxRetries) {
+          retries += 1;
+          retryTimeout = window.setTimeout(initializeWidget, retryDelayMs);
+        } else {
+          console.error('Featurebase SDK loaded but Featurebase function is unavailable.');
+        }
+        return;
+      }
+
+      if (retryTimeout !== undefined) {
+        window.clearTimeout(retryTimeout);
+        retryTimeout = undefined;
+      }
+
+      featurebase('initialize_feedback_widget', widgetOptions);
+    };
+
+    if (typeof window.Featurebase === 'function') {
+      initializeWidget();
+      return () => {
+        isActive = false;
+        if (retryTimeout !== undefined) {
+          window.clearTimeout(retryTimeout);
+        }
+      };
+    }
+
+    const script = (() => {
+      const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+      if (existing) {
+        return existing;
+      }
+
+      const created = document.createElement('script');
+      created.id = scriptId;
+      created.async = true;
+      created.src = 'https://do.featurebase.app/js/sdk.js';
+      document.body.appendChild(created);
+
+      return created;
+    })();
+
+    const handleLoad = () => {
+      retries = 0;
+      initializeWidget();
+    };
+
+    const handleError = (event: ErrorEvent | Event) => {
+      console.error('Failed to load Featurebase SDK.', event);
+    };
+
+    script.addEventListener('load', handleLoad);
+    script.addEventListener('error', handleError);
+
+    return () => {
+      isActive = false;
+      script.removeEventListener('load', handleLoad);
+      script.removeEventListener('error', handleError);
+      if (retryTimeout !== undefined) {
+        window.clearTimeout(retryTimeout);
+      }
+    };
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
