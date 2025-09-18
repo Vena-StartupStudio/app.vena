@@ -9,8 +9,8 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
 
   const {
     config,
+    setConfig,
     status,
-    setStatus,
     saveProfile,
     handleTemplateChange,
     handleStyleChange,

@@ -124,40 +124,38 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     setConfig((prev: ProfileConfig) => ({ ...prev, sections }));
   };
 
-// Add these functions to your useProfileConfig.ts file, before the return statement:
+  const saveProfile = async () => {
+    setStatus('saving');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
 
-const saveProfile = async () => {
-  setStatus('saving');
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('You must be logged in to save your profile.');
+        setStatus('error');
+        return;
+      }
 
-    if (!user) {
-      alert('You must be logged in to save your profile.');
+      const { error } = await supabase
+        .from('registrations')
+        .update({ profile_config: config })
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setStatus('success');
+      setTimeout(() => setStatus('idle'), 2000);
+    } catch (error) {
+      console.error('Error saving profile:', error);
       setStatus('error');
-      return;
     }
-
-    const { error } = await supabase
-      .from('registrations')
-      .update({ profile_config: config })
-      .eq('id', user.id);
-
-    if (error) {
-      throw error;
-    }
-
-    setStatus('success');
-  } catch (error) {
-    console.error('Error saving profile:', error);
-    setStatus('error');
-  }
-};
+  };
 
   return {
     config,
     setConfig,
     status,
-    setStatus,
     saveProfile,
     handleTemplateChange,
     handleStyleChange,
