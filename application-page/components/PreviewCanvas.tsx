@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ProfileConfig } from '../index';
 import { HEBREW_TRANSLATIONS, INITIAL_PLACEHOLDER_IMAGE } from '../constants/config';
@@ -14,7 +14,7 @@ interface PreviewCanvasProps {
   isRtl: boolean;
   onValueChange: <K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) => void;
   status: DataStatus;
-  setStatus: React.Dispatch<React.SetStateAction<DataStatus>>;
+  onSave: () => Promise<void>;
 }
 
 const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
@@ -24,41 +24,15 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
   isRtl,
   onValueChange,
   status,
-  setStatus,
+  onSave,
 }) => {
   const handleSave = async () => {
-    setStatus('saving');
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        alert('You must be logged in to save your profile.');
-        setStatus('error');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('registrations')
-        .update({ profile_config: config })
-        .eq('id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      setStatus('success');
+      await onSave();
     } catch (error) {
       console.error('Error saving profile:', error);
-      setStatus('error');
     }
   };
-
-  useEffect(() => {
-    if (status === 'success') {
-      const timer = setTimeout(() => setStatus('idle'), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [status, setStatus]);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

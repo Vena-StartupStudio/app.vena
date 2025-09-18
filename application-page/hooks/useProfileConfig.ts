@@ -132,6 +132,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
       if (!user) {
         alert('You must be logged in to save your profile.');
         setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
         return;
       }
 
@@ -149,6 +150,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     } catch (error) {
       console.error('Error saving profile:', error);
       setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
@@ -165,3 +167,4 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     handleSectionsOrderChange,
   };
 };
+

@@ -76,12 +76,7 @@ interface EditorPanelProps {
   language: 'en' | 'he';
   onTemplateChange: (templateKey: string) => void;
   onStyleChange: <K extends keyof ProfileConfig['styles']>(key: K, value: ProfileConfig['styles'][K]) => void;
-  onFontThemeChange: (themeKey: FontThemeKey) => void;
-  onSectionVisibilityChange: (sectionId: SectionId, isVisible: boolean) => void;
-  onSectionsOrderChange: (sections: SectionId[]) => void;
-  saveProfile: () => Promise<void>;
-  status: 'idle' | 'loading' | 'saving' | 'success' | 'error';
-}
+  onFontThemeChange: (themeKey: FontThemeKey) => void;}
 
 const EditorPanel: React.FC<EditorPanelProps> = ({
   isPreviewMode,
@@ -89,12 +84,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   language,
   onTemplateChange,
   onStyleChange,
-  onFontThemeChange,
-  onSectionVisibilityChange,
-  onSectionsOrderChange,
-  saveProfile,
-  status
-}) => {
+  onFontThemeChange,}) => {
   const [openAccordions, setOpenAccordions] = useState(['Templates']);
   const [showCustomPrimary, setShowCustomPrimary] = useState(false);
   const [showCustomSecondary, setShowCustomSecondary] = useState(false);
@@ -513,3 +503,4 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
 };
 
 export default EditorPanel;
+
