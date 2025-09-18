@@ -43,10 +43,18 @@ const SignInForm: React.FC = () => {
         
         setSuccessMessage('Sign in successful! Redirecting...');
         
-        // Add a small delay to see the success message
+        // Get the session to transfer it
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Redirect with session tokens in URL
         setTimeout(() => {
-          console.log('🎯 Redirecting to dashboard...');
-          window.location.href = 'https://app.vena.software/dashboard';
+          console.log('🎯 Redirecting to dashboard with session...');
+          if (session?.access_token) {
+            // Include tokens in URL for cross-domain transfer
+            window.location.href = `https://app.vena.software/dashboard#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=access_token`;
+          } else {
+            window.location.href = 'https://app.vena.software/dashboard';
+          }
         }, 1000);
       } else {
         console.warn('⚠️ No user returned from sign in');

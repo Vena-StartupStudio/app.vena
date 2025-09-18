@@ -11,6 +11,34 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const checkAuth = async () => {
       console.log('🔍 Dashboard: Checking authentication...');
+      
+      // First check if there are tokens in the URL hash
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      if (accessToken && refreshToken) {
+        console.log('🔑 Dashboard: Found tokens in URL, setting session...');
+        
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        if (error) {
+          console.error('❌ Dashboard: Error setting session:', error);
+        } else {
+          console.log('✅ Dashboard: Session set successfully:', data.user);
+          setIsAuthenticated(true);
+          setUser(data.user);
+          
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return;
+        }
+      }
+      
+      // Fallback to normal session check
       const { data: { user } } = await supabase.auth.getUser();
       
       console.log('👤 Dashboard: User check result:', user);
