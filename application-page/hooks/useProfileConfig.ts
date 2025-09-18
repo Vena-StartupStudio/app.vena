@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
 import { FONT_THEMES } from '../constants/themes';
 import { supabase } from '../lib/supabaseClient';
@@ -75,43 +76,24 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     fetchProfile();
   }, [language]);
 
-  // Replace just this part in your useProfileConfig.ts file:
-// const saveProfile = () => {
-//   // Use a local reference to setStatus
-//   const updateStatus = setStatus;
-  
-//   const doSave = async () => {
-//     updateStatus('saving');
-//     console.log('DIAGNOSTIC: Attempting to save profile...');
-//     try {
-//       const { data: { user } } = await supabase.auth.getUser();
-//       if (!user) {
-//         console.error("DIAGNOSTIC: No user is logged in. Cannot save profile.");
-//         updateStatus('error');
-//         return;
-//       }
-
-//       const { error } = await supabase
-//         .from('registrations')
-//         .update({ profile_config: config })
-//         .eq('id', user.id);
-
-//       if (error) {
-//         console.error('DIAGNOSTIC: Supabase save error:', error);
-//         updateStatus('error');
-//         return;
-//       }
-
-//       console.log('DIAGNOSTIC: Profile saved successfully!');
-//       updateStatus('success');
-//     } catch (error) {
-//       console.error('DIAGNOSTIC: An unexpected error occurred in saveProfile:', error);
-//       updateStatus('error');
-//     }
-//   };
-  
-//   doSave();
-// };
+  const handleTemplateChange = (templateKey: string) => {
+    if (templateKey === 'scratch') {
+      setConfig(getInitialConfig(language));
+    } else {
+      const template = TEMPLATES[templateKey];
+      if (template) {
+        setConfig(prev => ({
+          ...prev,
+          ...template,
+          styles: {
+            ...prev.styles,
+            ...(template.styles || {}),
+          },
+          templateId: templateKey,
+        }));
+      }
+    }
+  };
 
   const handleStyleChange = <K extends keyof ProfileConfig['styles']>(
     key: K,
