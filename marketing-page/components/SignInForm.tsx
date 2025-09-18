@@ -13,28 +13,53 @@ const SignInForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔍 Form submitted, starting sign in process...');
+    
     setLoading(true);
     setError('');
     setSuccessMessage('');
 
+    console.log('📧 Attempting sign in with email:', email);
+    console.log('🔗 Supabase client:', supabase);
+
     try {
+      console.log('🚀 Calling supabase.auth.signInWithPassword...');
+      
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('📊 Sign in response:', { data, authError });
+
       if (authError) {
+        console.error('❌ Auth error occurred:', authError);
         throw authError;
       }
 
       if (data.user) {
+        console.log('✅ Sign in successful! User:', data.user);
+        console.log('🔄 Setting success message and redirecting...');
+        
         setSuccessMessage('Sign in successful! Redirecting...');
         
-        // Redirect to your app after successful sign in
-        window.location.href = 'https://app.vena.software/dashboard';
+        // Add a small delay to see the success message
+        setTimeout(() => {
+          console.log('🎯 Redirecting to dashboard...');
+          window.location.href = 'https://app.vena.software/dashboard';
+        }, 1000);
+      } else {
+        console.warn('⚠️ No user returned from sign in');
+        setError('Sign in failed. No user returned.');
       }
     } catch (err: any) {
-      console.error('Sign in error:', err);
+      console.error('💥 Sign in error caught:', err);
+      console.error('Error details:', {
+        message: err.message,
+        status: err.status,
+        code: err.code,
+        details: err
+      });
       
       // Handle specific error types
       if (err.message === 'Invalid login credentials') {
@@ -44,9 +69,10 @@ const SignInForm: React.FC = () => {
       } else if (err.message === 'Too many requests') {
         setError('Too many sign in attempts. Please wait a moment and try again.');
       } else {
-        setError('Sign in failed. Please try again.');
+        setError(`Sign in failed: ${err.message}`);
       }
     } finally {
+      console.log('🏁 Sign in process finished');
       setLoading(false);
     }
   };
