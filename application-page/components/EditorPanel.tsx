@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import type { ProfileConfig, FontThemeKey, SectionId } from '../types';
+import type { ProfileConfig, FontThemeKey, SectionId } from '../index';
 import { TEMPLATES } from '../constants/config';
 import { FONT_THEMES, COLOR_PALETTE, OPACITY_OPTIONS } from '../constants/themes';
 
@@ -79,8 +79,8 @@ interface EditorPanelProps {
   onFontThemeChange: (themeKey: FontThemeKey) => void;
   onSectionVisibilityChange: (sectionId: SectionId, isVisible: boolean) => void;
   onSectionsOrderChange: (sections: SectionId[]) => void;
-  // saveProfile: () => Promise<void>;
-  // status: 'idle' | 'loading' | 'saving' | 'success' | 'error';
+  saveProfile: () => Promise<void>;
+  status: 'idle' | 'loading' | 'saving' | 'success' | 'error';
 }
 
 const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -92,8 +92,8 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   onFontThemeChange,
   onSectionVisibilityChange,
   onSectionsOrderChange,
-  // saveProfile,
-  // status
+  saveProfile,
+  status
 }) => {
   const [openAccordions, setOpenAccordions] = useState(['Templates']);
   const [showCustomPrimary, setShowCustomPrimary] = useState(false);

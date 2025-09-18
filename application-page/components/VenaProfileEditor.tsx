@@ -9,8 +9,8 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
 
   const {
     config,
-    setConfig,
     status,
+    setStatus,
     saveProfile,
     handleTemplateChange,
     handleStyleChange,
@@ -31,7 +31,6 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         onTemplateChange={handleTemplateChange}
         onStyleChange={handleStyleChange}
         onFontThemeChange={handleFontThemeChange}
-        onValueChange={handleValueChange}
         onSectionVisibilityChange={handleSectionVisibilityChange}
         onSectionsOrderChange={handleSectionsOrderChange}
       />
@@ -39,7 +38,6 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         isPreviewMode={isPreviewMode}
         setIsPreviewMode={setIsPreviewMode}
         config={config}
-        setConfig={setConfig}
         isRtl={isRtl}
         onValueChange={handleValueChange}
         status={status}

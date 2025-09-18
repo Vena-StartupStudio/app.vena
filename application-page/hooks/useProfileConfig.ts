@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
-import { FONT_THEMES, FontThemeKey } from '../constants/themes';
+import { FONT_THEMES } from '../constants/themes';
 import { supabase } from '../lib/supabaseClient';
-import { ProfileConfig, SectionId } from '../types';
+import { ProfileConfig, SectionId, FontThemeKey } from '../index';
 
 export type DataStatus = 'idle' | 'loading' | 'saving' | 'success' | 'error';
 
@@ -43,7 +43,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           console.log('DIAGNOSTIC: Profile data found and received from Supabase:', data.profile_config);
           const dbConfig = data.profile_config as Partial<ProfileConfig>;
           
-          setConfig(prevConfig => {
+          setConfig((prevConfig: ProfileConfig) => {
             const newConfig = {
               ...prevConfig,
               ...dbConfig,
@@ -117,33 +117,60 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     key: K,
     value: ProfileConfig['styles'][K]
   ) => {
-    setConfig(prev => ({ ...prev, styles: { ...prev.styles, [key]: value } }));
+    setConfig((prev: ProfileConfig) => ({ ...prev, styles: { ...prev.styles, [key]: value } }));
   };
 
   const handleFontThemeChange = (themeKey: FontThemeKey) => {
-    const theme = FONT_THEMES[themeKey];
-    setConfig(prev => ({
+    const theme = FONT_THEMES[themeKey as keyof typeof FONT_THEMES];
+    setConfig((prev: ProfileConfig) => ({
       ...prev,
       styles: { ...prev.styles, fontPairing: themeKey, fontHeading: theme.heading, fontBody: theme.body },
     }));
   };
 
   const handleValueChange = <K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+    setConfig((prev: ProfileConfig) => ({ ...prev, [key]: value }));
   };
 
   const handleSectionVisibilityChange = (sectionId: SectionId, isVisible: boolean) => {
-    setConfig(prev => ({
+    setConfig((prev: ProfileConfig) => ({
       ...prev,
       sectionVisibility: { ...prev.sectionVisibility, [sectionId]: isVisible },
     }));
   };
 
   const handleSectionsOrderChange = (sections: SectionId[]) => {
-    setConfig(prev => ({ ...prev, sections }));
+    setConfig((prev: ProfileConfig) => ({ ...prev, sections }));
   };
 
 // Add these functions to your useProfileConfig.ts file, before the return statement:
+
+const saveProfile = async () => {
+  setStatus('saving');
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert('You must be logged in to save your profile.');
+      setStatus('error');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('registrations')
+      .update({ profile_config: config })
+      .eq('id', user.id);
+
+    if (error) {
+      throw error;
+    }
+
+    setStatus('success');
+  } catch (error) {
+    console.error('Error saving profile:', error);
+    setStatus('error');
+  }
+};
 
 const handleTemplateChange = (templateKey: string) => {
   if (templateKey === 'scratch') {
@@ -151,7 +178,7 @@ const handleTemplateChange = (templateKey: string) => {
   } else {
     const template = TEMPLATES[templateKey];
     if (template) {
-      setConfig(prev => ({
+      setConfig((prev: ProfileConfig) => ({
         ...prev,
         ...template,
         styles: {
@@ -167,9 +194,9 @@ const handleTemplateChange = (templateKey: string) => {
   return {
     config,
     setConfig,
-    //status,
+    status,
     setStatus,
-    //saveProfile,
+    saveProfile,
     handleTemplateChange,
     handleStyleChange,
     handleFontThemeChange,

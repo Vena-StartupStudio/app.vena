@@ -1,6 +1,6 @@
 import React from 'react';
 import BaseCard from './BaseCard';
-import type { ProfileConfig, Service } from '../../types';
+import type { ProfileConfig, Service } from '../../index';
 
 interface ServicesCardProps {
   config: ProfileConfig;

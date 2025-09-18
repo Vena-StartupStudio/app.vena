@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { ProfileConfig } from '../types';
+import { ProfileConfig } from '../index';
 import { HEBREW_TRANSLATIONS, INITIAL_PLACEHOLDER_IMAGE } from '../constants/config';
 import AboutCard from './cards/AboutCard';
 import ServicesCard from './cards/ServicesCard';
@@ -11,7 +11,6 @@ interface PreviewCanvasProps {
   isPreviewMode: boolean;
   setIsPreviewMode: React.Dispatch<React.SetStateAction<boolean>>;
   config: ProfileConfig;
-  setConfig: React.Dispatch<React.SetStateAction<ProfileConfig>>;
   isRtl: boolean;
   onValueChange: <K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) => void;
   status: DataStatus;
@@ -22,7 +21,6 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
   isPreviewMode,
   setIsPreviewMode,
   config,
-  setConfig,
   isRtl,
   onValueChange,
   status,
@@ -90,7 +88,12 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
     }
   };
 
-  const t = (key: keyof typeof HEBREW_TRANSLATIONS) => isRtl ? HEBREW_TRANSLATIONS[key] : key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  const t = (key: string) => {
+    if (isRtl && key in HEBREW_TRANSLATIONS) {
+      return HEBREW_TRANSLATIONS[key as keyof typeof HEBREW_TRANSLATIONS];
+    }
+    return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  };
 
   const renderSection = (sectionId: string) => {
     if (!config.sectionVisibility[sectionId as keyof typeof config.sectionVisibility]) return null;
@@ -124,7 +127,6 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
     }
   };
 
-  const inlineInputStyles = "bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md text-center w-full block";
 
   const getSaveButtonText = () => {
     switch (status) {

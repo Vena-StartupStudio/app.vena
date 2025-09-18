@@ -1,6 +1,6 @@
 import React from 'react';
 import BaseCard from './BaseCard';
-import type { ProfileConfig } from '../../types';
+import type { ProfileConfig } from '../../index';
 
 interface AboutCardProps {
   config: ProfileConfig;

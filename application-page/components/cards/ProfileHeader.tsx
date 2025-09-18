@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import BaseCard from './BaseCard';
-import type { ProfileConfig } from '../../types';
+import type { ProfileConfig } from '../../index';
 
 interface ProfileHeaderProps {
   config: ProfileConfig;
