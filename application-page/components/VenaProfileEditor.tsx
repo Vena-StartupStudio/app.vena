@@ -31,6 +31,7 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         onTemplateChange={handleTemplateChange}
         onStyleChange={handleStyleChange}
         onFontThemeChange={handleFontThemeChange}
+        onValueChange={handleValueChange}
         onSectionVisibilityChange={handleSectionVisibilityChange}
         onSectionsOrderChange={handleSectionsOrderChange}
       />
@@ -41,7 +42,6 @@ const VenaProfileEditor: React.FC<{ language: 'en' | 'he' }> = ({ language }) =>
         isRtl={isRtl}
         onValueChange={handleValueChange}
         status={status}
-        setStatus={setStatus}
       />
     </div>
   );
