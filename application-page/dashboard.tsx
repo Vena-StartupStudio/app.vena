@@ -14,8 +14,6 @@ declare global {
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const lastIdentifiedUserRef = useRef<string | null>(null);
   const isBootstrappingRef = useRef(true);
   const featurebaseInitialized = useRef(false);
 
@@ -100,39 +98,10 @@ const Dashboard: React.FC = () => {
     };
   }, []);
 
-  // Fetch user profile data from registrations table
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user?.id) {
-        setUserProfile(null);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('registrations')
-          .select('first_name, last_name, business_name')
-          .eq('id', user.id)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user profile:', error);
-          return;
-        }
-
-        if (data) {
-          setUserProfile(data);
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    };
-
-    fetchUserProfile();
-  }, [user?.id]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    // Don't run on server or if no user is logged in.
+    if (typeof window === 'undefined' || !user) {
       return;
     }
 
@@ -143,127 +112,12 @@ const Dashboard: React.FC = () => {
     const retryDelayMs = 200;
     const scriptId = 'featurebase-sdk';
 
-    const metadata: Record<string, string> | null = (() => {
-      if (!user) {
-        return null;
-      }
-
-      const result: Record<string, string> = {};
-
-      if (typeof user.id === 'string' && user.id.length > 0) {
-        result.supabaseUserId = user.id;
-      }
-
-      if (typeof user.email === 'string' && user.email.length > 0) {
-        result.supabaseEmail = user.email;
-      }
-
-      if (userProfile?.business_name) {
-        result.businessName = userProfile.business_name;
-      }
-
-      return Object.keys(result).length > 0 ? result : null;
-    })();
-
     const widgetOptions = {
       organization: 'vena',
       theme: 'light',
       placement: 'right',
       defaultBoard: 'Feature Request',
       locale: 'en',
-      metadata,
-    };
-
-    const identifyUserIfNeeded = () => {
-      if (!user || !userProfile) {
-        lastIdentifiedUserRef.current = null;
-        return;
-      }
-
-      const featurebase = window.Featurebase;
-
-      if (typeof featurebase !== 'function') {
-        return;
-      }
-
-      let identifier: string | null = null;
-
-      if (typeof user.id === 'string' && user.id.length > 0) {
-        identifier = user.id;
-      } else if (typeof user.email === 'string' && user.email.length > 0) {
-        identifier = user.email;
-      }
-
-      if (!identifier) {
-        return;
-      }
-
-      if (lastIdentifiedUserRef.current === identifier) {
-        return;
-      }
-
-      // Construct name from profile data
-      let name = '';
-      if (userProfile.first_name && userProfile.last_name) {
-        name = `${userProfile.first_name} ${userProfile.last_name}`.trim();
-      } else if (userProfile.first_name) {
-        name = userProfile.first_name;
-      } else if (userProfile.last_name) {
-        name = userProfile.last_name;
-      } else if (userProfile.business_name) {
-        name = userProfile.business_name;
-      }
-
-      // Only proceed if we have a name (Featurebase requires it)
-      if (!name) {
-        console.warn('Featurebase identify skipped: no name available');
-        return;
-      }
-
-      const payload: {
-        organization: string;
-        email?: string;
-        userId?: string;
-        name: string;
-      } = {
-        organization: 'vena',
-        name: name,
-      };
-
-      if (typeof user.email === 'string' && user.email.length > 0) {
-        payload.email = user.email;
-      }
-
-      if (typeof user.id === 'string' && user.id.length > 0) {
-        payload.userId = user.id;
-      }
-
-      // Add rate limiting - only try once every 30 seconds per user
-      const now = Date.now();
-      const lastIdentifyTime = parseInt(localStorage.getItem('featurebase_last_identify') || '0');
-      if (now - lastIdentifyTime < 30000) {
-        console.log('Featurebase identify skipped: rate limited');
-        return;
-      }
-
-      localStorage.setItem('featurebase_last_identify', now.toString());
-
-      featurebase(
-        'identify',
-        payload,
-        (err: unknown) => {
-          if (err) {
-            console.error('Featurebase identify failed', err);
-            lastIdentifiedUserRef.current = null;
-            // Clear rate limit on error to allow retry
-            localStorage.removeItem('featurebase_last_identify');
-            return;
-          }
-
-          console.log('Featurebase identify successful for:', name);
-          lastIdentifiedUserRef.current = identifier;
-        }
-      );
     };
 
     const initializeWidget = () => {
@@ -290,15 +144,14 @@ const Dashboard: React.FC = () => {
 
       // Only initialize once
       if (featurebaseInitialized.current) {
-        identifyUserIfNeeded();
         return;
       }
 
       try {
-        identifyUserIfNeeded();
+        // We no longer call identify. We just initialize the widget.
         featurebase('initialize_feedback_widget', widgetOptions);
         featurebaseInitialized.current = true;
-        console.log('Featurebase widget initialized successfully');
+        console.log('Featurebase widget initialized for anonymous user.');
       } catch (error) {
         console.error('Error initializing Featurebase widget:', error);
         featurebaseInitialized.current = false;
@@ -352,9 +205,8 @@ const Dashboard: React.FC = () => {
       }
       // Reset initialization state when component unmounts or user changes
       featurebaseInitialized.current = false;
-      lastIdentifiedUserRef.current = null;
     };
-  }, [user, userProfile]);
+  }, [user]);
 
 
   const handleSignOut = async () => {
