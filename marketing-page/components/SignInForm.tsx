@@ -31,9 +31,7 @@ const SignInForm: React.FC = () => {
         setSuccessMessage('Sign in successful! Redirecting...');
         
         // Redirect to your app after successful sign in
-        setTimeout(() => {
-          window.location.href = 'https://app.vena.software/dashboard';  // Correct URL
-        }, 1500);
+        window.location.href = 'https://app.vena.software/dashboard';
       }
     } catch (err: any) {
       console.error('Sign in error:', err);
