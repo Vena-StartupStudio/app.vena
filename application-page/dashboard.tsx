@@ -109,7 +109,7 @@ const Dashboard: React.FC = () => {
       <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-semibold">Vena Dashboard</h1>
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">Welcome, {user?.first_name}</span>
+          <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
           <button 
             onClick={handleSignOut}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
