@@ -3,43 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { supabase } from './lib/supabaseClient';
 import VenaProfileEditor from './components/VenaProfileEditor';
 
-// Keep the AuthGuard component for reference, but don't use it
-const AuthGuard: React.FC = () => {
-  const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setLoading(false);
-
-      if (!session) {
-        window.location.href = 'https://vena.software/signin.html';
-      }
-    };
-
-    getSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
-        window.location.href = 'https://vena.software/signin.html';
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  if (loading || !session) {
-    return <div>Loading...</div>;
-  }
-
-  return <VenaProfileEditor language="en" />;
-};
-
 // Dashboard component with authentication check and sign out button
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -47,12 +10,17 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log('🔍 Dashboard: Checking authentication...');
       const { data: { user } } = await supabase.auth.getUser();
       
+      console.log('👤 Dashboard: User check result:', user);
+      
       if (user) {
+        console.log('✅ Dashboard: User authenticated, setting state...');
         setIsAuthenticated(true);
         setUser(user);
       } else {
+        console.log('❌ Dashboard: No user found, redirecting to sign-in...');
         window.location.href = 'https://vena.software/signin.html';
       }
     };
@@ -61,9 +29,12 @@ const Dashboard: React.FC = () => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔄 Dashboard: Auth state change:', event, session?.user);
       if (event === 'SIGNED_OUT' || !session?.user) {
+        console.log('❌ Dashboard: User signed out, redirecting...');
         window.location.href = 'https://vena.software/signin.html';
       } else if (session?.user) {
+        console.log('✅ Dashboard: User signed in via state change');
         setIsAuthenticated(true);
         setUser(session.user);
       }
@@ -112,6 +83,6 @@ if (!rootElement) throw new Error('Root element not found');
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <Dashboard />  {/* Use Dashboard instead of AuthGuard */}
+    <Dashboard />  {/* Only use Dashboard, remove AuthGuard */}
   </React.StrictMode>
 );
