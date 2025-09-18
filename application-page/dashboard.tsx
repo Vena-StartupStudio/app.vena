@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { supabase } from './lib/supabaseClient';
 import VenaProfileEditor from './components/VenaProfileEditor';
+import Featurebase from "@featurebase/sdk"; // Make sure Featurebase is imported
 
 declare global {
   interface Window {
@@ -18,9 +19,7 @@ const Dashboard: React.FC = () => {
   const isBootstrappingRef = useRef(true);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const bootstrapSession = async () => {
+    const checkAuthAndFetchProfile = async () => {
       isBootstrappingRef.current = true;
 
       try {
@@ -40,7 +39,7 @@ const Dashboard: React.FC = () => {
 
           if (error) {
             console.error('Dashboard: Error setting session from URL tokens:', error);
-          } else if (data.session?.user && isMounted) {
+          } else if (data.session?.user) {
             console.log('Dashboard: Session established from URL tokens');
             setIsAuthenticated(true);
             setUser(data.session.user);
@@ -51,25 +50,47 @@ const Dashboard: React.FC = () => {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!isMounted) {
-          return;
-        }
-
-        if (user) {
-          console.log('Dashboard: Existing session found');
-          setIsAuthenticated(true);
-          setUser(user);
-        } else {
+        if (!user) {
           console.log('Dashboard: No session found, redirecting to sign-in');
           setIsAuthenticated(false);
           window.location.href = 'https://vena.software/signin.html';
+          return;
+        }
+
+        setIsAuthenticated(true);
+        setUser(user);
+        console.log('DIAGNOSTIC: Logged in user ID:', user.id);
+
+        // Fetch profile from registrations table
+        console.log('DIAGNOSTIC: Querying "registrations" table for user profile...');
+        const { data: profileData, error: profileError } = await supabase
+          .from('registrations')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+        } else if (profileData) {
+          console.log('DIAGNOSTIC: Profile data found and received from Supabase:', profileData.profile_config);
+          
+          // FIX: Initialize Featurebase with the user's name
+          if (window.Featurebase) {
+            window.Featurebase.identify({
+              // The error occurs because 'name' is missing.
+              // Your logs show the name is in `profileData.profile_config.me`
+              name: profileData.profile_config?.me, 
+              email: user.email,
+              userId: user.id,
+            });
+          }
         }
       } finally {
         isBootstrappingRef.current = false;
       }
     };
 
-    bootstrapSession();
+    checkAuthAndFetchProfile();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Dashboard: Auth state change:', event, session?.user);
@@ -93,7 +114,6 @@ const Dashboard: React.FC = () => {
     });
 
     return () => {
-      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
