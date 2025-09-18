@@ -14,6 +14,7 @@ declare global {
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
+  const lastIdentifiedUserRef = useRef<string | null>(null);
   const isBootstrappingRef = useRef(true);
 
   useEffect(() => {
@@ -110,14 +111,104 @@ const Dashboard: React.FC = () => {
     const retryDelayMs = 200;
     const scriptId = 'featurebase-sdk';
 
+    const metadata: Record<string, string> | null = (() => {
+      if (!user) {
+        return null;
+      }
+
+      const result: Record<string, string> = {};
+
+      if (typeof user.id === 'string' && user.id.length > 0) {
+        result.supabaseUserId = user.id;
+      }
+
+      if (typeof user.email === 'string' && user.email.length > 0) {
+        result.supabaseEmail = user.email;
+      }
+
+      return Object.keys(result).length > 0 ? result : null;
+    })();
+
     const widgetOptions = {
       organization: 'vena',
       theme: 'light',
       placement: 'right',
       defaultBoard: 'Feature Request',
       locale: 'en',
-      metadata: null,
-    } as const;
+      metadata,
+    };
+
+    const identifyUserIfNeeded = () => {
+      if (!user) {
+        lastIdentifiedUserRef.current = null;
+        return;
+      }
+
+      const featurebase = window.Featurebase;
+
+      if (typeof featurebase !== 'function') {
+        return;
+      }
+
+      let identifier: string | null = null;
+
+      if (typeof user.id === 'string' && user.id.length > 0) {
+        identifier = user.id;
+      } else if (typeof user.email === 'string' && user.email.length > 0) {
+        identifier = user.email;
+      }
+
+      if (!identifier) {
+        return;
+      }
+
+      if (lastIdentifiedUserRef.current === identifier) {
+        return;
+      }
+
+      const payload: {
+        organization: string;
+        email?: string;
+        userId?: string;
+        name?: string;
+      } = {
+        organization: 'vena',
+      };
+
+      if (typeof user.email === 'string' && user.email.length > 0) {
+        payload.email = user.email;
+      }
+
+      if (typeof user.id === 'string' && user.id.length > 0) {
+        payload.userId = user.id;
+      }
+
+      const rawName =
+        user.user_metadata?.full_name ??
+        user.user_metadata?.name ??
+        user.user_metadata?.preferred_username ??
+        null;
+
+      const name = typeof rawName === 'string' && rawName.length > 0 ? rawName : null;
+
+      if (name) {
+        payload.name = name;
+      }
+
+      featurebase(
+        'identify',
+        payload,
+        (err: unknown) => {
+          if (err) {
+            console.error('Featurebase identify failed', err);
+            lastIdentifiedUserRef.current = null;
+            return;
+          }
+
+          lastIdentifiedUserRef.current = identifier;
+        }
+      );
+    };
 
     const initializeWidget = () => {
       if (!isActive) {
@@ -140,6 +231,8 @@ const Dashboard: React.FC = () => {
         window.clearTimeout(retryTimeout);
         retryTimeout = undefined;
       }
+
+      identifyUserIfNeeded();
 
       featurebase('initialize_feedback_widget', widgetOptions);
     };
@@ -190,7 +283,8 @@ const Dashboard: React.FC = () => {
         window.clearTimeout(retryTimeout);
       }
     };
-  }, []);
+  }, [user]);
+
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
