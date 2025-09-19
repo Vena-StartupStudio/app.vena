@@ -181,17 +181,35 @@ export const useProfileConfig = (language: 'en' | 'he') => {
         throw new Error('You must be logged in to publish your landing page.');
       }
 
-      const preferredSource = (businessName || config.name || user.email?.split('@')[0] || '').trim();
-      const preferredSlug = config.landingPage?.slug ?? slugify(preferredSource);
+      const fallbackSlug = `page-${user.id.slice(0, 8).toLowerCase()}`;
+      const slugSources = [
+        config.landingPage?.slug ?? '',
+        businessName ?? '',
+        config.name ?? '',
+        user.email?.split('@')[0] ?? '',
+      ];
 
-      if (!preferredSlug) {
-        throw new Error('Please add a business name before publishing your landing page.');
+      let baseSlug = '';
+      for (const source of slugSources) {
+        const trimmed = source.trim();
+        if (!trimmed) continue;
+        const slugCandidate = slugify(trimmed);
+        if (slugCandidate) {
+          baseSlug = slugCandidate;
+          break;
+        }
       }
 
-      let slugToUse = preferredSlug;
+      if (!baseSlug) {
+        baseSlug = fallbackSlug;
+      }
+
+      let slugToUse = baseSlug;
       let attempt = 0;
-      while (true) {
-        const candidate = attempt === 0 ? preferredSlug : `${preferredSlug}-${attempt + 1}`;
+      const maxAttempts = 25;
+
+      while (attempt < maxAttempts) {
+        const candidate = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
         const { data: existing, error: existingError } = await supabase
           .from('registrations')
           .select('id')
@@ -207,11 +225,11 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           break;
         }
 
-        if (config.landingPage?.slug) {
-          throw new Error('Another account is already using this landing page URL. Please contact support.');
-        }
-
         attempt += 1;
+      }
+
+      if (attempt === maxAttempts) {
+        throw new Error('Unable to reserve a unique landing page URL. Please try again or contact support.');
       }
 
       const isoNow = new Date().toISOString();
