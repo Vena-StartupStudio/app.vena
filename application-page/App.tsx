@@ -1,5 +1,5 @@
 // application-page/App.tsx
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react"; // Add useEffect
 import { supabase } from "./lib/supabaseClient";
 import RegistrationForm from "./components/RegistrationForm";
 import ConfirmationMessage from "./components/ConfirmationMessage";
@@ -29,6 +29,19 @@ const App: React.FC = () => {
 
   // ✅ new: keep what to show on the success screen
   const [confirmation, setConfirmation] = useState<{ email: string; logoUrl?: string | null } | null>(null);
+
+  // This effect will run when `isSubmitted` becomes true
+  useEffect(() => {
+    if (isSubmitted) {
+      const timer = setTimeout(() => {
+        // Redirect to the sign-in page after 3 seconds
+        window.location.href = 'https://vena.software/signin.html';
+      }, 3000); // 3000 milliseconds = 3 seconds
+
+      // Cleanup the timer if the component unmounts
+      return () => clearTimeout(timer);
+    }
+  }, [isSubmitted]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -134,7 +147,7 @@ const App: React.FC = () => {
       }
 
       setConfirmation({ email: payload.email, logoUrl: publicLogoUrl });
-      setIsSubmitted(true);
+      setIsSubmitted(true); // This line will now trigger the useEffect above
     } catch (err: any) {
       console.error("Registration failed:", err);
       setErrors((prev) => ({ ...prev, submit: err.message || "Unexpected error. Try again." }));
