@@ -2,13 +2,27 @@ import { useState, useEffect } from 'react';
 import { getInitialConfig, TEMPLATES } from '../constants/config';
 import { FONT_THEMES } from '../constants/themes';
 import { supabase } from '../lib/supabaseClient';
-import { ProfileConfig, SectionId, FontThemeKey } from '../index';
+import { ProfileConfig, SectionId, FontThemeKey, LandingPageMeta } from '../index';
 
 export type DataStatus = 'idle' | 'loading' | 'saving' | 'success' | 'error';
+export type PublishStatus = 'idle' | 'publishing' | 'success' | 'error';
+
+const slugify = (raw: string) => raw
+  .normalize('NFKD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .trim()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+
 
 export const useProfileConfig = (language: 'en' | 'he') => {
   const [config, setConfig] = useState<ProfileConfig>(() => getInitialConfig(language));
   const [status, setStatus] = useState<DataStatus>('loading');
+  const [publishStatus, setPublishStatus] = useState<PublishStatus>('idle');
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [businessName, setBusinessName] = useState<string>('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -28,7 +42,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
 
         const { data, error } = await supabase
           .from('registrations')
-          .select('profile_config')
+          .select('profile_config, business_name')
           .eq('id', user.id)
           .single();
 
@@ -39,6 +53,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           throw error;
         }
 
+        setBusinessName(data?.business_name ?? '');
         if (data && data.profile_config) {
           console.log('DIAGNOSTIC: Profile data found and received from Supabase:', data.profile_config);
           const dbConfig = data.profile_config as Partial<ProfileConfig>;
@@ -65,6 +80,8 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           setConfig(getInitialConfig(language));
         }
         setStatus('idle');
+        setPublishStatus('idle');
+        setPublishError(null);
       } catch (error) {
         console.error('DIAGNOSTIC: An unexpected error occurred in fetchProfile:', error);
         setStatus('error');
@@ -153,12 +170,92 @@ export const useProfileConfig = (language: 'en' | 'he') => {
       setTimeout(() => setStatus('idle'), 3000);
     }
   };
+  const publishProfile = async () => {
+    setPublishError(null);
+    setPublishStatus('publishing');
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error('You must be logged in to publish your landing page.');
+      }
+
+      const preferredSource = (businessName || config.name || user.email?.split('@')[0] || '').trim();
+      const preferredSlug = config.landingPage?.slug ?? slugify(preferredSource);
+
+      if (!preferredSlug) {
+        throw new Error('Please add a business name before publishing your landing page.');
+      }
+
+      let slugToUse = preferredSlug;
+      let attempt = 0;
+      while (true) {
+        const candidate = attempt === 0 ? preferredSlug : `${preferredSlug}-${attempt + 1}`;
+        const { data: existing, error: existingError } = await supabase
+          .from('registrations')
+          .select('id')
+          .eq('profile_config->landingPage->>slug', candidate)
+          .neq('id', user.id);
+
+        if (existingError) {
+          throw existingError;
+        }
+
+        if (!existing || existing.length === 0) {
+          slugToUse = candidate;
+          break;
+        }
+
+        if (config.landingPage?.slug) {
+          throw new Error('Another account is already using this landing page URL. Please contact support.');
+        }
+
+        attempt += 1;
+      }
+
+      const isoNow = new Date().toISOString();
+      const landingMeta: LandingPageMeta = {
+        slug: slugToUse,
+        published: true,
+        publishedAt: config.landingPage?.publishedAt ?? isoNow,
+        lastUpdatedAt: isoNow,
+      };
+
+      const payload: ProfileConfig = {
+        ...config,
+        landingPage: landingMeta,
+      };
+
+      const { error: updateError } = await supabase
+        .from('registrations')
+        .update({ profile_config: payload })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setConfig(payload);
+      setPublishStatus('success');
+      setTimeout(() => setPublishStatus('idle'), 2000);
+    } catch (error: any) {
+      console.error('Error publishing profile:', error);
+      setPublishError(error?.message ?? 'Failed to publish landing page.');
+      setPublishStatus('error');
+      setTimeout(() => setPublishStatus('idle'), 3000);
+    }
+  };
 
   return {
     config,
     setConfig,
     status,
+    publishStatus,
+    publishError,
+    businessName,
     saveProfile,
+    publishProfile,
     handleTemplateChange,
     handleStyleChange,
     handleFontThemeChange,
@@ -167,4 +264,8 @@ export const useProfileConfig = (language: 'en' | 'he') => {
     handleSectionsOrderChange,
   };
 };
+
+
+
+
 

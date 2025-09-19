@@ -9,6 +9,13 @@ export interface Service {
   description: string;
 }
 
+export interface LandingPageMeta {
+  slug: string;
+  published: boolean;
+  publishedAt?: string | null;
+  lastUpdatedAt?: string | null;
+}
+
 export interface ProfileConfig {
   templateId: string;
   name: string;
@@ -29,4 +36,6 @@ export interface ProfileConfig {
     colorBackground: string;
     backgroundOpacity: string;
   };
+  landingPage?: LandingPageMeta;
 }
+

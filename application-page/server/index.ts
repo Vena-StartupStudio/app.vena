@@ -42,6 +42,19 @@ fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // ------------ App init ------------
 const app = express();
+const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets']);
+
+const shouldServeLandingSlug = (slug?: string) => {
+  if (!slug) {
+    return false;
+  }
+  const normalized = slug.toLowerCase();
+  if (RESERVED_LANDING_SEGMENTS.has(normalized)) {
+    return false;
+  }
+  return !normalized.includes('.');
+};
+
 const upload = multer({ dest: UPLOADS_DIR });
 
 // CORS + parsers
@@ -158,6 +171,16 @@ app.get('/dashboard', (req, res) => {
 
 // Serve ProfileEditor assets
 app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
+app.get('/:slug', (req, res, next) => {
+  const { slug } = req.params;
+  if (!shouldServeLandingSlug(slug)) {
+    return next();
+  }
+
+  console.log(`LOG: Serving landing page for slug: ${slug}`);
+  return res.sendFile(path.join(clientDistPath, 'landing.html'));
+});
+
 
 // Fallback for other routes -> index.html
 app.get("*", (req, res) => {

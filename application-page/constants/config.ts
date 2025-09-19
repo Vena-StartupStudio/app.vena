@@ -1,4 +1,4 @@
-import type { ProfileConfig } from '../types';
+import type { ProfileConfig } from '../index';
 import { FONT_THEMES } from './themes';
 
 export const INITIAL_PLACEHOLDER_IMAGE = 'https://i.imgur.com/rS42r8s.png';
@@ -24,6 +24,7 @@ const BASE_DEFAULT_CONFIG: Omit<ProfileConfig, 'styles'> = {
   ],
   sections: ['about', 'services'],
   sectionVisibility: { about: true, services: true },
+  landingPage: { slug: '', published: false, publishedAt: null, lastUpdatedAt: null },
 };
 
 export const getInitialConfig = (language: 'en' | 'he'): ProfileConfig => {
@@ -161,3 +162,5 @@ export const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
     sections: ['about', 'services'] 
   },
 };
+
+
