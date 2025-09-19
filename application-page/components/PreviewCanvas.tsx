@@ -66,6 +66,8 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
 }) => {
 
+  const viewMode: 'edit' | 'view' = isPreviewMode ? 'view' : 'edit';
+
   const handleSave = async () => {
 
     try {
@@ -194,6 +196,8 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
             t={t}
 
+            mode={viewMode}
+
           />
 
         );
@@ -215,6 +219,8 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
             isRtl={isRtl}
 
             t={t}
+
+            mode={viewMode}
 
           />
 
@@ -447,6 +453,8 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
             isRtl={isRtl}
 
             initialPlaceholderImage={INITIAL_PLACEHOLDER_IMAGE}
+
+            mode={viewMode}
 
           />
 
