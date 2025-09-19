@@ -37,10 +37,10 @@ interface PreviewCanvasProps {
   onSave: () => Promise<void>;
 
   onPublish: () => Promise<void>;
-
+  // ADD: New props for the language switcher
+  language: 'en' | 'he';
+  onLanguageSwitch: () => void;
 }
-
-
 
 const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
@@ -63,6 +63,11 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
   onPublish,
 
   onSave,
+
+  // ADD: Destructure the new props
+  language,
+
+  onLanguageSwitch,
 
 }) => {
 
@@ -341,6 +346,15 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
       <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
 
         <div className="flex gap-2">
+          
+          {/* ADD: The language switch button here, to the left of the others */}
+          <button
+            onClick={onLanguageSwitch}
+            className="px-4 py-2 bg-slate-800 text-white rounded-md shadow-lg hover:bg-slate-700 transition-colors"
+            title={language === 'en' ? "Switch to Hebrew" : "Switch to English"}
+          >
+            {language === 'en' ? 'עברית' : 'English'}
+          </button>
 
           <button 
 
