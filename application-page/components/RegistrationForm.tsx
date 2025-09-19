@@ -10,13 +10,11 @@ type Props = {
   onSubmit: (payload: RegistrationFormData) => void;
 };
 
-export default function RegistrationForm({
-  formData,
-  errors,
-  onInputChange,
-  onFileChange,
-  onSubmit,
-}: Props) {
+interface RegistrationFormProps {
+  onSuccess: () => void;
+}
+
+const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -35,10 +33,51 @@ export default function RegistrationForm({
 
   const strengthLabel = ["Very Weak", "Weak", "Fair", "Good", "Strong", "Excellent"][passwordStrength];
   // ✅ Prevent native navigation; call App.tsx handler
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return; // block submit if required fields not satisfied
-    onSubmit(formData);
+    setLoading(true);
+    setError('');
+
+    try {
+      // Step 1: Sign up the user with Supabase Auth
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            business_name: businessName,
+            first_name: firstName,
+            last_name: lastName,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+      if (!user) throw new Error("Sign up successful, but no user returned.");
+
+      // Step 2: Insert public profile data into the 'registrations' table
+      const { error: insertError } = await supabase
+        .from('registrations')
+        .insert({
+          id: user.id,
+          email: user.email,
+          business_name: businessName,
+          first_name: firstName,
+          last_name: lastName,
+          // Add any other fields you collect
+        });
+
+      if (insertError) throw insertError;
+
+      // Step 3: Call the onSuccess callback to trigger the redirect
+      onSuccess();
+
+    } catch (err: any) {
+      console.error('Registration failed:', err);
+      setError(err.message || 'An unknown error occurred.');
+      setLoading(false);
+    }
+    // No need to set loading to false on success, as the page will redirect
   };
 
   // Enforce required fields + password policy before allowing submit
@@ -275,3 +314,5 @@ export default function RegistrationForm({
     </form>
   );
 }
+
+export default RegistrationForm;
