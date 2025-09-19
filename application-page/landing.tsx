@@ -7,6 +7,12 @@ import PublishedLandingPage from './components/PublishedLandingPage';
 
 const normalizeSlug = (input: string) => input.replace(/^\/+|\/+$/g, '').toLowerCase();
 
+const apiOrigin = (import.meta.env.VITE_PUBLIC_API_ORIGIN || '').trim().replace(/\/+$/, '');
+const buildLandingApiUrl = (slug: string) => {
+  const encodedSlug = encodeURIComponent(slug);
+  return apiOrigin ? `${apiOrigin}/api/landing/${encodedSlug}` : `/api/landing/${encodedSlug}`;
+};
+
 type ViewState = 'loading' | 'ready' | 'not-found' | 'error';
 
 const mergeConfig = (base: ProfileConfig, incoming: Partial<ProfileConfig>): ProfileConfig => ({
@@ -38,8 +44,45 @@ const LandingApp: React.FC = () => {
       return;
     }
 
-    const fetchLanding = async () => {
-      setStatus('loading');
+    const loadFromApi = async (): Promise<boolean> => {
+      try {
+        const response = await fetch(buildLandingApiUrl(slug), {
+          headers: { Accept: 'application/json' },
+          credentials: 'omit',
+        });
+
+        if (response.status === 404) {
+          setStatus('not-found');
+          return true;
+        }
+
+        if (!response.ok) {
+          console.warn('Landing API returned', response.status);
+          return false;
+        }
+
+        const payload = await response.json().catch(() => null as any);
+        if (!payload?.ok || !payload.profile) {
+          setStatus('not-found');
+          return true;
+        }
+
+        const merged = mergeConfig(getInitialConfig('en'), payload.profile as Partial<ProfileConfig>);
+        if (!merged.landingPage?.published || merged.landingPage.slug?.toLowerCase() !== slug) {
+          setStatus('not-found');
+          return true;
+        }
+
+        setConfig(merged);
+        setStatus('ready');
+        return true;
+      } catch (apiError) {
+        console.warn('Landing API unavailable, falling back to Supabase.', apiError);
+        return false;
+      }
+    };
+
+    const loadFromSupabase = async () => {
       try {
         const { data, error } = await supabase
           .from('registrations')
@@ -53,7 +96,7 @@ const LandingApp: React.FC = () => {
             setStatus('not-found');
             return;
           }
-          console.error('Error fetching landing page:', error);
+          console.error('Error fetching landing page via Supabase:', error);
           setStatus('error');
           setErrorMessage('We could not load this landing page right now.');
           return;
@@ -74,9 +117,19 @@ const LandingApp: React.FC = () => {
         setConfig(merged);
         setStatus('ready');
       } catch (err) {
-        console.error('Unexpected error loading landing page', err);
+        console.error('Unexpected error loading landing page via Supabase', err);
         setStatus('error');
         setErrorMessage('We could not load this landing page right now.');
+      }
+    };
+
+    const fetchLanding = async () => {
+      setStatus('loading');
+      setErrorMessage(null);
+
+      const handledByApi = await loadFromApi();
+      if (!handledByApi) {
+        await loadFromSupabase();
       }
     };
 
@@ -134,5 +187,3 @@ ReactDOM.createRoot(rootElement).render(
     <LandingApp />
   </React.StrictMode>
 );
-
-

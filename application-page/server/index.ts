@@ -24,6 +24,7 @@ import {
   type RegistrationRecord,
   dbFile,
 } from "./sqlite.js";
+import { supabaseAdmin } from './lib/supabaseAdmin.js';
 
 // ------------ Config ------------
 const PORT = Number(process.env.PORT || 3001);
@@ -180,6 +181,44 @@ app.get('/:slug', (req, res, next) => {
   console.log(`LOG: Serving landing page for slug: ${slug}`);
   return res.sendFile(path.join(clientDistPath, 'landing.html'));
 });
+
+// Public landing profile lookup
+app.get('/api/landing/:slug', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ ok: false, error: 'Landing pages are unavailable at the moment.' });
+  }
+
+  const rawSlug = String(req.params.slug || '').trim();
+  if (!shouldServeLandingSlug(rawSlug)) {
+    return res.status(400).json({ ok: false, error: 'Invalid landing page slug.' });
+  }
+
+  const slug = rawSlug.toLowerCase();
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('registrations')
+      .select('profile_config')
+      .eq('profile_config->landingPage->>slug', slug)
+      .eq('profile_config->landingPage->>published', 'true')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to fetch landing page config:', error);
+      return res.status(500).json({ ok: false, error: 'Unable to load landing page.' });
+    }
+
+    if (!data?.profile_config) {
+      return res.status(404).json({ ok: false, error: 'Landing page not found.' });
+    }
+
+    return res.json({ ok: true, profile: data.profile_config });
+  } catch (err) {
+    console.error('Unexpected landing lookup error:', err);
+    return res.status(500).json({ ok: false, error: 'Unable to load landing page.' });
+  }
+});
+
 
 
 // Fallback for other routes -> index.html
