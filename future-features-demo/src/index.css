@@ -1,0 +1,45 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-night text-slate-50 antialiased;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    background-image:
+      radial-gradient(60% 80% at 10% 10%, rgba(139, 92, 246, 0.20), transparent),
+      radial-gradient(60% 80% at 80% 0%, rgba(99, 102, 241, 0.16), transparent),
+      linear-gradient(180deg, #0a0f1c 0%, #0e1629 45%, #070b14 100%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(139, 92, 246, 0.35);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-3xl border border-white/5 bg-slate-900/40 backdrop-blur-xl shadow-glass;
+  }
+
+  .glow-ring {
+    box-shadow: 0 0 0 1px rgba(106, 126, 255, 0.35), 0 28px 80px -42px rgba(90, 203, 255, 0.55);
+  }
+
+  .divider {
+    @apply h-px bg-white/10 w-full;
+  }
+}
+
+@layer utilities {
+  .mask-soft {
+    mask-image: radial-gradient(circle at top, black 60%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at top, black 60%, transparent 100%);
+  }
+}
