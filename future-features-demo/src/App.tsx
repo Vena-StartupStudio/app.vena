@@ -130,7 +130,7 @@ export default function App() {
     <Shell
       persona={persona}
       onPersonaChange={setPersona}
-      tabs={TABS}
+      tabs={[...TABS]}
       activeTab={activeTab}
       onTabChange={setActiveTab}
       highlights={personaHighlights[persona]}

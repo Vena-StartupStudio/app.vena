@@ -68,23 +68,55 @@ export function Shell({
 
       <main className="mx-auto w-full max-w-shell flex-1 px-6 pb-20 pt-12 md:px-10">
         <div className="overflow-x-auto">
-          <nav className="inline-flex items-center gap-2 rounded-full border border-slate-100 bg-white p-1 shadow-soft">
-            {tabs.map((tab) => {
+          <nav
+            className="relative flex w-full min-w-[320px] max-w-full items-center justify-center rounded-full border border-slate-100 bg-white p-1 shadow-soft"
+            role="tablist"
+            aria-label="Main navigation"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              const idx = tabs.findIndex((t) => t.id === activeTab);
+              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                onTabChange(tabs[(idx + 1) % tabs.length].id);
+                e.preventDefault();
+              } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                onTabChange(tabs[(idx - 1 + tabs.length) % tabs.length].id);
+                e.preventDefault();
+              }
+            }}
+          >
+            {/* Sliding indicator */}
+            <div
+              aria-hidden
+              className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400 shadow-md transition-all duration-300 ease-soft"
+              style={{
+                width: `calc(100% / ${tabs.length})`,
+                transform: `translateX(${tabs.findIndex((t) => t.id === activeTab) * 100}%)`,
+                zIndex: 1,
+              }}
+            />
+            {tabs.map((tab, i) => {
               const active = tab.id === activeTab;
               return (
                 <button
                   key={tab.id}
                   type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={tab.label}
+                  tabIndex={active ? 0 : -1}
                   onClick={() => onTabChange(tab.id)}
                   className={cn(
-                    'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ease-soft',
-                    active
-                      ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
-                      : 'text-slate-500 hover:text-ink'
+                    'relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-300 ease-soft outline-none',
+                    active ? 'text-white' : 'text-slate-600 hover:text-brand-600',
+                    'focus:ring-2 focus:ring-brand-300 focus:ring-offset-2'
                   )}
+                  style={{ minWidth: 0 }}
                 >
                   <span className="text-lg">{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  <span className="hidden sm:inline-block">{tab.label}</span>
+                  {tab.helper && (
+                    <span className="ml-2 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-semibold text-brand-600">{tab.helper}</span>
+                  )}
                 </button>
               );
             })}
