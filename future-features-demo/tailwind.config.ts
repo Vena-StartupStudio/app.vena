@@ -5,38 +5,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        night: '#070910',
-        ink: '#0b1220',
-        mist: '#f6f7fb',
-        alabaster: '#f7f5f1',
+        // Keep a dark canvas but shift accents towards the marketing page’s purple–indigo spectrum
+        night: '#0b0f1a',
+        ink: '#0e1424',
+        mist: '#faf8f4',
+        alabaster: '#fcfaf7',
         slate: {
-          50: '#f3f7ff',
-          100: '#dde7ff',
-          200: '#c0d3ff',
-          300: '#a0bbff',
-          400: '#7f9cff',
-          500: '#6b84ff',
-          600: '#5667e5',
-          700: '#4a53b7',
-          800: '#3a418f',
-          900: '#2b2f68',
+          50: '#f8fafc',
+          100: '#eef2f6',
+          200: '#dce3ea',
+          300: '#c9d0dc',
+          400: '#9aa6b2',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
         },
+        // Replace aqua with indigo hues
         aqua: {
-          100: '#d8f5ff',
-          300: '#97e3ff',
-          500: '#5acbff',
-          700: '#1d97d6',
+          100: '#e0e7ff',
+          300: '#b7c3ff',
+          500: '#6366f1', // indigo-500
+          700: '#4f46e5', // indigo-600
         },
+        // Replace lavender with violet/purple hues
         lavender: {
-          100: '#f1e8ff',
-          300: '#d5c3ff',
-          500: '#b195ff',
-          700: '#8a63f0',
+          100: '#ede9fe', // violet-100
+          300: '#c4b5fd', // violet-300
+          500: '#8b5cf6', // violet-500
+          700: '#7c3aed', // violet-600
         },
         surface: {
-          base: 'rgba(12, 17, 32, 0.72)',
-          raised: 'rgba(16, 22, 41, 0.78)',
-          glass: 'rgba(23, 32, 59, 0.72)',
+          base: 'rgba(14, 20, 36, 0.78)',
+          raised: 'rgba(16, 23, 42, 0.82)',
+          glass: 'rgba(20, 28, 50, 0.78)',
           soft: 'rgba(255, 255, 255, 0.06)',
         },
       },
@@ -49,8 +52,9 @@ const config: Config = {
         soft: '0 18px 40px -24px rgba(10, 19, 40, 0.6)',
       },
       backgroundImage: {
-        'gradient-surface': 'linear-gradient(135deg, rgba(107, 132, 255, 0.16) 0%, rgba(90, 203, 255, 0.08) 40%, rgba(177, 149, 255, 0.14) 100%)',
-        'gradient-card': 'linear-gradient(135deg, rgba(33, 45, 80, 0.95) 0%, rgba(21, 30, 58, 0.92) 100%)',
+        // Marketing-inspired purple→indigo blends
+        'gradient-surface': 'linear-gradient(135deg, rgba(139, 92, 246, 0.20) 0%, rgba(99, 102, 241, 0.14) 40%, rgba(139, 92, 246, 0.18) 100%)',
+        'gradient-card': 'linear-gradient(135deg, rgba(28, 32, 52, 0.95) 0%, rgba(18, 24, 42, 0.92) 100%)',
       },
       borderRadius: {
         '3xl': '1.75rem',
