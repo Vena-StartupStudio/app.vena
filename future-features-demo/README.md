@@ -23,7 +23,7 @@ Fonts rely on system-safe stacks (`Inter`, `Segoe UI`, `system-ui`); no webfont 
 ## What you can demo
 
 - Toggle between **Coach workspace** and **Client experience** using the persona switch in the header.
-- Step through feature tabs (Members' Lounge, Weekly Picks, Challenges, Milestones, AMA, Task Inbox) to show focused screens without scrolling.
+- Step through feature tabs (Members' Lounge, Weekly Picks, Challenges, Milestones,  Task Inbox) to show focused screens without scrolling.
 - Share the calm, expo-ready layout: bright cards, bold section headings, and concise copy tuned for large displays.
 
 ## Accessibility & motion

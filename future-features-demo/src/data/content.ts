@@ -75,23 +75,6 @@ export const milestones = [
   },
 ];
 
-export const amaQueue = [
-  {
-    id: 'ama-1',
-    question: 'How do I stay on track when I travel?',
-    from: 'Taylor',
-    status: 'Answered',
-    answerSummary: 'Pack two staple moves and celebrate small check-ins.',
-    audioLength: '05:02',
-  },
-  {
-    id: 'ama-2',
-    question: 'Favorite recovery cue after leg day?',
-    from: 'Riley',
-    status: 'Queued',
-    answerSummary: 'Foam roll, extra water, optional magnesium.',
-  },
-];
 
 export const coachTasks = [
   {
@@ -112,13 +95,13 @@ export const coachTasks = [
 
 export const personaHighlights: Record<Persona, Array<{ id: string; label: string; value: string; helper: string }>> = {
   coach: [
-    { id: 'highlight-1', label: 'Check-ins', value: '3', helper: 'Ready for warm replies.' },
-    { id: 'highlight-2', label: 'Challenges live', value: '2', helper: 'Keep nudges gentle.' },
-    { id: 'highlight-3', label: 'Milestones', value: '2', helper: 'Celebrations queued.' },
+    { id: 'highlight-1', label: 'Check-ins', value: '3', helper: '' },
+    { id: 'highlight-2', label: 'Challenges live', value: '2', helper: '' },
+    { id: 'highlight-3', label: 'Milestones', value: '2', helper: '' },
   ],
   client: [
-    { id: 'highlight-1', label: 'This week', value: 'Ease back in', helper: 'Soft movement, slow breath.' },
-    { id: 'highlight-2', label: 'Badges', value: '2 tracking', helper: 'Consistency and recovery.' },
-    { id: 'highlight-3', label: 'Shout-outs', value: '5 live', helper: 'Scroll the lounge feed.' },
+    { id: 'highlight-1', label: 'This week', value: 'Ease back in', helper: '' },
+    { id: 'highlight-2', label: 'Badges', value: '2 tracking', helper: '' },
+    { id: 'highlight-3', label: 'Shout-outs', value: '5 live', helper: '' },
   ],
 };

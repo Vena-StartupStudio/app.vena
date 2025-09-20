@@ -35,7 +35,7 @@ export function MembersLounge({ persona }: MembersLoungeProps) {
             <h2 id="members-lounge" className="text-2xl font-extrabold tracking-tight text-ink">Members' Lounge</h2>
             <p className="mt-1 text-sm text-slate-600 max-w-xl">
               {isCoach
-                ? 'Create an upbeat space for short wins, quick playlists, and micro-updates your members will love.'
+                ? 'Create an upbeat space for unique content, playlists, and updates your members will love.'
                 : "A friendly feed curated for you — highlights, nudges, and saved moments from your coach and peers."}
             </p>
 
@@ -56,7 +56,7 @@ export function MembersLounge({ persona }: MembersLoungeProps) {
             <input
               id="lounge-search"
               type="search"
-              placeholder="Search posts, topics, authors"
+              placeholder="Search posts, topics..."
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
               aria-label="Search lounge posts"
             />

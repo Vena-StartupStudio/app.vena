@@ -6,7 +6,6 @@ import { MembersLounge } from './sections/MembersLounge';
 import { WeeklyPicks } from './sections/WeeklyPicks';
 import { ChallengesBoard } from './sections/Challenges';
 import { MilestonesPlanner } from './sections/Milestones';
-import { AMACorner } from './sections/AMA';
 import { TaskInbox } from './sections/TaskInbox';
 
 const TABS = [
@@ -52,16 +51,6 @@ const TABS = [
     ),
   },
   {
-    id: 'ama',
-    label: 'Monthly AMA',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="m7 8 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 13v5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
     id: 'tasks',
     label: 'Task Inbox',
     icon: (
@@ -78,7 +67,6 @@ const TAB_COMPONENTS = {
   weekly: WeeklyPicks,
   challenges: ChallengesBoard,
   milestones: MilestonesPlanner,
-  ama: AMACorner,
   tasks: TaskInbox,
 } as const;
 
