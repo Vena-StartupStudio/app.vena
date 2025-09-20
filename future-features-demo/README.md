@@ -13,23 +13,23 @@ Open the printed localhost URL (defaults to `http://127.0.0.1:5173`). Everything
 ## Stack & structure
 
 - **Vite + React + TypeScript** for fast iteration.
-- **Tailwind CSS** with a custom theme mirroring the marketing palette (gradients, glass panels, generous spacing).
-- **Framer Motion** for scroll reveals that respect `prefers-reduced-motion`.
-- Hard-coded mock data lives in `src/data/content.ts` so the demo stays deterministic and offline.
-- UI shell & sections sit in `src/components` and `src/sections`, organised by feature area (Members’ Lounge, Weekly Picks, Challenges, Milestones, AMA, Spotlight Stories, Recognition, Task Inbox, Template Gallery).
+- **Tailwind CSS** with a light marketing palette (white canvas, purple/indigo accents) so the demo mirrors vena.software.
+- **Framer Motion** for gentle tab reveals that respect `prefers-reduced-motion`.
+- Mock data lives in `src/data/content.ts`, keeping the experience deterministic and offline.
+- UI shell & feature views sit in `src/components` and `src/sections`; each feature is rendered on its own tab for easy demo pacing.
 
 Fonts rely on system-safe stacks (`Inter`, `Segoe UI`, `system-ui`); no webfont downloads occur.
 
 ## What you can demo
 
 - Toggle between **Coach workspace** and **Client experience** using the persona switch in the header.
-- Scroll through live-styled mock screens: lounge feed, weekly picks, inclusive challenges, milestone planner, AMA queue, spotlight stories, recognition badges, coach task inbox, and template gallery.
-- Hover micro-interactions and glass surface treatments echo the existing marketing visuals while presenting an in-product feel.
+- Step through feature tabs (Members' Lounge, Weekly Picks, Challenges, Milestones, AMA, Spotlight Stories, Recognition, Task Inbox, Template Gallery) to show focused screens without scrolling.
+- Share the calm, expo-ready layout: bright cards, bold section headings, and concise copy tuned for large displays.
 
 ## Accessibility & motion
 
-- Scroll reveals short-circuit when `prefers-reduced-motion` is set.
-- Interactive elements include aria labels, focusable buttons, and clear contrast against the dark surface theme.
+- Reveal animations short-circuit when `prefers-reduced-motion` is set.
+- Components use high-contrast text on a light background, keyboard-focusable controls, and aria labels where needed.
 
 ## No external dependencies
 

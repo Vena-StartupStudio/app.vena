@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react';
+﻿import { useState } from 'react';
 import { Shell } from './components/Shell';
 import type { Persona } from './lib/theme';
 import { personaHighlights } from './data/content';
@@ -12,7 +12,7 @@ import { RecognitionStudio } from './sections/Recognition';
 import { TaskInbox } from './sections/TaskInbox';
 import { TemplateGallery } from './sections/TemplateGallery';
 
-const NAV_SECTIONS = [
+const TABS = [
   {
     id: 'lounge',
     label: "Members' Lounge",
@@ -46,7 +46,7 @@ const NAV_SECTIONS = [
   },
   {
     id: 'milestones',
-    label: 'Milestone Moments',
+    label: 'Milestones',
     icon: (
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M6 12 12 6l6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -108,80 +108,34 @@ const NAV_SECTIONS = [
   },
 ] as const;
 
-const SECTION_IDS = NAV_SECTIONS.map((section) => section.id);
+const TAB_COMPONENTS = {
+  lounge: MembersLounge,
+  weekly: WeeklyPicks,
+  challenges: ChallengesBoard,
+  milestones: MilestonesPlanner,
+  ama: AMACorner,
+  spotlight: SpotlightStories,
+  badges: RecognitionStudio,
+  tasks: TaskInbox,
+  templates: TemplateGallery,
+} as const;
 
 export default function App() {
   const [persona, setPersona] = useState<Persona>('coach');
-  const [activeSection, setActiveSection] = useState<string>(NAV_SECTIONS[0].id);
+  const [activeTab, setActiveTab] = useState<string>(TABS[0].id);
 
-  const handleScrollToSection = useCallback((id: string) => {
-    const target = document.getElementById(id);
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleSections = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        const first = visibleSections[0];
-        if (first) {
-          const id = first.target.getAttribute('data-shell-section');
-          if (id && SECTION_IDS.includes(id) && id !== activeSection) {
-            setActiveSection(id);
-          }
-        }
-      },
-      { threshold: [0.4, 0.6, 0.75], rootMargin: '-10% 0px -20% 0px' }
-    );
-
-    const sections = document.querySelectorAll('[data-shell-section]');
-    sections.forEach((section) => observer.observe(section));
-
-    return () => {
-      sections.forEach((section) => observer.unobserve(section));
-      observer.disconnect();
-    };
-  }, [activeSection]);
+  const ActiveView = TAB_COMPONENTS[activeTab as keyof typeof TAB_COMPONENTS] ?? MembersLounge;
 
   return (
     <Shell
       persona={persona}
       onPersonaChange={setPersona}
-      sections={NAV_SECTIONS}
-      activeSection={activeSection}
-      onScrollToSection={handleScrollToSection}
+      tabs={TABS}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
       highlights={personaHighlights[persona]}
     >
-      <section id="lounge" data-shell-section="lounge">
-        <MembersLounge persona={persona} />
-      </section>
-      <section id="weekly" data-shell-section="weekly">
-        <WeeklyPicks persona={persona} />
-      </section>
-      <section id="challenges" data-shell-section="challenges">
-        <ChallengesBoard persona={persona} />
-      </section>
-      <section id="milestones" data-shell-section="milestones">
-        <MilestonesPlanner persona={persona} />
-      </section>
-      <section id="ama" data-shell-section="ama">
-        <AMACorner persona={persona} />
-      </section>
-      <section id="spotlight" data-shell-section="spotlight">
-        <SpotlightStories persona={persona} />
-      </section>
-      <section id="badges" data-shell-section="badges">
-        <RecognitionStudio persona={persona} />
-      </section>
-      <section id="tasks" data-shell-section="tasks">
-        <TaskInbox persona={persona} />
-      </section>
-      <section id="templates" data-shell-section="templates">
-        <TemplateGallery persona={persona} />
-      </section>
+      <ActiveView persona={persona} />
     </Shell>
   );
 }

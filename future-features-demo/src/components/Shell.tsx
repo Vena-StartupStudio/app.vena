@@ -1,14 +1,15 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import type { Persona } from '../lib/theme';
 import { personaTokens } from '../lib/theme';
 import { cn } from '../lib/utils';
 import { MetricPill } from './MetricPill';
 import { PersonaToggle } from './PersonaToggle';
 
-interface SectionLink {
+interface TabLink {
   id: string;
   label: string;
   icon: ReactNode;
+  helper?: string;
 }
 
 interface Highlight {
@@ -21,9 +22,9 @@ interface Highlight {
 interface ShellProps {
   persona: Persona;
   onPersonaChange: (value: Persona) => void;
-  sections: SectionLink[];
-  activeSection: string;
-  onScrollToSection: (id: string) => void;
+  tabs: TabLink[];
+  activeTab: string;
+  onTabChange: (id: string) => void;
   highlights: Highlight[];
   children: ReactNode;
 }
@@ -31,78 +32,73 @@ interface ShellProps {
 export function Shell({
   persona,
   onPersonaChange,
-  sections,
-  activeSection,
-  onScrollToSection,
+  tabs,
+  activeTab,
+  onTabChange,
   highlights,
   children,
 }: ShellProps) {
   const personaToken = personaTokens[persona];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-night/85 backdrop-blur-2xl">
-        <div className="mx-auto flex w-full max-w-shell items-center justify-between gap-6 px-6 py-5 md:px-10">
+    <div className="flex min-h-screen flex-col bg-night">
+      <header className="border-b border-slate-100/70 bg-white/95 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-shell items-center justify-between gap-6 px-6 py-6 md:px-10">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-slate-400/40 via-white/10 to-aqua-400/40 shadow-soft">
-              <img src="/assets/glow.svg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
-              <span className="relative z-10 text-xs font-semibold uppercase tracking-[0.3em] text-white/80">FF</span>
+            <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand-100 via-white to-accent-100 shadow-soft">
+              <img src="/assets/glow.svg" alt="" className="absolute inset-0 h-full w-full opacity-70" />
+              <span className="relative z-10 text-xs font-semibold uppercase tracking-[0.3em] text-brand-600">FF</span>
             </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/40">Future Features</p>
-              <p className="text-base font-medium text-white">Prototype Workspace</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Future Features</p>
+              <p className="text-lg font-semibold text-ink">Experience Prototype</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <PersonaToggle value={persona} onChange={onPersonaChange} />
-          </div>
+          <PersonaToggle value={persona} onChange={onPersonaChange} />
         </div>
-        <div className="border-t border-white/5 bg-white/5 py-3">
-          <div className="mx-auto flex w-full max-w-shell flex-col gap-3 px-6 md:flex-row md:items-center md:justify-between md:px-10">
-            <p className="max-w-3xl text-xs text-white/60 md:text-sm">{personaToken.blurb}</p>
-            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-              Local-only mock � No live data
+        <div className="border-t border-slate-100/70 bg-white/90">
+          <div className="mx-auto flex w-full max-w-shell items-center justify-between gap-4 px-6 py-4 md:px-10">
+            <p className="text-sm text-slate-500">{personaToken.blurb}</p>
+            <span className="hidden text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 md:inline-flex">
+              Local-only mock · No live data
             </span>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-shell gap-6 px-6 pb-24 pt-10 md:px-10">
-        <aside className="sticky top-36 hidden w-60 flex-shrink-0 flex-col gap-6 lg:flex">
-          <nav className="rounded-3xl border border-white/5 bg-white/5 p-3 backdrop-blur-xl">
-            <p className="px-4 pb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/35">Map</p>
-            <ul className="space-y-1">
-              {sections.map((section) => {
-                const active = section.id === activeSection;
-                return (
-                  <li key={section.id}>
-                    <button
-                      type="button"
-                      onClick={() => onScrollToSection(section.id)}
-                      className={cn(
-                        'group flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-left text-sm transition ease-soft',
-                        active ? 'bg-gradient-to-r from-lavender-500/40 to-aqua-500/40 text-white shadow-soft' : 'text-white/60 hover:bg-white/8 hover:text-white'
-                      )}
-                    >
-                      <span className="text-white/50 transition group-hover:text-white">{section.icon}</span>
-                      <span className="font-medium">{section.label}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+      <main className="mx-auto w-full max-w-shell flex-1 px-6 pb-20 pt-12 md:px-10">
+        <div className="overflow-x-auto">
+          <nav className="inline-flex items-center gap-2 rounded-full border border-slate-100 bg-white p-1 shadow-soft">
+            {tabs.map((tab) => {
+              const active = tab.id === activeTab;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onTabChange(tab.id)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ease-soft',
+                    active
+                      ? 'bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-soft'
+                      : 'text-slate-500 hover:text-ink'
+                  )}
+                >
+                  <span className="text-lg">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </nav>
-        </aside>
-
-        <div className="flex-1 space-y-14">
-          <div className="grid gap-4 md:grid-cols-3">
-            {highlights.map((highlight) => (
-              <MetricPill key={highlight.id} label={highlight.label} value={highlight.value} helper={highlight.helper} />
-            ))}
-          </div>
-          <main className="space-y-16">{children}</main>
         </div>
-      </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {highlights.map((highlight) => (
+            <MetricPill key={highlight.id} label={highlight.label} value={highlight.value} helper={highlight.helper} />
+          ))}
+        </div>
+
+        <section className="mt-12 space-y-10">{children}</section>
+      </main>
     </div>
   );
 }

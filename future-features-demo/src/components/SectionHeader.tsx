@@ -13,9 +13,9 @@ interface SectionHeaderProps {
 }
 
 const personaAccent: Record<Exclude<SectionHeaderProps['persona'], undefined>, string> = {
-  coach: 'bg-gradient-to-r from-lavender-500/40 to-aqua-500/40 text-white/90',
-  client: 'bg-gradient-to-r from-aqua-400/30 to-lavender-300/30 text-white/85',
-  all: 'bg-white/5 text-white/80',
+  coach: 'bg-gradient-to-r from-brand-500 to-brand-400 text-white',
+  client: 'bg-gradient-to-r from-brand-300 to-brand-500 text-white',
+  all: 'bg-accent-100 text-ink',
 };
 
 export function SectionHeader({ title, description, persona = 'all', eyebrow, actions, className }: SectionHeaderProps) {
@@ -26,16 +26,16 @@ export function SectionHeader({ title, description, persona = 'all', eyebrow, ac
       <div className="max-w-xl space-y-3">
         <div className="flex items-center gap-3">
           {eyebrow ? (
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">{eyebrow}</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-500">{eyebrow}</span>
           ) : null}
           <span className={cn('inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]', personaAccent[persona])}>
-            {personaToken?.label ?? 'Shared Space'}
+            {personaToken?.label ?? 'Shared space'}
           </span>
         </div>
-        <h2 className="text-2xl font-semibold text-white md:text-3xl">
+        <h2 className="text-3xl font-semibold text-ink md:text-4xl">
           {title}
         </h2>
-        <p className="text-sm text-white/70 md:text-base">{description}</p>
+        <p className="text-base text-slate-600">{description}</p>
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-3">{actions}</div> : null}
     </div>

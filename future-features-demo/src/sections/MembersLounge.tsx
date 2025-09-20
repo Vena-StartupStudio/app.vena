@@ -1,185 +1,142 @@
-﻿import { Fragment } from 'react';
-import { loungePosts } from '../data/content';
+﻿import { loungePosts } from '../data/content';
 import type { Persona } from '../lib/theme';
 import { SectionHeader } from '../components/SectionHeader';
-import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
-import { Reveal } from '../components/Reveal';
-import { cn } from '../lib/utils';
+import { useMemo } from 'react';
 
 interface MembersLoungeProps {
   persona: Persona;
 }
 
+function IconHeart({ filled = false }: { filled?: boolean }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} aria-hidden>
+      <path d="M20.8 4.6a5 5 0 00-7.1 0L12 6.3l-1.7-1.7a5 5 0 00-7.1 7.1L12 21.9l8.8-10.2a5 5 0 000-7.1z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function MembersLounge({ persona }: MembersLoungeProps) {
   const isCoach = persona === 'coach';
 
-  return (
-    <div className="space-y-6">
-      <SectionHeader
-        eyebrow="Community vibe"
-        persona={isCoach ? 'coach' : 'client'}
-        title="Members’ Lounge feed"
-        description={
-          isCoach
-            ? 'Skim the broadcast hub, queue the next voice note, and keep an eye on who is celebrating wins.'
-            : 'Fresh coach notes, tips, and playlists land here. React, leave a comment, or simply take it in.'
-        }
-      />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-4">
-          {loungePosts.map((post, index) => (
-            <Reveal key={post.id} delay={index * 0.1}>
-              <Card className="bg-gradient-to-br from-slate-900/70 via-slate-900/30 to-slate-900/70">
-                <div className="flex flex-col gap-4 p-6">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{post.title}</p>
-                      <p className="text-xs text-white/60">
-                        {post.author} • {post.role}
-                      </p>
-                    </div>
-                    <Badge tone="soft">{post.timestamp}</Badge>
-                  </div>
-                  <p className="text-sm text-white/70">{post.body}</p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
-                    {post.tags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-white/10 px-3 py-1">
-                        #{tag}
-                      </span>
-                    ))}
-                    {post.attachments.map((attachment, idx) => (
-                      <span key={`${post.id}-attachment-${idx}`} className="rounded-full border border-white/10 px-3 py-1">
-                        {attachment.label}
-                      </span>
-                    ))}
-                    <span className="ml-auto inline-flex items-center gap-3">
-                      <span>🎉 {post.reactions.celebrate}</span>
-                      <span>💬 {post.reactions.comments}</span>
-                      <span>👀 {post.seenBy}</span>
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </Reveal>
-          ))}
-        </div>
-        <div className="space-y-4">
-          {isCoach ? <CoachInsights /> : <ClientFilters />}
-        </div>
-      </div>
-    </div>
-  );
-}
+  // colorful stats derived from posts
+  const stats = useMemo(() => {
+    const total = loungePosts.length;
+    const topics = new Set<string>();
+    loungePosts.forEach((p) => p.tags.forEach((t: string) => topics.add(t)));
+    return { total, topics: topics.size };
+  }, []);
 
-function CoachInsights() {
   return (
-    <Fragment>
-      <Reveal>
-        <Card variant="accent" className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">Broadcast controls</p>
-          <div className="mt-4 space-y-4 text-sm text-white/80">
-            <div className="flex items-center justify-between">
-              <span>Auto-nudge new joiners</span>
-              <Toggle ariaLabel="Toggle auto nudge" active />
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Pin hydration reminder</span>
-              <Toggle ariaLabel="Pin hydration reminder" />
+    <section aria-labelledby="members-lounge" className="space-y-6">
+      <div className="rounded-2xl overflow-hidden bg-gradient-to-r from-rose-50 via-indigo-50 to-amber-50 p-6 shadow-lg">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 id="members-lounge" className="text-2xl font-extrabold tracking-tight text-ink">Members' Lounge</h2>
+            <p className="mt-1 text-sm text-slate-600 max-w-xl">
+              {isCoach
+                ? 'Create an upbeat space for short wins, quick playlists, and micro-updates your members will love.'
+                : "A friendly feed curated for you — highlights, nudges, and saved moments from your coach and peers."}
+            </p>
+
+            <div className="mt-4 flex gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-ink shadow-sm">
+                <strong className="text-brand-600">{stats.total}</strong>
+                posts
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-ink shadow-sm">
+                <strong className="text-brand-600">{stats.topics}</strong>
+                topics
+              </span>
             </div>
           </div>
-        </Card>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <Card className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Next in queue</p>
-          <div className="mt-4 space-y-4 text-sm text-white/80">
-            <div>
-              <p className="font-medium text-white">Friday reset voice note</p>
-              <p className="text-xs text-white/55">Draft saved • drops in 2 days</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/65">
-              <p>Outline</p>
-              <ul className="mt-2 space-y-1">
-                <li>• Gratitude micro-journal</li>
-                <li>• Hydration stretch combo</li>
-                <li>• Weekend reset reflection</li>
-              </ul>
-            </div>
-            <button className="inline-flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/10">
-              Export preview card <span aria-hidden="true">↗</span>
+
+          <div className="flex items-center gap-3">
+            <label htmlFor="lounge-search" className="sr-only">Search lounge</label>
+            <input
+              id="lounge-search"
+              type="search"
+              placeholder="Search posts, topics, authors"
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+              aria-label="Search lounge posts"
+            />
+
+            <button className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-300" aria-label="Create post">
+              Create
             </button>
           </div>
-        </Card>
-      </Reveal>
-    </Fragment>
-  );
-}
+        </div>
+      </div>
 
-function ClientFilters() {
-  return (
-    <Fragment>
-      <Reveal>
-        <Card variant="accent" className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">Quick filters</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {['All posts', 'Movement', 'Recipes', 'Recovery', 'Playlists'].map((filter) => (
-              <button
-                key={filter}
-                className="rounded-full border border-white/10 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/20"
-                type="button"
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-        </Card>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <Card className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/50">Coach spotlight</p>
-          <div className="mt-4 space-y-3 text-sm text-white/70">
-            <p>“Tag me when you wrap today’s walk + stretch. I’m handing out Recovery Champ badges all week.”</p>
-            <p className="text-xs text-white/50">Coach Avery • Broadcasted to all clients</p>
-          </div>
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/65">
-            <p className="font-semibold text-white">Completion badges on deck</p>
-            <ul className="mt-2 space-y-1">
-              <li>• 7-day walk + stretch</li>
-              <li>• Hydrate & pause</li>
-              <li>• Recovery lounge wind-down</li>
-            </ul>
-          </div>
-        </Card>
-      </Reveal>
-    </Fragment>
-  );
-}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {loungePosts.map((post) => (
+          <article
+            key={post.id}
+            aria-labelledby={`post-${post.id}-title`}
+            className="group rounded-2xl overflow-hidden bg-white shadow-lg transition-transform hover:-translate-y-1"
+          >
+            <div className="relative h-40 w-full overflow-hidden bg-slate-100">
+              <img
+                src={`https://picsum.photos/seed/${encodeURIComponent(String(post.id))}/800/600`}
+                alt={post.title}
+                className="h-full w-full object-cover object-center"
+                loading="lazy"
+              />
+              <div className="absolute left-4 top-4 flex items-center gap-3 rounded-full bg-white/70 px-2 py-1 backdrop-blur">
+                <img
+                  src={`https://i.pravatar.cc/40?u=${encodeURIComponent(post.author)}`}
+                  alt={`${post.author} avatar`}
+                  className="h-8 w-8 rounded-full border border-white"
+                />
+                <div className="text-xs">
+                  <p className="font-semibold text-ink">{post.author}</p>
+                  <p className="text-[11px] text-slate-600">{post.role} · <span className="font-mono">{post.timestamp}</span></p>
+                </div>
+              </div>
+            </div>
 
-interface ToggleProps {
-  active?: boolean;
-  ariaLabel: string;
-}
+            <div className="p-4">
+              <h3 id={`post-${post.id}-title`} className="text-sm font-bold text-ink line-clamp-2">
+                {post.title}
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 line-clamp-3">{post.body}</p>
 
-function Toggle({ active = false, ariaLabel }: ToggleProps) {
-  return (
-    <span
-      role="switch"
-      aria-label={ariaLabel}
-      aria-checked={active}
-      className={cn(
-        'inline-flex h-6 w-11 items-center rounded-full border border-white/10 transition-colors duration-300 ease-soft',
-        active ? 'bg-gradient-to-r from-lavender-500/60 to-aqua-500/60' : 'bg-white/10'
-      )}
-    >
-      <span
-        className={cn(
-          'ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] font-semibold text-night transition-transform duration-300 ease-soft transform',
-          active ? 'translate-x-5' : 'translate-x-0'
-        )}
-      >
-        {active ? 'On' : ''}
-      </span>
-    </span>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {post.tags.map((tag: string) => (
+                  <span key={tag} className="rounded-full bg-gradient-to-r from-indigo-50 to-rose-50 px-2 py-1 text-[12px] font-semibold text-brand-600">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button aria-label={`Like ${post.title}`} className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-300">
+                    <IconHeart />
+                    <span className="text-xs">{(post as any).likes ?? 0}</span>
+                  </button>
+                  <button aria-label={`Save ${post.title}`} className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-300">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path d="M6 2h12v20l-6-4-6 4V2z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="text-xs">Save</span>
+                  </button>
+                </div>
+
+                <a href="#" className="text-xs font-semibold text-brand-600 hover:underline" aria-label={`Read more about ${post.title}`}>
+                  Read more →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-2 flex items-center justify-center">
+        <button className="rounded-full bg-gradient-to-r from-brand-500 to-brand-400 px-5 py-3 text-sm font-semibold text-white shadow-lg hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-300">
+          View all posts
+        </button>
+      </div>
+    </section>
   );
 }

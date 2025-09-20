@@ -2,7 +2,6 @@
 import type { Persona } from '../lib/theme';
 import { SectionHeader } from '../components/SectionHeader';
 import { Card } from '../components/Card';
-import { Reveal } from '../components/Reveal';
 import { Badge } from '../components/Badge';
 
 interface TaskInboxProps {
@@ -15,52 +14,31 @@ export function TaskInbox({ persona }: TaskInboxProps) {
   return (
     <div className="space-y-6">
       <SectionHeader
-        eyebrow="Pro tools"
+        eyebrow="Coach tools"
         persona="coach"
         title="Task inbox"
-        description="Morning brief automatically compiles the handful of actions that keep the community humming."
+        description="A short list of nudges so the coach can stay responsive without juggling tabs."
       />
-      <Reveal>
-        <Card className="p-6">
-          {isCoach ? <CoachTaskList /> : <ClientPlaceholder />}
-        </Card>
-      </Reveal>
-    </div>
-  );
-}
-
-function CoachTaskList() {
-  return (
-    <div className="space-y-4">
-      {coachTasks.map((task) => (
-        <div key={task.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-white">{task.label}</p>
-              <p className="text-xs text-white/50">{task.context}</p>
-            </div>
-            <Badge tone={task.priority === 'today' ? 'highlight' : 'soft'}>
-              {task.priority}
-            </Badge>
+      <Card className="p-6">
+        {isCoach ? (
+          <div className="space-y-3">
+            {coachTasks.map((task) => (
+              <div key={task.id} className="rounded-2xl border border-slate-100 bg-white px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-ink">{task.label}</p>
+                  <Badge tone={task.priority === 'today' ? 'highlight' : 'default'}>{task.priority}</Badge>
+                </div>
+                <p className="text-xs text-slate-500">{task.context}</p>
+                <p className="mt-1 text-xs text-slate-500">Estimated {task.effort}</p>
+              </div>
+            ))}
           </div>
-          <p className="mt-3 text-xs text-white/60">Estimated effort • {task.effort}</p>
-        </div>
-      ))}
-      <button className="inline-flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/15">
-        Sync to calendar ↗
-      </button>
-    </div>
-  );
-}
-
-function ClientPlaceholder() {
-  return (
-    <div className="space-y-4 text-sm text-white/70">
-      <p>This space is part of the coach workspace. Clients only see gentle nudges and badges—not the task queue.</p>
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-white/60">
-        <p className="font-semibold text-white">Why it matters</p>
-        <p className="mt-1">Smart suggestions keep your coach responsive without needing extra tools.</p>
-      </div>
+        ) : (
+          <p className="text-sm text-slate-600">
+            Coaches see a focused task list here. Clients simply enjoy the shout-outs it powers.
+          </p>
+        )}
+      </Card>
     </div>
   );
 }

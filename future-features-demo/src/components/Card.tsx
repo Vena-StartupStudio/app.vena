@@ -10,9 +10,9 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const baseByVariant: Record<CardVariant, string> = {
-  default: 'glass-panel',
-  accent: 'glass-panel bg-gradient-to-br from-white/10 via-white/5 to-white/0 shadow-glow',
-  subtle: 'rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-soft',
+  default: 'rounded-3xl border border-slate-100 bg-white shadow-soft',
+  accent: 'rounded-3xl border border-transparent bg-gradient-to-br from-brand-50 via-white to-accent-100 shadow-glow',
+  subtle: 'rounded-3xl border border-slate-100 bg-white shadow-sm',
 };
 
 export function Card({ children, className, variant = 'default', blur = true, ...props }: CardProps) {
@@ -21,12 +21,12 @@ export function Card({ children, className, variant = 'default', blur = true, ..
       className={cn(
         'relative overflow-hidden transition-transform duration-300 ease-soft hover:-translate-y-0.5',
         baseByVariant[variant],
-        blur ? 'backdrop-blur-xl' : null,
+        blur ? 'backdrop-blur-lg' : null,
         className
       )}
       {...props}
     >
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/0 via-white/5 to-white/0 opacity-40" />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/0 via-white/40 to-white/0" />
       <div className="relative z-10">{children}</div>
     </div>
   );

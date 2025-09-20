@@ -1,67 +1,37 @@
-﻿import type { Persona } from '../lib/theme';
+import type { Persona } from '../lib/theme';
 
 export const loungePosts = [
   {
     id: 'lounge-1',
     author: 'Coach Avery',
     role: 'Head Coach',
-    timestamp: '2m ago',
-    title: 'Morning reset playlist is live',
-    body: 'Try the five-track breathing ladder with gentle ankle rolls. Pair it with a tall glass of water and a two-minute gratitude jot.',
-    tags: ['Playlist', 'Reset'],
-    attachments: [{ type: 'audio', label: '12 tracks' }],
-    reactions: { celebrate: 18, comments: 6 },
-    seenBy: 42,
+    timestamp: 'Just now',
+    title: 'Morning reset playlist',
+    body: 'Five gentle tracks to ease into the day. Pair with three slow breaths.',
+    tags: ['Playlist'],
   },
   {
     id: 'lounge-2',
     author: 'Coach Sam',
-    role: 'Nutrition Specialist',
-    timestamp: '38m ago',
-    title: 'Gentle fuel for travel days',
-    body: 'Simple wrap: chickpeas, spinach, citrus tahini. Prep two in advance and thank yourself on the road.',
+    role: 'Nutrition Coach',
+    timestamp: 'Today',
+    title: 'Travel-friendly fuel',
+    body: 'Pack the chickpea wrap and a citrus water bottle. Simple and steady.',
     tags: ['Recipe'],
-    attachments: [{ type: 'checklist', label: 'Prep steps' }],
-    reactions: { celebrate: 9, comments: 2 },
-    seenBy: 31,
-  },
-  {
-    id: 'lounge-3',
-    author: 'Coach Mika',
-    role: 'Movement Coach',
-    timestamp: '1h ago',
-    title: 'Recovery corner reminder',
-    body: 'Your calves called—they love that 5-minute fascia roll. Tag us in the lounge once you’re done for a gentle high-five.',
-    tags: ['Recovery'],
-    attachments: [],
-    reactions: { celebrate: 27, comments: 4 },
-    seenBy: 54,
   },
 ];
 
 export const weeklyPicks = {
-  theme: 'Ease back in week',
-  dropsAt: 'Mondays • 7:00 AM',
+  theme: 'Ease back in',
+  dropsAt: 'Mondays 7:00 AM',
   entries: [
-    {
-      type: 'Exercise',
-      title: 'Sunrise Mobility Ladder',
-      detail: '12 minutes • low impact',
-    },
-    {
-      type: 'Recipe',
-      title: 'Blueberry Glow Overnight Oats',
-      detail: 'Prep Sunday • Grab-and-go breakfast',
-    },
-    {
-      type: 'Mindset',
-      title: 'Micro-wins keep you moving',
-      detail: 'Take sixty seconds to note where you showed up today.',
-    },
+    { type: 'Move', title: 'Sunrise stretch', detail: '10 minutes, light pace.' },
+    { type: 'Fuel', title: 'Blueberry oats', detail: 'Batch once, enjoy all week.' },
+    { type: 'Mindset', title: 'One win note', detail: 'Jot a win before bed.' },
   ],
   voice: {
     duration: '02:16',
-    transcriptPreview: 'Three anchors for the week: lighter loads, longer exhale, and gratitude on Fridays.',
+    transcriptPreview: "Coach shares the week's focus: light movement, easy meals, kind self-talk.",
     waveform: [5, 12, 7, 14, 9, 11, 6, 10, 15, 8, 12, 7],
   },
 };
@@ -69,27 +39,18 @@ export const weeklyPicks = {
 export const challenges = [
   {
     id: 'challenge-1',
-    title: '7-day walk + stretch blend',
-    description: '15-minute walk plus gentle hip opener. Badge lands when you log 5 of 7 days—no leaderboard, only cheers.',
+    title: 'Walk and stretch',
+    description: '15-minute walk plus a hip opener. Earn a calm badge after five days.',
     status: 'in-progress',
     completion: 64,
-    coachNote: 'Send a Monday nudge to the new cohort.',
   },
   {
     id: 'challenge-2',
-    title: 'Hydrate & pause challenge',
-    description: 'Sip 2L daily and take one mindful pause. Coach shout-outs spark midweek momentum.',
+    title: 'Hydrate and pause',
+    description: 'Drink 2L and log one mindful pause. Coach shout-outs midweek.',
     status: 'upcoming',
-    kickoff: 'Starts next Tuesday',
+    kickoff: 'Starts Tuesday',
     completion: 0,
-  },
-  {
-    id: 'challenge-3',
-    title: 'Recovery lounge wind-down',
-    description: 'Light yin stretch before bed, optional foam roll. Badge auto-grants after 3 check-ins.',
-    status: 'completed',
-    completion: 100,
-    coachNote: 'Send the recap postcard on Friday.',
   },
 ];
 
@@ -97,47 +58,38 @@ export const milestones = [
   {
     id: 'milestone-1',
     member: 'Jamie L.',
-    milestone: '6 months with the club',
-    scheduledFor: 'Friday • 9:00 AM',
-    channel: 'Members’ Lounge',
+    milestone: '6 months strong',
+    scheduledFor: 'Friday 9:00 AM',
+    channel: "Members' Lounge",
     optIn: true,
-    note: 'Plan a group cheer + offer a recovery badge upgrade.',
+    note: 'Plan a quick cheer card and optional recovery perk.',
   },
   {
     id: 'milestone-2',
     member: 'Priya D.',
     milestone: '10th session',
-    scheduledFor: 'Wednesday • 5:30 PM',
+    scheduledFor: 'Wednesday 5:30 PM',
     channel: 'Direct shout-out',
     optIn: true,
-    note: 'Add the “Consistency 4 weeks” badge with a handwritten message.',
-  },
-  {
-    id: 'milestone-3',
-    member: 'Jordan P.',
-    milestone: 'First session anniversary',
-    scheduledFor: 'Next Monday',
-    channel: 'Spotlight story',
-    optIn: false,
-    note: 'Awaiting consent toggle—remind them in tomorrow’s check-in.',
+    note: 'Add the Consistency badge with a short thank-you.',
   },
 ];
 
 export const amaQueue = [
   {
     id: 'ama-1',
-    question: 'How do I stay consistent when I travel every other week?',
+    question: 'How do I stay on track when I travel?',
     from: 'Taylor',
     status: 'Answered',
-    answerSummary: 'Pack two staple moves and a five-minute reflection. Travelling is success when you keep it small.',
+    answerSummary: 'Pack two staple moves and celebrate small check-ins.',
     audioLength: '05:02',
   },
   {
     id: 'ama-2',
-    question: 'What are your go-to recovery cues after leg day?',
+    question: 'Favorite recovery cue after leg day?',
     from: 'Riley',
     status: 'Queued',
-    answerSummary: 'Prep foam roll, hydration bump, optional magnesium.',
+    answerSummary: 'Foam roll, extra water, optional magnesium.',
   },
 ];
 
@@ -146,94 +98,78 @@ export const spotlightStories = [
     id: 'story-1',
     member: 'Priya',
     focus: 'Mindful mornings',
-    quote: 'Three months of gentle wake-ups with the lounge playlist means I start my workday unhurried.',
-    coachNote: 'Consent on file • Reviewed 2 days ago',
-    tone: 'warm',
+    quote: 'I start the day unhurried with the lounge playlist and light stretch.',
+    coachNote: 'Consent on file � Reviewed this week',
   },
   {
     id: 'story-2',
     member: 'Luis',
-    focus: 'Walk + stretch streak',
-    quote: 'My joints stopped complaining once I treated the stretch videos like meetings with myself.',
-    coachNote: 'Coach Avery scheduled post-run shout-out',
-    tone: 'bright',
+    focus: 'Walk streak',
+    quote: 'Treating the walk like a calendar block keeps me steady.',
+    coachNote: 'Coach shout-out goes live Friday',
   },
 ];
 
 export const badgeRoster = {
   coachComposer: {
     draftName: 'Recovery Champ',
-    draftMessage: 'You kept showing up for the roll + rest flow every single week. Body thanks you, team thanks you.',
-    autoRule: 'After 4 logged recoveries',
-    palette: 'from-lavender-500 to-aqua-400',
+    draftMessage: 'Thanks for showing up for weekly reset time. Keep that gentle groove.',
+    autoRule: 'Grant after 4 logged recoveries',
+    palette: 'from-brand-500 to-brand-300',
   },
   clientBadges: [
-    { id: 'badge-1', name: 'Consistency • 4 weeks', status: 'earned', grantedBy: 'Coach Avery' },
-    { id: 'badge-2', name: 'Early-bird', status: 'tracking', grantedBy: 'Auto rule' },
-    { id: 'badge-3', name: 'Recovery Champ', status: 'queued', grantedBy: 'Coach review' },
+    { id: 'badge-1', name: 'Consistency � 4 weeks', status: 'earned', grantedBy: 'Coach Avery' },
+    { id: 'badge-2', name: 'Early-bird', status: 'tracking', grantedBy: 'Automation' },
   ],
 };
 
 export const coachTasks = [
   {
     id: 'task-1',
-    label: 'Reply to 3 new check-ins',
+    label: 'Reply to new check-ins',
     effort: '12 min',
     priority: 'today',
-    context: 'Members shared weekend mobility wins.',
+    context: 'Clients shared weekend mobility wins.',
   },
   {
     id: 'task-2',
-    label: 'Approve spotlight story draft',
+    label: 'Approve spotlight draft',
     effort: '5 min',
     priority: 'today',
-    context: 'Luis’ walk + stretch spotlight needs final polish.',
-  },
-  {
-    id: 'task-3',
-    label: 'Record challenge kickoff voice note',
-    effort: '8 min',
-    priority: 'suggested',
-    context: 'Hydrate & pause challenge launches next Tuesday.',
+    context: "Luis' walk story needs final sign-off.",
   },
 ];
 
 export const templateKits = [
   {
     id: 'kit-1',
-    name: 'Challenge kickoff set',
-    summary: 'Announcement post, daily nudge templates, recap storyboard.',
+    name: 'Challenge kickoff',
+    summary: 'Announcement tile, daily nudges, wrap recap.',
     tags: ['Featured'],
   },
   {
     id: 'kit-2',
-    name: 'Monthly AMA kit',
-    summary: 'Submission form, teaser tile, audio outline, follow-up message.',
+    name: 'Monthly AMA',
+    summary: 'Question form, teaser, audio outline.',
     tags: ['Updated'],
   },
   {
     id: 'kit-3',
     name: 'Welcome bundle',
-    summary: 'First-week roadmap, printable postcard, lounge introduction script.',
-    tags: [],
-  },
-  {
-    id: 'kit-4',
-    name: 'Partner postcard set',
-    summary: 'Co-branded note + story spotlight prompts for collaborators.',
+    summary: 'First-week roadmap and lounge intro.',
     tags: [],
   },
 ];
 
 export const personaHighlights: Record<Persona, Array<{ id: string; label: string; value: string; helper: string }>> = {
   coach: [
-    { id: 'highlight-1', label: 'Check-ins waiting', value: '3', helper: 'All flagged for a warm reply.' },
-    { id: 'highlight-2', label: 'Challenges in motion', value: '2', helper: 'Next kickoff voice note recommended.' },
-    { id: 'highlight-3', label: 'Milestones queued', value: '4', helper: 'Two need consent confirmations.' },
+    { id: 'highlight-1', label: 'Check-ins', value: '3', helper: 'Ready for warm replies.' },
+    { id: 'highlight-2', label: 'Challenges live', value: '2', helper: 'Keep nudges gentle.' },
+    { id: 'highlight-3', label: 'Milestones', value: '2', helper: 'Celebrations queued.' },
   ],
   client: [
-    { id: 'highlight-1', label: 'This week’s focus', value: 'Ease back in', helper: 'Coach notes: soften your pace, extend your exhale.' },
-    { id: 'highlight-2', label: 'Badges tracking', value: '3', helper: 'Consistency, Early-bird, Recovery Champ.' },
-    { id: 'highlight-3', label: 'Community shout-outs', value: '5', helper: 'Catch the latest wins in the lounge feed.' },
+    { id: 'highlight-1', label: 'This week', value: 'Ease back in', helper: 'Soft movement, slow breath.' },
+    { id: 'highlight-2', label: 'Badges', value: '2 tracking', helper: 'Consistency and recovery.' },
+    { id: 'highlight-3', label: 'Shout-outs', value: '5 live', helper: 'Scroll the lounge feed.' },
   ],
 };
