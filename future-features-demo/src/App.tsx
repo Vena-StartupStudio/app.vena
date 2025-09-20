@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Shell } from './components/Shell';
 import type { Persona } from './lib/theme';
 import { personaHighlights } from './data/content';
@@ -85,8 +85,24 @@ const TAB_COMPONENTS = {
 export default function App() {
   const [persona, setPersona] = useState<Persona>('coach');
   const [activeTab, setActiveTab] = useState<string>(TABS[0].id);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [previousTab, setPreviousTab] = useState<string>(TABS[0].id);
+
+  const handleTabChange = (newTab: string) => {
+    if (newTab === activeTab) return;
+
+    setPreviousTab(activeTab);
+    setIsTransitioning(true);
+
+    // Add a small delay for smooth transition
+    setTimeout(() => {
+      setActiveTab(newTab);
+      setIsTransitioning(false);
+    }, 200);
+  };
 
   const ActiveView = TAB_COMPONENTS[activeTab as keyof typeof TAB_COMPONENTS] ?? MembersLounge;
+  const PreviousView = TAB_COMPONENTS[previousTab as keyof typeof TAB_COMPONENTS] ?? MembersLounge;
 
   return (
     <Shell
@@ -94,10 +110,36 @@ export default function App() {
       onPersonaChange={setPersona}
       tabs={[...TABS]}
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
       highlights={personaHighlights[persona]}
     >
-      <ActiveView persona={persona} />
+      <div className="relative min-h-[400px]">
+        {/* Previous tab content (fading out) */}
+        {isTransitioning && (
+          <div
+            key={`prev-${previousTab}`}
+            className="absolute inset-0 animate-fade-out opacity-0"
+            style={{ animationFillMode: 'forwards' }}
+          >
+            <PreviousView persona={persona} />
+          </div>
+        )}
+
+        {/* Active tab content (fading in) */}
+        <div
+          key={`active-${activeTab}`}
+          className={`transition-all duration-500 ease-out ${
+            isTransitioning ? 'opacity-0 translate-y-4 scale-98' : 'opacity-100 translate-y-0 scale-100'
+          }`}
+        >
+          <ActiveView persona={persona} />
+        </div>
+
+        {/* Subtle shimmer effect during transition */}
+        {isTransitioning && (
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+        )}
+      </div>
     </Shell>
   );
 }

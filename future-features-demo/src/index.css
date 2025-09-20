@@ -42,4 +42,30 @@
     mask-image: radial-gradient(circle at top, black 60%, transparent 100%);
     -webkit-mask-image: radial-gradient(circle at top, black 60%, transparent 100%);
   }
+
+  .animate-fade-out {
+    animation: fadeOut 0.15s ease-out forwards;
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

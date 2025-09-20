@@ -63,6 +63,7 @@ const config: Config = {
       animation: {
         'pulse-soft': 'pulse-soft 3s ease-in-out infinite',
         float: 'float 8s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.5s ease-out forwards',
       },
       keyframes: {
         'pulse-soft': {
@@ -72,6 +73,10 @@ const config: Config = {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
+        },
+        fadeIn: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
         },
       },
       transitionTimingFunction: {
