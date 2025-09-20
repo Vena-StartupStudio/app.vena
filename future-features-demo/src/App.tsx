@@ -7,10 +7,7 @@ import { WeeklyPicks } from './sections/WeeklyPicks';
 import { ChallengesBoard } from './sections/Challenges';
 import { MilestonesPlanner } from './sections/Milestones';
 import { AMACorner } from './sections/AMA';
-import { SpotlightStories } from './sections/SpotlightStories';
-import { RecognitionStudio } from './sections/Recognition';
 import { TaskInbox } from './sections/TaskInbox';
-import { TemplateGallery } from './sections/TemplateGallery';
 
 const TABS = [
   {
@@ -65,44 +62,12 @@ const TABS = [
     ),
   },
   {
-    id: 'spotlight',
-    label: 'Spotlight Stories',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 5.5v13" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9 16.5v2M15 16.5v2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M7 7.5 12 5l5 2.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: 'badges',
-    label: 'Recognition',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 3 7 5v6a5 5 0 0 0 10 0V5l-5-2Z" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="m8 16-1 5 5-2 5 2-1-5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
     id: 'tasks',
     label: 'Task Inbox',
     icon: (
       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M4 7h16" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M6 3h12a2 2 0 0 1 2 2v14l-4-3H8l-4 3V5a2 2 0 0 1 2-2Z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: 'templates',
-    label: 'Template Gallery',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M4 4h16v16H4z" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M4 9h16" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9 20V9" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -114,10 +79,7 @@ const TAB_COMPONENTS = {
   challenges: ChallengesBoard,
   milestones: MilestonesPlanner,
   ama: AMACorner,
-  spotlight: SpotlightStories,
-  badges: RecognitionStudio,
   tasks: TaskInbox,
-  templates: TemplateGallery,
 } as const;
 
 export default function App() {

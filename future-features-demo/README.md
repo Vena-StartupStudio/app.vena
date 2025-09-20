@@ -1,6 +1,6 @@
-ï»¿# Future Features Prototype
+# Future Features Prototype
 
-A local-only Vena experience prototype that simulates how upcoming community and coaching tools might look inside the product. Built as a self-contained Vite + React + Tailwind workspaceâ€”no servers, analytics, or external CDNs.
+A local-only Vena experience prototype that simulates how upcoming community and coaching tools might look inside the product. Built as a self-contained Vite + React + Tailwind workspace—no servers, analytics, or external CDNs.
 
 ## Getting started
 
@@ -23,7 +23,7 @@ Fonts rely on system-safe stacks (`Inter`, `Segoe UI`, `system-ui`); no webfont 
 ## What you can demo
 
 - Toggle between **Coach workspace** and **Client experience** using the persona switch in the header.
-- Step through feature tabs (Members' Lounge, Weekly Picks, Challenges, Milestones, AMA, Spotlight Stories, Recognition, Task Inbox, Template Gallery) to show focused screens without scrolling.
+- Step through feature tabs (Members' Lounge, Weekly Picks, Challenges, Milestones, AMA, Task Inbox) to show focused screens without scrolling.
 - Share the calm, expo-ready layout: bright cards, bold section headings, and concise copy tuned for large displays.
 
 ## Accessibility & motion
@@ -35,4 +35,4 @@ Fonts rely on system-safe stacks (`Inter`, `Segoe UI`, `system-ui`); no webfont 
 
 - All assets sit inside this folder (see `assets/glow.svg`).
 - There are **no** runtime API calls, telemetry, analytics, or third-party fonts.
-- Delete the directory to remove the demoâ€”no shared state with the main codebase.
+- Delete the directory to remove the demo—no shared state with the main codebase.

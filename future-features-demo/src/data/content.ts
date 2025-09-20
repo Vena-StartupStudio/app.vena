@@ -1,4 +1,4 @@
-import type { Persona } from '../lib/theme';
+﻿import type { Persona } from '../lib/theme';
 
 export const loungePosts = [
   {
@@ -93,36 +93,6 @@ export const amaQueue = [
   },
 ];
 
-export const spotlightStories = [
-  {
-    id: 'story-1',
-    member: 'Priya',
-    focus: 'Mindful mornings',
-    quote: 'I start the day unhurried with the lounge playlist and light stretch.',
-    coachNote: 'Consent on file � Reviewed this week',
-  },
-  {
-    id: 'story-2',
-    member: 'Luis',
-    focus: 'Walk streak',
-    quote: 'Treating the walk like a calendar block keeps me steady.',
-    coachNote: 'Coach shout-out goes live Friday',
-  },
-];
-
-export const badgeRoster = {
-  coachComposer: {
-    draftName: 'Recovery Champ',
-    draftMessage: 'Thanks for showing up for weekly reset time. Keep that gentle groove.',
-    autoRule: 'Grant after 4 logged recoveries',
-    palette: 'from-brand-500 to-brand-300',
-  },
-  clientBadges: [
-    { id: 'badge-1', name: 'Consistency � 4 weeks', status: 'earned', grantedBy: 'Coach Avery' },
-    { id: 'badge-2', name: 'Early-bird', status: 'tracking', grantedBy: 'Automation' },
-  ],
-};
-
 export const coachTasks = [
   {
     id: 'task-1',
@@ -137,27 +107,6 @@ export const coachTasks = [
     effort: '5 min',
     priority: 'today',
     context: "Luis' walk story needs final sign-off.",
-  },
-];
-
-export const templateKits = [
-  {
-    id: 'kit-1',
-    name: 'Challenge kickoff',
-    summary: 'Announcement tile, daily nudges, wrap recap.',
-    tags: ['Featured'],
-  },
-  {
-    id: 'kit-2',
-    name: 'Monthly AMA',
-    summary: 'Question form, teaser, audio outline.',
-    tags: ['Updated'],
-  },
-  {
-    id: 'kit-3',
-    name: 'Welcome bundle',
-    summary: 'First-week roadmap and lounge intro.',
-    tags: [],
   },
 ];
 
