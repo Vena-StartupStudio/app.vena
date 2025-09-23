@@ -39,7 +39,11 @@
     var c=d.createElement('script');o.api=new Array();c.async=true;c.type='text/javascript';
     c.charset='utf-8';c.src='https://web-sdk.smartlook.com/recorder.js';h.appendChild(c);
     })(document);
-    smartlook('init', 'b2c36fa6303aa50e1252d5a23e6f5c45d9981311', { region: 'eu' });
+    smartlook('init', 'b2c36fa6303aa50e1252d5a23e6f5c45d9981311', { 
+      region: 'eu',
+      crossDomainTracking: true,
+      domains: ['vena.software', 'app.vena.software']
+    });
 </script>
 </head>
   <body class="bg-[#fcfaf7] text-slate-800">

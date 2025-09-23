@@ -8,6 +8,8 @@ interface AboutCardProps {
   onBioChange: (value: string) => void;
   isRtl: boolean;
   t: (key: string) => string;
+  mode?: 'edit' | 'view';
+  language: 'en' | 'he'; // Accept the language prop
 }
 
 const AboutCard: React.FC<AboutCardProps> = ({
@@ -15,14 +17,17 @@ const AboutCard: React.FC<AboutCardProps> = ({
   bio,
   onBioChange,
   isRtl,
-  t
+  t,
+  mode = 'edit',
+  language,
 }) => {
-  const inlineInputStyles = "bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/30 rounded-md px-2 py-1 w-full resize-none min-h-[120px] leading-relaxed";
+  const isView = mode === 'view';
+  const dirAttr = isRtl ? 'rtl' : 'ltr';
+  const textareaClasses = `${config.styles.fontBody} text-slate-700 dark:text-slate-300 text-lg leading-relaxed`;
 
   return (
     <BaseCard variant="glass" className="text-center">
       <div className="space-y-6">
-        {/* Icon or decorative element */}
         <div className="flex justify-center">
           <div className={`w-16 h-16 rounded-full ${config.styles.colorPrimary} flex items-center justify-center shadow-lg`}>
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,28 +36,31 @@ const AboutCard: React.FC<AboutCardProps> = ({
           </div>
         </div>
 
-        {/* Section Title */}
         <h2 className={`text-3xl font-bold ${config.styles.fontHeading} ${config.styles.colorSecondary} relative`}>
           {t('aboutMe')}
-          <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 ${config.styles.colorPrimary} rounded-full`}></div>
+          <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 ${config.styles.colorPrimary} rounded-full`} />
         </h2>
 
-        {/* Bio Content */}
         <div className="max-w-3xl mx-auto">
-          <textarea
-            value={bio}
-            onChange={(e) => onBioChange(e.target.value)}
-            className={`${inlineInputStyles} ${config.styles.fontBody} text-slate-700 dark:text-slate-300 text-lg leading-relaxed`}
-            placeholder={t('aboutMePlaceholder') || "Tell your story..."}
-            dir={isRtl ? 'rtl' : 'ltr'}
-          />
+          {isView ? (
+            <p className={`${textareaClasses} whitespace-pre-line`} dir={dirAttr}>
+              {bio || t('aboutMePlaceholder') || 'Tell your story...'}
+            </p>
+          ) : (
+            <textarea
+              value={bio}
+              onChange={(event) => onBioChange(event.target.value)}
+              className={`bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/30 rounded-md px-2 py-1 w-full resize-none min-h-[120px] leading-relaxed ${textareaClasses}`}
+              placeholder={t('aboutMePlaceholder') || 'Tell your story...'}
+              dir={dirAttr}
+            />
+          )}
         </div>
 
-        {/* Decorative dots */}
         <div className="flex justify-center space-x-2">
-          <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} opacity-60`}></div>
-          <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} opacity-40`}></div>
-          <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} opacity-20`}></div>
+          <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} opacity-60`} />
+          <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} opacity-40`} />
+          <div className={`w-2 h-2 rounded-full ${config.styles.colorPrimary} opacity-20`} />
         </div>
       </div>
     </BaseCard>
