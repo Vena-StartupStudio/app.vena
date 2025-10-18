@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import type { ProfileConfig, FontThemeKey, SectionId } from '../index';
+import type { ProfileConfig, FontThemeKey, SectionId, LoungeConfig, LoungePost } from '../index';
 import { TEMPLATES } from '../constants/config';
-import { FONT_THEMES, COLOR_PALETTE, OPACITY_OPTIONS } from '../constants/themes';
+import { FONT_THEMES, COLOR_PALETTE } from '../constants/themes';
+import { createEmptyLoungePost } from '../lib/lounge';
 
 // --- ICONS ---
 const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>);
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>);
 const ChevronRightIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>);
-const DragHandleIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="currentColor" viewBox="0 0 16 16"><path d="M.5 1a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13A.5.5 0 0 1 .5 1zm15 0a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13a.5.5 0 0 1 .5-.5z"/></svg>);
+const ChevronUpIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>);
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>);
 const LayoutIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -18,6 +19,14 @@ const LayoutIcon: React.FC<{ className?: string }> = ({ className }) => (
   const PaletteIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+    </svg>
+  );
+  
+  const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l1.2 3.6L17 7.5l-3 2.3L15 13l-3-2-3 2 .9-3.2-3-2.3 3.8-.9L12 3z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l.6 1.8L7 17l-1.4 1 .4 1.6L5 18.6l-1 1 .4-1.6L3 17l1.4-.2L5 15z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 15.5l.4 1.2L20.5 17l-1 .7.3 1.1L19 18l-.8.8.3-1.1-1-.7 1.1-.3L19 15.5z" />
     </svg>
   );
 
@@ -76,7 +85,11 @@ interface EditorPanelProps {
   language: 'en' | 'he';
   onTemplateChange: (templateKey: string) => void;
   onStyleChange: <K extends keyof ProfileConfig['styles']>(key: K, value: ProfileConfig['styles'][K]) => void;
-  onFontThemeChange: (themeKey: FontThemeKey) => void;}
+  onFontThemeChange: (themeKey: FontThemeKey) => void;
+  onValueChange: <K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) => void;
+  onSectionVisibilityChange: (sectionId: SectionId, isVisible: boolean) => void;
+  onSectionsOrderChange: (sections: SectionId[]) => void;
+}
 
 const EditorPanel: React.FC<EditorPanelProps> = ({
   isPreviewMode,
@@ -84,12 +97,125 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
   language,
   onTemplateChange,
   onStyleChange,
-  onFontThemeChange,}) => {
+  onFontThemeChange,
+  onValueChange,
+  onSectionVisibilityChange,
+  onSectionsOrderChange,
+}) => {
   const [openAccordions, setOpenAccordions] = useState(['Templates']);
   const [showCustomPrimary, setShowCustomPrimary] = useState(false);
   const [showCustomSecondary, setShowCustomSecondary] = useState(false);
   const [showCustomBackground, setShowCustomBackground] = useState(false);
-  
+
+  const loungeEnabled = config.sectionVisibility.lounge !== false;
+
+  const ensureLoungeInSections = () => {
+    if (!config.sections.includes('lounge')) {
+      const next: SectionId[] = [...config.sections, 'lounge'];
+      onSectionsOrderChange(next);
+    }
+  };
+
+  const updateLounge = (updater: (prev: LoungeConfig) => LoungeConfig) => {
+    const next = updater(config.lounge);
+    onValueChange('lounge', next);
+  };
+
+  const handleLoungeFieldChange = <K extends keyof LoungeConfig>(key: K, value: LoungeConfig[K]) => {
+    updateLounge((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handlePostChange = (postId: string, patch: Partial<LoungePost>) => {
+    updateLounge((prev) => ({
+      ...prev,
+      posts: prev.posts.map((post) =>
+        post.id === postId ? { ...post, ...patch } : post
+      ),
+    }));
+  };
+
+  const handleAddPost = () => {
+    const newPost = createEmptyLoungePost(config);
+
+    updateLounge((prev) => ({
+      ...prev,
+      posts: [newPost, ...prev.posts],
+    }));
+
+    ensureLoungeInSections();
+    onSectionVisibilityChange('lounge', true);
+  };
+
+  const handleRemovePost = (postId: string) => {
+    updateLounge((prev) => ({
+      ...prev,
+      posts: prev.posts.filter((post) => post.id !== postId),
+    }));
+  };
+
+  const handleMovePost = (postId: string, direction: 'up' | 'down') => {
+    updateLounge((prev) => {
+      const index = prev.posts.findIndex((post) => post.id === postId);
+      if (index === -1) return prev;
+      const target = direction === 'up' ? index - 1 : index + 1;
+      if (target < 0 || target >= prev.posts.length) return prev;
+      const posts = [...prev.posts];
+      const [moved] = posts.splice(index, 1);
+      posts.splice(target, 0, moved);
+      return { ...prev, posts };
+    });
+  };
+
+  const handleTogglePinned = (postId: string, pinned: boolean) => {
+    handlePostChange(postId, { pinned });
+  };
+
+  const handleLoungeVisibilityChange = (enabled: boolean) => {
+    onSectionVisibilityChange('lounge', enabled);
+    if (enabled) {
+      ensureLoungeInSections();
+    }
+  };
+
+  const handleMoveLoungeSection = (direction: 'up' | 'down') => {
+    const order: SectionId[] = config.sections.includes('lounge')
+      ? [...config.sections]
+      : [...config.sections, 'lounge'];
+    const currentIndex = order.indexOf('lounge');
+    if (currentIndex === -1) return;
+    const targetIndex = direction === 'up' ? Math.max(0, currentIndex - 1) : Math.min(order.length - 1, currentIndex + 1);
+    if (targetIndex === currentIndex) return;
+    order.splice(currentIndex, 1);
+    order.splice(targetIndex, 0, 'lounge');
+    onSectionsOrderChange(order);
+  };
+
+  const toDatetimeLocal = (value: string) => {
+    const date = value ? new Date(value) : new Date();
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const pad = (input: number) => input.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const fromDatetimeLocal = (value: string, fallback: string) => {
+    if (!value) {
+      return fallback;
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return fallback;
+    }
+    return parsed.toISOString();
+  };
+
+  const locale = language === 'he' ? 'he-IL' : 'en-US';
+  const loungePosts = config.lounge.posts ?? [];
+
   const [panelWidth, setPanelWidth] = useState(384); // Default width w-96
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -357,6 +483,340 @@ const EditorPanel: React.FC<EditorPanelProps> = ({
                     {t}
                   </button>
                 ))}
+              </div>
+            </AccordionItem>
+            <AccordionItem 
+              title="Members Lounge" 
+              isOpen={openAccordions.includes('Members Lounge')} 
+              onToggle={() => handleAccordionToggle('Members Lounge')}
+              icon={<SparklesIcon className="w-5 h-5" />}
+            >
+              <div className="space-y-6 mt-4">
+                <div className="bg-white/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/50 rounded-2xl p-5">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                        Section visibility
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Toggle whether the lounge is shown on your live page.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-400"
+                          checked={loungeEnabled}
+                          onChange={(event) => handleLoungeVisibilityChange(event.target.checked)}
+                        />
+                        Show lounge on profile
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveLoungeSection('up')}
+                          className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
+                        >
+                          Move up
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveLoungeSection('down')}
+                          className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
+                        >
+                          Move down
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4">
+                  <div className="bg-white/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/50 rounded-2xl p-5">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+                      Headline
+                    </label>
+                    <input
+                      type="text"
+                      value={config.lounge.headline}
+                      onChange={(event) => handleLoungeFieldChange('headline', event.target.value)}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="Members' Lounge"
+                    />
+                  </div>
+
+                  <div className="bg-white/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/50 rounded-2xl p-5">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+                      Intro description
+                    </label>
+                    <textarea
+                      value={config.lounge.description}
+                      onChange={(event) => handleLoungeFieldChange('description', event.target.value)}
+                      className="w-full min-h-[80px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="Explain how you use the lounge with clients..."
+                    />
+                  </div>
+
+                  <div className="bg-white/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/50 rounded-2xl p-5">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+                      Search placeholder
+                    </label>
+                    <input
+                      type="text"
+                      value={config.lounge.searchPlaceholder}
+                      onChange={(event) => handleLoungeFieldChange('searchPlaceholder', event.target.value)}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      placeholder="Search posts, tags, or authors..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                      Posts ({loungePosts.length})
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Create updates, playlists, or celebrations for your members.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddPost}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow hover:bg-slate-800 transition"
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
+                      <path d="M12 5v14" />
+                      <path d="M5 12h14" />
+                    </svg>
+                    Add post
+                  </button>
+                </div>
+
+                <div className="space-y-5">
+                  {loungePosts.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-8 text-center text-sm text-slate-500">
+                      No lounge posts yet. Add your first update to welcome members.
+                    </div>
+                  ) : (
+                    loungePosts.map((post, index) => {
+                      const tagValue = (post.tags ?? []).join(', ');
+                      const createdDisplay = (() => {
+                        if (!post.createdAt) {
+                          return 'Not set';
+                        }
+                        const date = new Date(post.createdAt);
+                        if (Number.isNaN(date.getTime())) {
+                          return 'Not set';
+                        }
+                        return date.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
+                      })();
+                      return (
+                        <div
+                          key={post.id}
+                          className="rounded-2xl border border-slate-200/70 dark:border-slate-700/60 bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm"
+                        >
+                          <div className="flex flex-col gap-3 border-b border-slate-200/60 dark:border-slate-700/50 px-5 py-4 md:flex-row md:items-center md:justify-between">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Post {index + 1}
+                              </p>
+                              <p className="text-[11px] text-slate-400">
+                                Created {createdDisplay}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                  checked={!!post.pinned}
+                                  onChange={(event) => handleTogglePinned(post.id, event.target.checked)}
+                                />
+                                Pinned
+                              </label>
+                              <div className="hidden md:flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMovePost(post.id, 'up')}
+                                  disabled={index === 0}
+                                  className="rounded-full border border-slate-200 p-1 text-slate-500 hover:text-slate-700 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                >
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMovePost(post.id, 'down')}
+                                  disabled={index === loungePosts.length - 1}
+                                  className="rounded-full border border-slate-200 p-1 text-slate-500 hover:text-slate-700 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                                >
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                </button>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePost(post.id)}
+                                className="inline-flex items-center gap-1 rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-rose-600 hover:bg-rose-50 transition"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="px-5 py-5 space-y-5">
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Post title
+                                </label>
+                                <input
+                                  type="text"
+                                  value={post.title}
+                                  onChange={(event) => handlePostChange(post.id, { title: event.target.value })}
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                  placeholder="Weekly focus or headline"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Published at
+                                </label>
+                                <input
+                                  type="datetime-local"
+                                  value={toDatetimeLocal(post.createdAt)}
+                                  onChange={(event) =>
+                                    handlePostChange(post.id, { createdAt: fromDatetimeLocal(event.target.value, post.createdAt) })
+                                  }
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Summary
+                              </label>
+                              <textarea
+                                value={post.body}
+                                onChange={(event) => handlePostChange(post.id, { body: event.target.value })}
+                                className="w-full min-h-[90px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                placeholder="Describe the update and why it matters..."
+                              />
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Author name
+                                </label>
+                                <input
+                                  type="text"
+                                  value={post.authorName}
+                                  onChange={(event) => handlePostChange(post.id, { authorName: event.target.value })}
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Author role
+                                </label>
+                                <input
+                                  type="text"
+                                  value={post.authorRole}
+                                  onChange={(event) => handlePostChange(post.id, { authorRole: event.target.value })}
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Cover image URL
+                                </label>
+                                <input
+                                  type="url"
+                                  value={post.coverImageUrl ?? ''}
+                                  onChange={(event) => handlePostChange(post.id, { coverImageUrl: event.target.value })}
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                  placeholder="https://"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Author avatar URL
+                                </label>
+                                <input
+                                  type="url"
+                                  value={post.authorAvatarUrl ?? ''}
+                                  onChange={(event) => handlePostChange(post.id, { authorAvatarUrl: event.target.value })}
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                  placeholder="https://"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Tags
+                                </label>
+                                <input
+                                  type="text"
+                                  value={tagValue}
+                                  onChange={(event) => {
+                                    const raw = event.target.value;
+                                    const tags = raw.split(',').map(tag => tag.trim()).filter(Boolean);
+                                    handlePostChange(post.id, { tags });
+                                  }}
+                                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                  placeholder="breathwork, community, playlist"
+                                />
+                                <p className="text-[11px] text-slate-400">
+                                  Separate tags with commas.
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Likes
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={post.likes ?? 0}
+                                    onChange={(event) => handlePostChange(post.id, { likes: Math.max(0, Number(event.target.value) || 0) })}
+                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Saves
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={post.saves ?? 0}
+                                    onChange={(event) => handlePostChange(post.id, { saves: Math.max(0, Number(event.target.value) || 0) })}
+                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </AccordionItem>
             <AccordionItem 

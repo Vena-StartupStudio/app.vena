@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { supabase } from './lib/supabaseClient';
 import VenaProfileEditor from './components/VenaProfileEditor';
-import Featurebase from "@featurebase/sdk"; // Make sure Featurebase is imported
+
+type FeaturebaseClient = ((...args: any[]) => void) & {
+  identify?: (payload: { name?: string; email?: string | null; userId?: string }) => void;
+};
 
 declare global {
   interface Window {
-    Featurebase?: (...args: any[]) => void;
+    Featurebase?: FeaturebaseClient;
   }
 }
 
@@ -76,7 +79,7 @@ const Dashboard: React.FC = () => {
           
           // FIX: Initialize Featurebase with the user's name
           if (window.Featurebase) {
-            window.Featurebase.identify({
+            window.Featurebase?.identify?.({
               // The error occurs because 'name' is missing.
               // Your logs show the name is in `profileData.profile_config.me`
               name: profileData.profile_config?.me, 
@@ -229,6 +232,18 @@ const Dashboard: React.FC = () => {
   }, [user]);
 
 
+  const handleJumpToMembersClub = () => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const target = document.getElementById('members-lounge');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      console.warn('Members lounge section not found on the page.');
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     // The auth state change listener will handle the redirect
@@ -245,9 +260,27 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header with sign out button */}
-      <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <div className="bg-white shadow-sm px-6 py-4 flex flex-wrap items-center gap-4 justify-between">
         <h1 className="text-xl font-semibold">Vena Dashboard</h1>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={handleJumpToMembersClub}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400"
+          >
+            <span>Members Club</span>
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.8}
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
           <button 
             onClick={handleSignOut}
@@ -259,7 +292,7 @@ const Dashboard: React.FC = () => {
       </div>
       
       {/* Profile Editor */}
-      <VenaProfileEditor language="en" />
+      <VenaProfileEditor initialLanguage="en" />
     </div>
   );
 };
@@ -272,3 +305,6 @@ ReactDOM.createRoot(rootElement).render(
     <Dashboard />  {/* Only use Dashboard, remove AuthGuard */}
   </React.StrictMode>
 );
+
+
+

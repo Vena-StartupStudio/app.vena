@@ -10,6 +10,8 @@ import AboutCard from './cards/AboutCard';
 
 import ServicesCard from './cards/ServicesCard';
 
+import MembersLoungeCard from './cards/MembersLoungeCard';
+
 import ProfileHeader from './cards/ProfileHeader';
 
 import { DataStatus, PublishStatus } from '../hooks/useProfileConfig';
@@ -72,6 +74,7 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 }) => {
 
   const viewMode: 'edit' | 'view' = isPreviewMode ? 'view' : 'edit';
+  const loungeEnabled = config.sectionVisibility?.lounge !== false;
 
   const handleSave = async () => {
 
@@ -85,6 +88,16 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
     }
 
+  };
+
+  const handleScrollToLounge = () => {
+    if (!loungeEnabled || typeof document === 'undefined') {
+      return;
+    }
+    const target = document.getElementById('members-lounge');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
 
@@ -233,6 +246,46 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
 
 
+      case 'lounge':
+
+        return (
+
+          <section
+
+            key="lounge"
+
+            id="members-lounge"
+
+            aria-labelledby="members-lounge-heading"
+
+            className="scroll-mt-24"
+
+          >
+
+            <h2 id="members-lounge-heading" className="sr-only">
+
+              Members Lounge
+
+            </h2>
+
+            <MembersLoungeCard
+
+              config={config}
+
+              lounge={config.lounge}
+
+              isRtl={isRtl}
+
+              mode={viewMode}
+
+            />
+
+          </section>
+
+        );
+
+
+
       default: 
 
         return null;
@@ -345,7 +398,7 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
       <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           
           {/* ADD: The language switch button here, to the left of the others */}
           <button
@@ -354,6 +407,23 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
             title={language === 'en' ? "Switch to Hebrew" : "Switch to English"}
           >
             {language === 'en' ? 'עברית' : 'English'}
+          </button>
+
+          <button
+            onClick={handleScrollToLounge}
+            disabled={!loungeEnabled}
+            className={`px-4 py-2 rounded-md shadow-lg transition-colors ${
+              loungeEnabled
+                ? 'bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 text-white hover:shadow-xl hover:shadow-purple-500/40'
+                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+            }`}
+            title={
+              loungeEnabled
+                ? 'Scroll to Members Club section'
+                : 'Enable the Members Lounge section to use this shortcut'
+            }
+          >
+            Members Club
           </button>
 
           <button 

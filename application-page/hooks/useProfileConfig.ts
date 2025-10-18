@@ -17,7 +17,7 @@ const slugify = (raw: string) => raw
 
 
 
-export const useProfileConfig = (language: 'en' | 'he') => {
+export const useProfileConfig = (language: 'en' | 'he' = 'en') => {
   const [config, setConfig] = useState<ProfileConfig>(() => getInitialConfig(language));
   const [status, setStatus] = useState<DataStatus>('loading');
   const [publishStatus, setPublishStatus] = useState<PublishStatus>('idle');
@@ -59,6 +59,27 @@ export const useProfileConfig = (language: 'en' | 'he') => {
           const dbConfig = data.profile_config as Partial<ProfileConfig>;
           
           setConfig((prevConfig: ProfileConfig) => {
+            const incomingLounge = dbConfig.lounge;
+            const baseLounge = prevConfig.lounge ?? getInitialConfig(language).lounge;
+            const nextLounge = (() => {
+              if (!incomingLounge) {
+                return {
+                  ...baseLounge,
+                  posts: baseLounge.posts.map((post) => ({ ...post })),
+                };
+              }
+
+              const posts = Array.isArray(incomingLounge.posts)
+                ? incomingLounge.posts.map((post) => ({ ...post }))
+                : baseLounge.posts.map((post) => ({ ...post }));
+
+              return {
+                ...baseLounge,
+                ...incomingLounge,
+                posts,
+              };
+            })();
+
             const newConfig = {
               ...prevConfig,
               ...dbConfig,
@@ -70,6 +91,7 @@ export const useProfileConfig = (language: 'en' | 'he') => {
                 ...prevConfig.sectionVisibility,
                 ...(dbConfig.sectionVisibility || {}),
               },
+              lounge: nextLounge,
               sections: dbConfig.sections && dbConfig.sections.length > 0 ? dbConfig.sections : prevConfig.sections,
               services: dbConfig.services && dbConfig.services.length > 0 ? dbConfig.services : prevConfig.services,
             };

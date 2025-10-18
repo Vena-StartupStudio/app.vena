@@ -22,6 +22,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isView = mode === 'view';
   const dirAttr = isRtl ? 'rtl' : 'ltr';
+  const loungeVisible = config.sectionVisibility?.lounge !== false;
 
   const baseInputClasses =
     'bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500/30 rounded-md px-3 py-2 w-full text-center transition-all duration-200 hover:bg-white/10 dark:hover:bg-slate-700/30';
@@ -97,6 +98,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     );
   };
 
+  const handleMembersLoungeClick = () => {
+    if (!loungeVisible || typeof document === 'undefined') {
+      return;
+    }
+    const target = document.getElementById('members-lounge');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50/80 to-gray-100/60 dark:from-slate-900 dark:via-slate-800/90 dark:to-gray-900/80 rounded-3xl" />
@@ -125,7 +136,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
         <div className="relative z-10 p-12 lg:p-16">
           <div className="flex flex-col lg:flex-row items-center lg:items-center gap-12 lg:gap-16">
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex flex-col items-center gap-6">
               <div className={`relative group ${isView ? 'pointer-events-none' : ''}`}>
                 <div className="relative">
                   <div className="relative">
@@ -174,6 +185,43 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </div>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleMembersLoungeClick}
+                disabled={!loungeVisible}
+                className={`group inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  loungeVisible
+                    ? 'bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-purple-500/40 focus:ring-indigo-400'
+                    : 'bg-slate-200/90 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 cursor-not-allowed focus:ring-slate-300/60'
+                }`}
+              >
+                <span>{loungeVisible ? 'Explore Members Club' : 'Enable Members Club Section'}</span>
+                <span
+                  className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
+                    loungeVisible ? 'bg-white/20' : 'bg-white/40 dark:bg-slate-600/50'
+                  }`}
+                >
+                  <svg
+                    className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                      loungeVisible ? 'group-hover:translate-x-0.5' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </button>
+              {!loungeVisible && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center max-w-xs">
+                  Turn on the Members Lounge section in the left panel to make it visible on your page.
+                </p>
+              )}
             </div>
 
             <div className="flex-1 text-center lg:text-left space-y-8">
@@ -220,6 +268,31 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </div>
                 </div>
               </div>
+
+              {loungeVisible && (
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleMembersLoungeClick}
+                    className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400"
+                  >
+                    <span>Explore Members Club</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                      <svg
+                        className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                        aria-hidden="true"
+                      >
+                        <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

@@ -4,12 +4,13 @@ import { HEBREW_TRANSLATIONS, INITIAL_PLACEHOLDER_IMAGE } from '../constants/con
 import ProfileHeader from './cards/ProfileHeader';
 import AboutCard from './cards/AboutCard';
 import ServicesCard from './cards/ServicesCard';
+import MembersLoungeCard from './cards/MembersLoungeCard';
 
 interface PublishedLandingPageProps {
   config: ProfileConfig;
 }
 
-const fallbackSections: SectionId[] = ['about', 'services'];
+const fallbackSections: SectionId[] = ['about', 'services', 'lounge'];
 
 const noopValueChange: <K extends keyof ProfileConfig>(key: K, value: ProfileConfig[K]) => void = () => undefined;
 const noopUpload = () => undefined;
@@ -54,6 +55,25 @@ const PublishedLandingPage: React.FC<PublishedLandingPageProps> = ({ config }) =
             t={t}
             mode="view"
           />
+        );
+      case 'lounge':
+        return (
+          <section
+            key="lounge"
+            id="members-lounge"
+            aria-labelledby="members-lounge-heading"
+            className="scroll-mt-24"
+          >
+            <h2 id="members-lounge-heading" className="sr-only">
+              Members Lounge
+            </h2>
+            <MembersLoungeCard
+              config={config}
+              lounge={config.lounge}
+              isRtl={isRtl}
+              mode="view"
+            />
+          </section>
         );
       default:
         return null;

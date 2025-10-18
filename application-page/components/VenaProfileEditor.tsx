@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useProfileConfig } from '../hooks/useProfileConfig';
 import EditorPanel from './EditorPanel';
 import PreviewCanvas from './PreviewCanvas';
 
-const VenaProfileEditor: React.FC = () => {
+interface VenaProfileEditorProps {
+  initialLanguage?: 'en' | 'he';
+}
+
+const VenaProfileEditor: React.FC<VenaProfileEditorProps> = ({ initialLanguage = 'en' }) => {
   const {
     config,
     setConfig,
@@ -18,9 +22,12 @@ const VenaProfileEditor: React.FC = () => {
     handleValueChange,
     handleSectionVisibilityChange,
     handleSectionsOrderChange,
-  } = useProfileConfig();
+  } = useProfileConfig(initialLanguage);
 
-  const currentLanguage = config.meta?.lang || 'en';
+  const currentLanguage = useMemo<'en' | 'he'>(() => {
+    const lang = config.meta?.lang;
+    return lang === 'he' ? 'he' : 'en';
+  }, [config.meta?.lang]);
   const isRtl = currentLanguage === 'he';
 
   const handleLanguageSwitch = () => {

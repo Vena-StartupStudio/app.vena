@@ -9,7 +9,6 @@ interface AboutCardProps {
   isRtl: boolean;
   t: (key: string) => string;
   mode?: 'edit' | 'view';
-  language: 'en' | 'he'; // Accept the language prop
 }
 
 const AboutCard: React.FC<AboutCardProps> = ({
@@ -19,7 +18,6 @@ const AboutCard: React.FC<AboutCardProps> = ({
   isRtl,
   t,
   mode = 'edit',
-  language,
 }) => {
   const isView = mode === 'view';
   const dirAttr = isRtl ? 'rtl' : 'ltr';

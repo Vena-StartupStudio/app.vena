@@ -1,7 +1,50 @@
-import type { ProfileConfig } from '../index';
+import type { ProfileConfig, LoungePost } from '../index';
 import { FONT_THEMES } from './themes';
 
 export const INITIAL_PLACEHOLDER_IMAGE = 'https://i.imgur.com/rS42r8s.png';
+
+const DEFAULT_LOUNGE_POSTS: LoungePost[] = [
+  {
+    id: 'lounge-1',
+    title: 'Weekly Breathwork Reset',
+    body: 'A guided audio to help members decompress after busy days. Encourage them to pair it with gentle movement.',
+    tags: ['breathwork', 'audio', 'reset'],
+    authorName: 'Team Vena',
+    authorRole: 'Community Coach',
+    authorAvatarUrl: 'https://i.pravatar.cc/80?u=vena-community-coach',
+    coverImageUrl: 'https://images.unsplash.com/photo-1517840901100-8179e982acb7?auto=format&fit=crop&w=900&q=80',
+    createdAt: '2024-07-15T14:30:00.000Z',
+    likes: 18,
+    saves: 7,
+    pinned: true,
+  },
+  {
+    id: 'lounge-2',
+    title: 'Mobility Challenge: 5 Days of Flow',
+    body: 'Share this carousel and invite members to post their favorite stretch in the comments. Celebrate completions on Friday.',
+    tags: ['mobility', 'challenge', 'community'],
+    authorName: 'You',
+    authorRole: 'Coach Update',
+    authorAvatarUrl: 'https://i.pravatar.cc/80?u=vena-coach-update',
+    coverImageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80',
+    createdAt: '2024-07-12T10:15:00.000Z',
+    likes: 42,
+    saves: 21,
+  },
+  {
+    id: 'lounge-3',
+    title: 'Spotify Playlist: Slow Sunrise',
+    body: 'Curated downtempo tracks for early morning routines. Perfect to pair with journal prompts or a cold plunge.',
+    tags: ['playlist', 'recovery'],
+    authorName: 'Community Manager',
+    authorRole: 'Curated Drop',
+    authorAvatarUrl: 'https://i.pravatar.cc/80?u=vena-community-manager',
+    coverImageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=900&q=80',
+    createdAt: '2024-07-05T08:00:00.000Z',
+    likes: 33,
+    saves: 14,
+  },
+];
 
 export const HEBREW_TRANSLATIONS = {
   aboutMe: 'עליי',
@@ -22,18 +65,39 @@ const BASE_DEFAULT_CONFIG: Omit<ProfileConfig, 'styles'> = {
     { id: 2, title: 'Group Yoga Class', description: 'Join our community for a revitalizing group yoga experience.' },
     { id: 3, title: 'Nutrition Planning', description: 'Custom meal plans to complement your wellness journey.' },
   ],
-  sections: ['about', 'services'],
-  sectionVisibility: { about: true, services: true },
+  lounge: {
+    headline: "Members' Lounge",
+    description: 'Keep your clients close with curated updates, guided resources, and celebrations from your practice.',
+    searchPlaceholder: 'Search posts or tags...',
+    posts: DEFAULT_LOUNGE_POSTS,
+  },
+  meta: { lang: 'en' },
+  sections: ['about', 'services', 'lounge'],
+  sectionVisibility: { about: true, services: true, lounge: true },
   landingPage: { slug: '', published: false, publishedAt: null, lastUpdatedAt: null },
 };
 
 export const getInitialConfig = (language: 'en' | 'he'): ProfileConfig => {
     const isHebrew = language === 'he';
+    const lang: 'en' | 'he' = isHebrew ? 'he' : 'en';
+    const clonedServices = BASE_DEFAULT_CONFIG.services.map((service) => ({ ...service }));
+    const clonedPosts = BASE_DEFAULT_CONFIG.lounge.posts.map((post) => ({ ...post }));
+
+    const lounge = {
+        ...BASE_DEFAULT_CONFIG.lounge,
+        posts: clonedPosts,
+    };
+
     const defaultConfig = {
         ...BASE_DEFAULT_CONFIG,
-        name: isHebrew ? 'שמך המלא' : BASE_DEFAULT_CONFIG.name,
-        title: isHebrew ? 'מקצוען בתחום הבריאות' : BASE_DEFAULT_CONFIG.title,
-        bio: isHebrew ? 'ברוכים הבאים למרחב הבריאות שלי. כאן אני חולק/ת את התשוקה שלי לעזור לאחרים להשיג איזון ובריאות באמצעות תכניות והדרכה מותאמות אישית.' : BASE_DEFAULT_CONFIG.bio,
+        services: clonedServices,
+        lounge,
+        sections: [...BASE_DEFAULT_CONFIG.sections],
+        sectionVisibility: { ...BASE_DEFAULT_CONFIG.sectionVisibility },
+        meta: { lang },
+        name: isHebrew ? '??? ????' : BASE_DEFAULT_CONFIG.name,
+        title: isHebrew ? '?????? ????? ???????' : BASE_DEFAULT_CONFIG.title,
+        bio: isHebrew ? '?????? ????? ????? ??????? ???. ??? ??? ????/? ?? ?????? ??? ????? ?????? ????? ????? ??????? ??????? ?????? ?????? ??????? ?????.' : BASE_DEFAULT_CONFIG.bio,
     };
 
     return {
@@ -71,7 +135,7 @@ export const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
       colorBackground: 'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50',
       backgroundOpacity: 'bg-opacity-90'
     }, 
-    sections: ['about', 'services'] 
+    sections: ['about', 'services', 'lounge'] 
   },
   nature: { 
     templateId: 'nature',
@@ -93,7 +157,7 @@ export const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
       colorBackground: 'bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50',
       backgroundOpacity: 'bg-opacity-95'
     }, 
-    sections: ['about', 'services'] 
+    sections: ['about', 'services', 'lounge'] 
   },
   ambient: { 
     templateId: 'ambient',
@@ -115,7 +179,7 @@ export const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
       colorBackground: 'bg-gradient-to-br from-slate-100 via-gray-50 to-zinc-50',
       backgroundOpacity: 'bg-opacity-100'
     }, 
-    sections: ['about', 'services'] 
+    sections: ['about', 'services', 'lounge'] 
   },
   tranquil: { 
     templateId: 'tranquil',
@@ -137,7 +201,7 @@ export const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
       colorBackground: 'bg-gradient-to-br from-sky-50 via-cyan-50 to-blue-50',
       backgroundOpacity: 'bg-opacity-90'
     }, 
-    sections: ['about', 'services'] 
+    sections: ['about', 'services', 'lounge'] 
   },
   serene: { 
     templateId: 'serene',
@@ -159,8 +223,9 @@ export const TEMPLATES: Record<string, Partial<ProfileConfig>> = {
       colorBackground: 'bg-gradient-to-br from-indigo-50 via-purple-50 to-violet-50',
       backgroundOpacity: 'bg-opacity-85'
     }, 
-    sections: ['about', 'services'] 
+    sections: ['about', 'services', 'lounge'] 
   },
 };
+
 
 

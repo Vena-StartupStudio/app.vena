@@ -26,6 +26,26 @@ const mergeConfig = (base: ProfileConfig, incoming: Partial<ProfileConfig>): Pro
     ...base.sectionVisibility,
     ...(incoming.sectionVisibility || {}),
   },
+  lounge: (() => {
+    const baseLounge = base.lounge;
+    const incomingLounge = incoming.lounge;
+    if (!incomingLounge) {
+      return {
+        ...baseLounge,
+        posts: baseLounge.posts.map((post) => ({ ...post })),
+      };
+    }
+
+    const posts = Array.isArray(incomingLounge.posts)
+      ? incomingLounge.posts.map((post) => ({ ...post }))
+      : baseLounge.posts.map((post) => ({ ...post }));
+
+    return {
+      ...baseLounge,
+      ...incomingLounge,
+      posts,
+    };
+  })(),
   sections: incoming.sections && incoming.sections.length > 0 ? incoming.sections : base.sections,
   services: incoming.services && incoming.services.length > 0 ? incoming.services : base.services,
   landingPage: incoming.landingPage ?? base.landingPage,
