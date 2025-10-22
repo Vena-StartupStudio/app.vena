@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import RegistrationForm from './components/RegistrationForm';
 import ConfirmationMessage from './components/ConfirmationMessage';
-import { VenaLogo } from './components/icons/VenaLogo';
+import VenaLogo from './components/icons/VenaLogo.png';
 
 const App: React.FC = () => {
   const [isRegistered, setIsRegistered] = useState(false);
@@ -19,7 +19,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <VenaLogo className="mx-auto h-12 w-auto" />
+          <img src={VenaLogo} alt="Vena logo" className="mx-auto h-12 w-auto" />
         </div>
         {isRegistered ? (
           <ConfirmationMessage 
@@ -42,3 +42,5 @@ ReactDOM.createRoot(rootElement).render(
     <App />
   </React.StrictMode>
 );
+
+

@@ -1,22 +1,50 @@
 import React, { useState, useMemo } from "react";
 import type { FormData as RegistrationFormData } from "../types";
 import { BUSINESS_NICHES } from "../constants";
-
-type Props = {
-  formData: RegistrationFormData;
-  errors: Partial<Record<keyof RegistrationFormData, string>> & { submit?: string };
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (payload: RegistrationFormData) => void;
-};
+import { supabase } from "../lib/supabaseClient";
 
 interface RegistrationFormProps {
   onSuccess: () => void;
 }
 
+const initialFormData: RegistrationFormData = {
+  businessName: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  socialMedia: '',
+  businessNiche: '',
+  logo: null
+};
+
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
+  const [formData, setFormData] = useState<RegistrationFormData>(initialFormData);
+  const [errors, setErrors] = useState<Partial<Record<keyof RegistrationFormData, string>> & { submit?: string }>({});
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear any existing error for this field
+    if (errors[name as keyof RegistrationFormData]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  // Handle file changes
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData(prev => ({ ...prev, logo: file }));
+    // Clear any existing error for this field
+    if (errors.logo) {
+      setErrors(prev => ({ ...prev, logo: undefined }));
+    }
+  };
 
   // Simple strength scoring: length + character variety
   const passwordStrength = useMemo(() => {
@@ -36,18 +64,18 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setErrors({});
 
     try {
       // Step 1: Sign up the user with Supabase Auth
       const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
         options: {
           data: {
-            business_name: businessName,
-            first_name: firstName,
-            last_name: lastName,
+            business_name: formData.businessName,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
           },
         },
       });
@@ -61,9 +89,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
         .insert({
           id: user.id,
           email: user.email,
-          business_name: businessName,
-          first_name: firstName,
-          last_name: lastName,
+          business_name: formData.businessName,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
           // Add any other fields you collect
         });
 
@@ -74,7 +102,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
 
     } catch (err: any) {
       console.error('Registration failed:', err);
-      setError(err.message || 'An unknown error occurred.');
+      setErrors({ submit: err.message || 'An unknown error occurred.' });
       setLoading(false);
     }
     // No need to set loading to false on success, as the page will redirect
@@ -104,7 +132,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
           className="border rounded px-3 py-2"
           name="businessName"
           value={formData.businessName}
-          onChange={onInputChange}
+          onChange={handleInputChange}
           placeholder="Acme Wellness"
           required
         />
@@ -119,7 +147,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
             className="border rounded px-3 py-2"
             name="firstName"
             value={formData.firstName}
-            onChange={onInputChange}
+            onChange={handleInputChange}
             placeholder="First name"
             required
           />
@@ -131,7 +159,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
             className="border rounded px-3 py-2"
             name="lastName"
             value={formData.lastName}
-            onChange={onInputChange}
+            onChange={handleInputChange}
             placeholder="Last name"
             required
           />
@@ -147,7 +175,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
           type="email"
           name="email"
           value={formData.email}
-          onChange={onInputChange}
+          onChange={handleInputChange}
           placeholder="you@example.com"
           required
         />
@@ -184,7 +212,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
             type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
-            onChange={onInputChange}
+            onChange={handleInputChange}
             placeholder="********"
             required
             aria-describedby="password-strength"
@@ -253,7 +281,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
             type={showConfirm ? 'text' : 'password'}
             name="confirmPassword"
             value={formData.confirmPassword}
-            onChange={onInputChange}
+            onChange={handleInputChange}
             placeholder="********"
             required
           />
@@ -271,7 +299,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
           className="border rounded px-3 py-2"
           name="socialMedia"
           value={formData.socialMedia}
-          onChange={onInputChange}
+          onChange={handleInputChange}
           placeholder="https://instagram.com/yourbusiness"
         />
         {errors.socialMedia && <p className="text-red-600 text-sm">{errors.socialMedia}</p>}
@@ -283,7 +311,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
           className="border rounded px-3 py-2 bg-white"
           name="businessNiche"
           value={formData.businessNiche}
-          onChange={onInputChange}
+          onChange={handleInputChange}
           required
         >
           {BUSINESS_NICHES.map(opt => (
@@ -298,19 +326,23 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
       {/* Logo (optional) */}
       <label className="grid gap-1">
         <span className="text-sm text-zinc-700">Logo (optional)</span>
-        <input className="border rounded px-3 py-2" type="file" accept="image/*" onChange={onFileChange} />
+        <input className="border rounded px-3 py-2" type="file" accept="image/*" onChange={handleFileChange} />
         {errors.logo && <p className="text-red-600 text-sm">{errors.logo}</p>}
       </label>
 
       {/* Submit */}
       <button
         type="submit"
-        disabled={!canSubmit}
+        disabled={!canSubmit || loading}
         className="mt-2 rounded px-4 py-2 font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed focus: outline-none focus-visible:ring-2 focus-visible:ring-primary-light focus-visible:ring-offset-2 transition-colors bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary"
-        aria-disabled={!canSubmit}
+        aria-disabled={!canSubmit || loading}
       >
-        {canSubmit ? 'Register' : 'Complete required fields'}
+        {loading ? 'Registering...' : (canSubmit ? 'Register' : 'Complete required fields')}
       </button>
+
+      {errors.submit && (
+        <p className="mt-2 text-red-600 text-sm">{errors.submit}</p>
+      )}
     </form>
   );
 }
