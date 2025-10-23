@@ -64,6 +64,7 @@ const fetchLandingProfile = async (slug) => {
 // IMPORTANT: This must come BEFORE static file serving
 app.use('/scheduler', (req, res, next) => {
   console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.url}`);
+  console.log(`[SCHEDULER PROXY] Cookies:`, req.headers.cookie);
   next();
 }, createProxyMiddleware({
   target: SCHEDULER_URL,
@@ -71,9 +72,32 @@ app.use('/scheduler', (req, res, next) => {
   pathRewrite: {
     '^/scheduler': '', // Remove /scheduler prefix when forwarding to Next.js
   },
+  // Preserve cookies and headers - critical for Supabase auth
+  cookieDomainRewrite: false,
+  preserveHeaderKeyCase: true,
   onProxyReq: (proxyReq, req, res) => {
     const newPath = req.url.replace('/scheduler', '') || '/';
     console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
+    
+    // Forward all cookies - critical for authentication
+    if (req.headers.cookie) {
+      proxyReq.setHeader('Cookie', req.headers.cookie);
+    }
+    
+    // Forward authorization headers if present
+    if (req.headers.authorization) {
+      proxyReq.setHeader('Authorization', req.headers.authorization);
+    }
+  },
+  onProxyRes: (proxyRes, req, res) => {
+    // Forward Set-Cookie headers back to client
+    const setCookie = proxyRes.headers['set-cookie'];
+    if (setCookie) {
+      proxyRes.headers['set-cookie'] = setCookie.map(cookie => {
+        // Don't modify domain/path for cookies
+        return cookie;
+      });
+    }
   },
   onError: (err, req, res) => {
     console.error('[SCHEDULER PROXY] Error:', err.message);
