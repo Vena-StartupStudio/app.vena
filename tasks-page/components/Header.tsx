@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { VenaLogo, PlusIcon, UsersIcon, SignOutIcon } from './Icons';
@@ -10,17 +10,67 @@ interface HeaderProps {
   user: User | null;
   clients: Client[];
   clientGroups: ClientGroup[];
-  onDataChange: () => void; // Add this prop
+  onDataChange: () => void;
+  onCreateTask: (taskData: any) => Promise<any>;
+  editingTask?: Task | null; // ADD THIS PROP
+  onUpdateTask?: (taskData: any) => Promise<void>; // ADD THIS PROP
+  onCancelEdit?: () => void; // ADD THIS PROP
 }
 
-const Header: React.FC<HeaderProps> = ({ user, clients, clientGroups, onDataChange }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  user, 
+  clients, 
+  clientGroups, 
+  onDataChange, 
+  onCreateTask,
+  editingTask, // ADD THIS
+  onUpdateTask, // ADD THIS
+  onCancelEdit // ADD THIS
+}) => {
   const [isTaskModalOpen, setTaskModalOpen] = useState(false);
   const [isClientModalOpen, setClientModalOpen] = useState(false);
+
+  // Open modal when editingTask is set
+  useEffect(() => {
+    if (editingTask) {
+      setTaskModalOpen(true);
+    }
+  }, [editingTask]);
 
   // Function to handle signing out
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     // The onAuthStateChange listener in App.tsx will handle redirecting to the login page.
+  };
+
+  const handleTaskSubmit = async (taskData: any) => {
+    try {
+      console.log('Task submit with data:', taskData);
+      
+      if (editingTask && onUpdateTask) {
+        // Update existing task
+        await onUpdateTask({
+          ...taskData,
+          id: editingTask.taskId || editingTask.id // Use the actual task ID
+        });
+      } else {
+        // Create new task
+        await onCreateTask(taskData);
+      }
+      
+      setTaskModalOpen(false); // Close modal after successful creation
+      console.log('Task operation completed successfully');
+    } catch (error) {
+      console.error('Error with task operation:', error);
+      alert('Error with task operation: ' + (error as Error).message);
+    }
+  };
+
+  const handleModalClose = () => {
+    setTaskModalOpen(false);
+    if (editingTask && onCancelEdit) {
+      onCancelEdit(); // Clear the editing state
+    }
   };
 
   return (
@@ -69,18 +119,18 @@ const Header: React.FC<HeaderProps> = ({ user, clients, clientGroups, onDataChan
       {/* Modals */}
       <TaskModal
         isOpen={isTaskModalOpen}
-        onClose={() => setTaskModalOpen(false)}
+        onClose={handleModalClose} // Use the updated close handler
         user={user}
-        onTaskCreated={onDataChange}
+        onTaskCreated={handleTaskSubmit}
         clients={clients}
         clientGroups={clientGroups}
+        editingTask={editingTask} // Pass the editing task to modal
       />
       <ClientManagementModal
         isOpen={isClientModalOpen}
         onClose={() => setClientModalOpen(false)}
         user={user}
         onDataChange={onDataChange}
-        // Pass the data down to the client modal
         clients={clients}
         clientGroups={clientGroups}
       />

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { TaskStatus } from '../types';
-import { CheckCircleIcon, ClockIcon, ExclamationIcon, RefreshIcon, ChevronDownIcon } from './Icons';
+import { CheckCircleIcon, ClockIcon, ExclamationIcon, RefreshIcon, ChevronDownIcon, UsersIcon } from './Icons';
 
 interface StatusBadgeProps {
   status: TaskStatus;
@@ -10,6 +10,12 @@ interface StatusBadgeProps {
 }
 
 const statusConfig = {
+  [TaskStatus.Assigned]: {
+    icon: UsersIcon,
+    bgColor: 'bg-purple-100',
+    textColor: 'text-purple-800',
+    label: 'Assigned',
+  },
   [TaskStatus.Done]: {
     icon: CheckCircleIcon,
     bgColor: 'bg-green-100',

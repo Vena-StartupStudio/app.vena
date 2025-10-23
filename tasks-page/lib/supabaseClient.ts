@@ -1,59 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '../types'; // We will generate this file for type safety
 
+// For Vite, use VITE_ prefix instead of REACT_APP_
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Supabase URL and Anon Key must be defined in .env.local");
+// Add validation to see what's wrong
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Key exists:', !!supabaseKey);
+
+if (!supabaseUrl) {
+  throw new Error('Missing VITE_SUPABASE_URL environment variable');
 }
 
-// Create and export the Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+if (!supabaseKey) {
+  throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable');
+}
 
-// Email service function
-export const sendTaskEmail = async (
-  taskId: string,
-  clientEmail: string,
-  clientName: string,
-  taskTitle: string,
-  taskDescription?: string,
-  dueDate?: string,
-  status: string = 'pending'
-) => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
+// Validate URL format
+if (!supabaseUrl.startsWith('https://') || !supabaseUrl.includes('.supabase.co')) {
+  throw new Error(`Invalid Supabase URL format: ${supabaseUrl}`);
+}
 
-    if (!session) {
-      throw new Error('User must be authenticated to send emails');
-    }
-
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-task-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        taskId,
-        clientEmail,
-        clientName,
-        taskTitle,
-        taskDescription,
-        dueDate,
-        status,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to send email');
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error('Error sending task email:', error);
-    throw error;
-  }
-};
+export const supabase = createClient(supabaseUrl, supabaseKey);

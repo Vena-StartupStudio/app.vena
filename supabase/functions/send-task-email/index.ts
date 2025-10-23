@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
-import { corsHeaders } from "../_shared/cors.ts"
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 interface TaskEmailRequest {
   taskId: string;
@@ -19,10 +23,17 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Function called with method:', req.method)
+    
     // Parse request body
-    const { taskId, clientEmail, clientName, taskTitle, taskDescription, dueDate, status }: TaskEmailRequest = await req.json()
+    const requestBody = await req.json()
+    console.log('Request body:', requestBody)
+    
+    const { taskId, clientEmail, clientName, taskTitle, taskDescription, dueDate, status }: TaskEmailRequest = requestBody
 
+    // Validate required fields
     if (!taskId || !clientEmail || !clientName || !taskTitle) {
+      console.error('Missing required fields:', { taskId, clientEmail, clientName, taskTitle })
       return new Response(
         JSON.stringify({ error: 'Missing required fields: taskId, clientEmail, clientName, taskTitle' }),
         {
@@ -32,23 +43,14 @@ serve(async (req) => {
       )
     }
 
-    // Get user from authorization header
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
+    // Check for Resend API key first
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    console.log('Resend API key configured:', !!resendApiKey)
+    
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY not configured')
       return new Response(
-        JSON.stringify({ error: 'No authorization header' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Create Supabase client with service role key
-    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    if (!supabaseServiceRoleKey) {
-      return new Response(
-        JSON.stringify({ error: 'Service role key not configured' }),
+        JSON.stringify({ error: 'RESEND_API_KEY not configured in Supabase secrets' }),
         {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -56,30 +58,11 @@ serve(async (req) => {
       )
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      supabaseServiceRoleKey
-    )
-
-    // Get user from JWT token
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
-
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
     // Email configuration
-    const emailFrom = Deno.env.get('SMTP_FROM_EMAIL') || 'noreply@vena.software'
+    const emailFrom = Deno.env.get('SMTP_FROM_EMAIL') || 'onboarding@resend.dev'
     const emailSubject = `Task Update: ${taskTitle}`
 
-    // Create email content based on status
+    // Create email content (keep existing content generation)
     let emailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h2 style="color: #8B5CF6;">Vena Task Management</h2>
@@ -97,7 +80,7 @@ serve(async (req) => {
       emailContent += `<p style="margin: 0 0 10px 0; color: #666;"><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>`
     }
 
-    // Add status-specific messaging
+    // Add status-specific messaging (keep existing logic)
     switch (status.toLowerCase()) {
       case 'done':
         emailContent += `<p style="margin: 10px 0; color: #10B981;"><strong>Status:</strong> ✅ Completed</p>`
@@ -130,51 +113,14 @@ serve(async (req) => {
       </div>
     `
 
-    // Send email using SMTP
-    const smtpHost = Deno.env.get('SMTP_HOST')
-    const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587')
-    const smtpUser = Deno.env.get('SMTP_USER')
-    const smtpPass = Deno.env.get('SMTP_PASS')
+    console.log('Attempting to send email via Resend...')
+    console.log('Email details:', { from: emailFrom, to: clientEmail, subject: emailSubject })
 
-    if (!smtpHost || !smtpUser || !smtpPass) {
-      console.warn('SMTP not configured, logging email instead of sending')
-      console.log('Email that would be sent:', {
-        to: clientEmail,
-        from: emailFrom,
-        subject: emailSubject,
-        html: emailContent
-      })
-
-      // Still update the database to mark email as sent
-      await supabase
-        .from('client_tasks')
-        .update({
-          status: status === 'reminder sent' ? 'Reminder Sent' : status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', taskId)
-
-      return new Response(
-        JSON.stringify({
-          message: 'Email logged (SMTP not configured)',
-          emailData: {
-            to: clientEmail,
-            subject: emailSubject,
-            content: emailContent
-          }
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Send actual email via SMTP
+    // Send email via Resend API
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+        'Authorization': `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -185,12 +131,18 @@ serve(async (req) => {
       }),
     })
 
+    console.log('Resend API response status:', emailResponse.status)
+
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text()
-      console.error('Email service error:', errorText)
+      console.error('Resend API error:', errorText)
 
       return new Response(
-        JSON.stringify({ error: 'Failed to send email', details: errorText }),
+        JSON.stringify({ 
+          error: 'Failed to send email via Resend', 
+          details: errorText,
+          status: emailResponse.status 
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -201,14 +153,22 @@ serve(async (req) => {
     const emailResult = await emailResponse.json()
     console.log('Email sent successfully:', emailResult)
 
-    // Update the database to reflect the email was sent
-    await supabase
-      .from('client_tasks')
-      .update({
-        status: status === 'reminder sent' ? 'Reminder Sent' : status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', taskId)
+    // Create Supabase client and update task status
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (supabaseServiceRoleKey) {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        supabaseServiceRoleKey
+      )
+
+      await supabase
+        .from('client_tasks')
+        .update({
+          status: status === 'reminder sent' ? 'Reminder Sent' : status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', taskId)
+    }
 
     return new Response(
       JSON.stringify({
@@ -225,7 +185,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Function error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        details: error.message,
+        stack: error.stack 
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

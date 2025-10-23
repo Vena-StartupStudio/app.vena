@@ -1,4 +1,5 @@
 export enum TaskStatus {
+  Assigned = 'Assigned',
   Done = 'Done',
   Pending = 'Pending',
   Missed = 'Missed',
@@ -20,16 +21,15 @@ export interface ClientGroup {
 
 export interface Task {
   id: string;
-  assignee: {
-    type: 'client' | 'group';
-    id: string;
-  };
   title: string;
-  details?: string;
-  dueDate: string;
+  details: string; // Make sure this matches your database field
+  dueDate: string; // Make sure this matches your database field
   status: TaskStatus;
-  reminder: boolean;
-  deliveryMethod: 'email';
+  assignee: {
+    id: string;
+    type: 'client' | 'group';
+  };
+  createdAt: string;
 }
 
 // Add this new interface for the combined data structure
