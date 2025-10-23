@@ -5,7 +5,7 @@ import { PlusIcon, UsersIcon, SignOutIcon } from './Icons';
 import TaskModal from './TaskModal';
 import ClientManagementModal from './ClientManagementModal';
 import { Client, ClientGroup } from '../../types/tasks';
-import VenaLogo from '../icons/vena-logo.png';
+import VenaLogo from '../icons/VenaLogo.png';
 
 interface HeaderProps {
   user: User | null;
