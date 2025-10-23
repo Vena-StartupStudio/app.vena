@@ -59,7 +59,9 @@ const LandingApp: React.FC = () => {
   const slug = useMemo(() => normalizeSlug(window.location.pathname), []);
 
   useEffect(() => {
-    if (!slug || slug === 'dashboard') {
+    // Exclude reserved routes from landing page lookup
+    const reservedRoutes = ['dashboard', 'scheduler', 'signin', 'login', 'register', 'api'];
+    if (!slug || reservedRoutes.includes(slug)) {
       setStatus('not-found');
       return;
     }
