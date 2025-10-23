@@ -22,10 +22,6 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: NEXTAUTH_URL
-        value: https://vena-scheduler.onrender.com
-      - key: NEXTAUTH_SECRET
-        value: your-nextauth-secret-here
 
   # Main Application (Proxy + Static Files)
   - type: web
