@@ -293,6 +293,24 @@ const Dashboard: React.FC = () => {
               <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
+          <button
+            type="button"
+            onClick={() => window.location.href = '/tasks'}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-green-600 via-teal-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400"
+          >
+            <span>Follow-Up Tasks Dashboard</span>
+            <svg
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.8}
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
           <button 
             onClick={handleSignOut}
@@ -383,6 +401,3 @@ ReactDOM.createRoot(rootElement).render(
     <Dashboard />  {/* Only use Dashboard, remove AuthGuard */}
   </React.StrictMode>
 );
-
-
-
