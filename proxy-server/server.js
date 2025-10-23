@@ -121,11 +121,12 @@ app.use(express.static(staticPath, {
   }
 }));
 
-// Fallback to index.html for SPA routes
+// Fallback to index.html for SPA routes (only for non-proxied routes)
 app.get('*', (req, res, next) => {
-  // Let the proxy handle /scheduler, and let API routes 404 properly
-  if (req.path.startsWith('/scheduler') || req.path.startsWith('/api')) {
-    return next();
+  // /scheduler is handled by proxy middleware above, so this won't be reached
+  // Let API routes 404 properly
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Not found' });
   }
   
   // Serve the appropriate HTML file based on the route
