@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegistrationForm from './components/RegistrationForm';
 import ConfirmationMessage from './components/ConfirmationMessage';
+import TasksPage from './components/TasksPage';
 import VenaLogo from './components/icons/VenaLogo.png';
 
-const App: React.FC = () => {
+// Your existing registration app component - UNCHANGED
+const RegistrationApp: React.FC = () => {
   const [isRegistered, setIsRegistered] = useState(false);
 
   const handleSuccess = () => {
@@ -34,6 +37,19 @@ const App: React.FC = () => {
   );
 };
 
+// New routing wrapper - ONLY ADDS functionality
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<RegistrationApp />} />
+        <Route path="/tasks" element={<TasksPage />} />
+      </Routes>
+    </Router>
+  );
+};
+
+// Your existing render code - UNCHANGED
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element not found');
 
