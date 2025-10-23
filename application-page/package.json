@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc -p tsconfig.node.json",
+    "build": "vite build && tsc -p tsconfig.node.json && npm run build:proxy",
+    "build:proxy": "cd ../proxy-server && npm install --production",
     "preview": "vite preview",
     "start": "cd ../proxy-server && node server.js",
     "start:app": "node dist/server/index.js",
