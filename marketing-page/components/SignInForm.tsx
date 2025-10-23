@@ -49,11 +49,20 @@ const SignInForm: React.FC = () => {
         // Redirect with session tokens in URL
         setTimeout(() => {
           console.log('🎯 Redirecting to dashboard with session...');
+          
+          // Check if user wants to go to scheduler from URL parameter
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectTo = urlParams.get('redirect') || 'dashboard';
+          
           if (session?.access_token) {
             // Include tokens in URL for cross-domain transfer
-            window.location.href = `https://app.vena.software/dashboard#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=access_token`;
+            if (redirectTo === 'scheduler') {
+              window.location.href = `https://app.vena.software/scheduler?access_token=${session.access_token}&refresh_token=${session.refresh_token}`;
+            } else {
+              window.location.href = `https://app.vena.software/dashboard#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=access_token`;
+            }
           } else {
-            window.location.href = 'https://app.vena.software/dashboard';
+            window.location.href = `https://app.vena.software/${redirectTo}`;
           }
         }, 1000);
       } else {

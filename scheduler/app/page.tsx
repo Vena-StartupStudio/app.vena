@@ -1,9 +1,33 @@
 ﻿import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: { access_token?: string; refresh_token?: string } }) {
   const supabase = createServerComponentClient({ cookies });
+  
+  // Check if tokens are provided in query parameters
+  if (searchParams.access_token && searchParams.refresh_token) {
+    console.log('Tokens found in query params, attempting to set session...');
+    
+    // Create a client with the provided tokens
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabaseWithToken = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabaseWithToken.auth.setSession({
+      access_token: searchParams.access_token,
+      refresh_token: searchParams.refresh_token,
+    });
+    
+    if (error) {
+      console.error('Error setting session from query params:', error);
+    } else if (data.user) {
+      console.log('Session established from query params, user:', data.user.id);
+      // Redirect without the tokens in URL
+      redirect('/scheduler');
+    }
+  }
   
   // Get the authenticated user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -11,8 +35,8 @@ export default async function HomePage() {
   console.log('Auth check:', { user: user?.id, error: authError });
   
   if (!user) {
-    // If not logged in, redirect to sign-in
-    redirect('https://app.vena.software/signin.html');
+    // If not logged in, redirect to sign-in with scheduler redirect parameter
+    redirect('https://vena.software/signin.html?redirect=scheduler');
   }
   
   // Fetch the user's business name from registrations table
