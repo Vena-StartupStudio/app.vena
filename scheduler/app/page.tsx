@@ -64,11 +64,19 @@ export default async function HomePage({ searchParams }: { searchParams: { acces
     .replace(/^-+|-+$/g, '');
   
   // Check if a schedule exists for this user, if not create one
-  let { data: schedule } = await supabase
+  const { data: scheduleData, error: scheduleError } = await supabase
     .from('schedules')
     .select('slug')
     .eq('owner_id', user.id)
-    .single();
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (scheduleError) {
+    console.warn('Scheduler lookup issue:', scheduleError);
+  }
+
+  let schedule = scheduleData;
   
   if (!schedule) {
     // Find an available slug by checking for conflicts
@@ -80,7 +88,7 @@ export default async function HomePage({ searchParams }: { searchParams: { acces
         .from('schedules')
         .select('id')
         .eq('slug', slug)
-        .single();
+        .maybeSingle();
       
       if (!existing) break;
       
