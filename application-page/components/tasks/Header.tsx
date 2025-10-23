@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
-import { VenaLogo, PlusIcon, UsersIcon, SignOutIcon } from './Icons';
+import { PlusIcon, UsersIcon, SignOutIcon } from './Icons';
 import TaskModal from './TaskModal';
 import ClientManagementModal from './ClientManagementModal';
 import { Client, ClientGroup } from '../../types/tasks';
+import VenaLogo from '../icons/VenaLogo.png';
 
 interface HeaderProps {
   user: User | null;
@@ -81,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* LEFT SIDE - LOGO */}
             <div className="flex items-center">
               <img 
-                src="\public\Vena-LOGO.png" 
+                src={VenaLogo} 
                 alt="Vena" 
                 className="h-12 w-auto"
               />
