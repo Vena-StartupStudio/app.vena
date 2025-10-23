@@ -6,6 +6,10 @@ import ConfirmationMessage from "./components/ConfirmationMessage";
 import { IntegrationSettings } from "./components/IntegrationSettings";
 import type { FormData as RegistrationFormData } from "./types";
 import VenaLogo from './components/icons/VenaLogo.png';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from './landing';
+import Dashboard from './dashboard';
+import TasksPage from './components/TasksPage';
 
 const initialFormData: RegistrationFormData = {
   businessName: "",
@@ -157,53 +161,55 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-secondary flex items-start justify-center p-4 sm:p-6 lg:p-8">
-      <main className="w-full max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
-          <div className="flex flex-col items-center text-center mb-8">
-            <img
-              src={VenaLogo}
-              alt="Vena logo"
-              className="h-16 w-auto mb-4 select-none"
-              draggable="false"
-            />
-            {!isSubmitted && (
+    <Router>
+      <div className="min-h-screen bg-secondary flex items-start justify-center p-4 sm:p-6 lg:p-8">
+        <main className="w-full max-w-2xl mx-auto">
+          <div className="bg-white rounded-xl shadow-lg p-8 md:p-12">
+            <div className="flex flex-col items-center text-center mb-8">
+              <img
+                src={VenaLogo}
+                alt="Vena logo"
+                className="h-16 w-auto mb-4 select-none"
+                draggable="false"
+              />
+              {!isSubmitted && (
+                <>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-zinc-800 tracking-tight leading-tight">
+                    Ready to take your Business to the next step?
+                  </h1>
+                  <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-md">
+                    Start growing your wellness practice today – simplify scheduling, payments, and client engagement with Vena.
+                  </p>
+                </>
+              )}
+            </div>
+            {isSubmitted ? (
+              // ✅ pass confirmation props
               <>
-                <h1 className="text-3xl sm:text-4xl font-bold text-zinc-800 tracking-tight leading-tight">
-                  Ready to take your Business to the next step?
-                </h1>
-                <p className="mt-3 text-sm sm:text-base text-zinc-600 max-w-md">
-                  Start growing your wellness practice today – simplify scheduling, payments, and client engagement with Vena.
-                </p>
+                <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
+                <div className="mt-8 border-t pt-8">
+                  <IntegrationSettings />
+                </div>
               </>
+            ) : (
+              <RegistrationForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                onFileChange={handleFileChange}
+                onSubmit={handleSubmit}
+              />
+            )}
+            {!isSubmitted && errors.submit && (
+              <p className="mt-4 text-sm text-red-600">{errors.submit}</p>
+            )}
+            {!isSubmitted && submitting && (
+              <p className="mt-4 text-sm text-zinc-500">Submitting...</p>
             )}
           </div>
-          {isSubmitted ? (
-            // ✅ pass confirmation props
-            <>
-              <ConfirmationMessage email={confirmation?.email ?? ""} logoUrl={confirmation?.logoUrl ?? undefined} />
-              <div className="mt-8 border-t pt-8">
-                <IntegrationSettings />
-              </div>
-            </>
-          ) : (
-            <RegistrationForm
-              formData={formData}
-              errors={errors}
-              onInputChange={handleInputChange}
-              onFileChange={handleFileChange}
-              onSubmit={handleSubmit}
-            />
-          )}
-          {!isSubmitted && errors.submit && (
-            <p className="mt-4 text-sm text-red-600">{errors.submit}</p>
-          )}
-          {!isSubmitted && submitting && (
-            <p className="mt-4 text-sm text-zinc-500">Submitting...</p>
-          )}
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </Router>
   );
 };
 
