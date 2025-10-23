@@ -18,6 +18,7 @@ declare global {
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [scheduleSlug, setScheduleSlug] = useState<string | null>(null);
   const isBootstrappingRef = useRef(true);
   const featurebaseInitialized = useRef(false);
 
@@ -76,6 +77,17 @@ const Dashboard: React.FC = () => {
           console.error('Error fetching profile:', profileError);
         } else if (profileData) {
           console.log('DIAGNOSTIC: Profile data found and received from Supabase:', profileData.profile_config);
+          
+          // Fetch user's schedule slug
+          const { data: scheduleData } = await supabase
+            .from('schedules')
+            .select('slug')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (scheduleData) {
+            setScheduleSlug(scheduleData.slug);
+          }
           
           // FIX: Initialize Featurebase with the user's name
           if (window.Featurebase) {
@@ -300,31 +312,53 @@ const Dashboard: React.FC = () => {
               <p className="text-violet-100 mb-4">
                 Manage your availability and let clients book appointments with you
               </p>
-              <div className="flex gap-3 flex-wrap">
-                <a
-                  href="/scheduler"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  View Public Page
-                </a>
-                <a
-                  href="/scheduler/edit"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-800 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Manage Schedule
-                </a>
-              </div>
+              {scheduleSlug ? (
+                <>
+                  <div className="bg-white/10 rounded-lg px-4 py-2 mb-4">
+                    <p className="text-sm text-violet-100 mb-1">Your public booking link:</p>
+                    <code className="text-white font-mono text-sm">
+                      https://app.vena.software/scheduler/s/{scheduleSlug}
+                    </code>
+                  </div>
+                  <div className="flex gap-3 flex-wrap">
+                    <a
+                      href={`/scheduler/s/${scheduleSlug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      View Public Page
+                    </a>
+                    <a
+                      href="/scheduler/edit"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-800 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Manage Schedule
+                    </a>
+                  </div>
+                </>
+              ) : (
+                <div className="flex gap-3 flex-wrap">
+                  <a
+                    href="/scheduler"
+                    className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Create Your Schedule
+                  </a>
+                </div>
+              )}
             </div>
             <div className="text-white">
               <svg className="w-24 h-24 opacity-20" fill="currentColor" viewBox="0 0 24 24">
