@@ -70,7 +70,8 @@ const fetchLandingProfile = async (slug) => {
 
 // Proxy /scheduler/* requests to the scheduler service
 // IMPORTANT: This must come BEFORE static file serving
-app.use('/scheduler', (req, res, next) => {
+app.use('/', (req, res, next) => {
+  if (!req.path.startsWith('/scheduler')) return next();
   console.log(`[SCHEDULER PROXY] ==========================================`);
   console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.url}`);
   console.log(`[SCHEDULER PROXY] Full Path: ${req.path}`);
@@ -92,13 +93,14 @@ app.use('/scheduler', (req, res, next) => {
   proxyTimeout: 30000,
   onProxyReq: (proxyReq, req, res) => {
     const newPath = req.url.replace('/scheduler', '') || '/';
+    proxyReq.path = newPath;
     console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
-    
+
     // Forward all cookies - critical for authentication
     if (req.headers.cookie) {
       proxyReq.setHeader('Cookie', req.headers.cookie);
     }
-    
+
     // Forward authorization headers if present
     if (req.headers.authorization) {
       proxyReq.setHeader('Authorization', req.headers.authorization);
@@ -106,12 +108,12 @@ app.use('/scheduler', (req, res, next) => {
 
     // Forward Supabase auth headers
     Object.keys(req.headers).forEach(key => {
-      if (key.toLowerCase().startsWith('x-supabase') || 
+      if (key.toLowerCase().startsWith('x-supabase') ||
           key.toLowerCase() === 'apikey') {
         proxyReq.setHeader(key, req.headers[key]);
       }
     });
-    
+
     // Set proper host header
     proxyReq.setHeader('Host', new URL(SCHEDULER_URL).host);
   },
