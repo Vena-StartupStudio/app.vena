@@ -103,6 +103,11 @@ app.use('/scheduler', (req, res, next) => {
     }
   },
   onProxyRes: (proxyRes, req, res) => {
+    // Log response status for debugging
+    const status = proxyRes.statusCode;
+    const location = proxyRes.headers['location'];
+    console.log(`[SCHEDULER PROXY] Response from upstream: ${req.method} ${req.originalUrl} -> ${status}${location ? ` (Location: ${location})` : ''}`);
+
     // Forward Set-Cookie headers back to client
     const setCookie = proxyRes.headers['set-cookie'];
     if (setCookie) {
