@@ -89,9 +89,19 @@ function App() {
 
   const fetchData = async (user: User) => {
     const [assignmentRes, clientsRes, groupsRes] = await Promise.all([
+      // Fetch both individual client tasks AND group tasks
       supabase
         .from('client_tasks')
-        .select(`id, status, due_date, client:clients(id, name:client_name, email:client_email, avatar:client_avatar), task:tasks(id, title, description)`)
+        .select(`
+          id, 
+          status, 
+          due_date, 
+          client_id,
+          group_id,
+          client:clients(id, name:client_name, email:client_email, avatar:client_avatar), 
+          task:tasks(id, title, description),
+          group:client_groups(id, name:group_name)
+        `)
         .eq('task.creator_user_id', user.id),
       supabase.from('clients').select('*').eq('creator_user_id', user.id),
       supabase.from('client_groups').select(`*, group_members(client_id)`).eq('creator_user_id', user.id)
@@ -101,17 +111,19 @@ function App() {
     setClients(clientsRes.data?.map(c => ({ id: c.id, name: c.client_name, email: c.client_email, avatar: c.client_avatar || '' })) || []);
     setClientGroups(groupsRes.data?.map(g => ({ id: g.id, name: g.group_name, clientIds: g.group_members.map((m: any) => m.client_id) })) || []);
     
-    // FIX: Use assignment ID (a.id) instead of task ID (a.task.id)
+    // Map tasks to include both individual and group assignments
     setTasks(assignmentRes.data?.map(a => ({
-      id: a.id, // This should be the client_tasks assignment ID, not a.task.id
+      id: a.id,
       title: a.task.title,
       details: a.task.description,
-      assignee: { type: 'client' as const, id: a.client.id },
+      assignee: a.group_id 
+        ? { type: 'group' as const, id: a.group_id }
+        : { type: 'client' as const, id: a.client_id },
       dueDate: a.due_date || '',
       status: mapStatusToEnum(a.status),
       reminder: false,
       deliveryMethod: 'email',
-      taskId: a.task.id // Store the actual task ID separately if needed
+      taskId: a.task.id
     })) || []);
   };
 
@@ -255,12 +267,12 @@ function App() {
     }
   };
 
-  // ADD NEW FUNCTION FOR MANUAL EMAIL SENDING
+  // Updated notify function to handle both individuals and groups
   const handleNotifyClient = async (assignmentId: string) => {
     try {
       console.log('Sending notification for assignment:', assignmentId);
 
-      // Find the task and client info
+      // Find the task and assignment info
       const taskAssignment = taskAssignments.find(ta => ta.id === assignmentId);
       const task = tasks.find(t => t.id === assignmentId);
       
@@ -269,25 +281,67 @@ function App() {
         return;
       }
 
-      const client = clients.find(c => c.id === taskAssignment.client.id);
-      if (!client || !client.email) {
-        alert('Client email not found');
-        return;
+      // Get professional name from session user
+      const professionalName = session?.user_metadata?.full_name || 
+                              session?.email?.split('@')[0] || 
+                              'Your Wellness Professional';
+
+      if (task.assignee.type === 'group') {
+        // Handle group notification - send to all group members
+        const group = clientGroups.find(g => g.id === task.assignee.id);
+        if (!group) {
+          alert('Group not found');
+          return;
+        }
+
+        // Get all clients in the group
+        const groupClients = clients.filter(c => group.clientIds.includes(c.id));
+        
+        if (groupClients.length === 0) {
+          alert('No clients found in this group');
+          return;
+        }
+
+        // Send email to each group member
+        const emailPromises = groupClients.map(client => 
+          sendTaskEmail(
+            assignmentId,
+            client.email,
+            client.name,
+            taskAssignment.task.title,
+            mapEnumToDatabaseStatus(task.status),
+            taskAssignment.task.description,
+            taskAssignment.due_date || undefined,
+            professionalName
+          )
+        );
+
+        await Promise.all(emailPromises);
+        console.log(`Notifications sent to ${groupClients.length} group members`);
+        alert(`Notification sent to ${groupClients.length} members of ${group.name}`);
+
+      } else {
+        // Handle individual client notification
+        const client = clients.find(c => c.id === task.assignee.id);
+        if (!client || !client.email) {
+          alert('Client email not found');
+          return;
+        }
+
+        await sendTaskEmail(
+          assignmentId,
+          client.email,
+          client.name,
+          taskAssignment.task.title,
+          mapEnumToDatabaseStatus(task.status),
+          taskAssignment.task.description,
+          taskAssignment.due_date || undefined,
+          professionalName
+        );
+
+        console.log('Notification sent successfully');
+        alert('Notification sent to ' + client.name);
       }
-
-      // Send email notification
-      await sendTaskEmail(
-        assignmentId,
-        client.email,
-        client.name,
-        taskAssignment.task.title,
-        mapEnumToDatabaseStatus(task.status),
-        taskAssignment.task.description,
-        taskAssignment.due_date || undefined
-      );
-
-      console.log('Notification sent successfully');
-      alert('Notification sent to ' + client.name);
 
     } catch (error) {
       console.error('Failed to send notification:', error);
@@ -300,47 +354,119 @@ function App() {
     title: string;
     description: string;
     due_date: string;
-    client_id: string;
-    task_id: string; // This should be the ID from your tasks table
+    assignee_type: 'client' | 'group';
+    client_id?: string;
+    group_id?: string;
   }) => {
     try {
-      // 1. Create the task assignment in database
-      const { data: task, error } = await supabase
-        .from('client_tasks')
+      console.log('Creating task with data:', taskData);
+
+      if (!session) {
+        throw new Error('User not authenticated');
+      }
+
+      // 1. First create the task in the tasks table
+      const { data: newTask, error: taskError } = await supabase
+        .from('tasks')
         .insert({
-          task_id: taskData.task_id,
-          client_id: taskData.client_id,
-          due_date: taskData.due_date,
-          status: 'Pending'
+          title: taskData.title,
+          description: taskData.description,
+          creator_user_id: session.id
         })
+        .select()
+        .single();
+
+      if (taskError) {
+        console.error('Error creating task:', taskError);
+        throw taskError;
+      }
+
+      console.log('Task created:', newTask);
+
+      // 2. Create the assignment in client_tasks table
+      const assignmentData: any = {
+        task_id: newTask.id,
+        due_date: taskData.due_date,
+        status: 'pending'
+      };
+
+      // Add either client_id or group_id based on assignee_type
+      if (taskData.assignee_type === 'client' && taskData.client_id) {
+        assignmentData.client_id = taskData.client_id;
+      } else if (taskData.assignee_type === 'group' && taskData.group_id) {
+        assignmentData.group_id = taskData.group_id;
+      } else {
+        throw new Error('Invalid assignee data');
+      }
+
+      const { data: assignment, error: assignmentError } = await supabase
+        .from('client_tasks')
+        .insert(assignmentData)
         .select(`
           id,
           due_date,
           status,
+          client_id,
+          group_id,
           client:clients(id, client_name, client_email),
-          task:tasks(id, title, description)
+          task:tasks(id, title, description),
+          group:client_groups(id, group_name)
         `)
         .single();
 
-      if (error) throw error;
-
-      // 2. Schedule reminder email
-      if (task.due_date && task.client?.client_email) {
-        await scheduleReminderEmail(
-          task.id,
-          task.client.client_email,
-          task.client.client_name,
-          task.task.title,
-          task.due_date,
-          1 // 1 day before due date
-        );
-        console.log('Reminder email scheduled for task:', task.id);
+      if (assignmentError) {
+        console.error('Error creating assignment:', assignmentError);
+        throw assignmentError;
       }
 
-      // 3. Refresh the data
+      console.log('Assignment created:', assignment);
+
+      // 3. Schedule reminder email if needed
+      if (assignment.due_date) {
+        const professionalName = session?.user_metadata?.full_name || 
+                                session?.email?.split('@')[0] || 
+                                'Your Wellness Professional';
+
+        if (taskData.assignee_type === 'group' && taskData.group_id) {
+          // Schedule reminders for all group members
+          const group = clientGroups.find(g => g.id === taskData.group_id);
+          if (group) {
+            const groupClients = clients.filter(c => group.clientIds.includes(c.id));
+            
+            const reminderPromises = groupClients.map(client => 
+              scheduleReminderEmail(
+                assignment.id,
+                client.email,
+                client.name,
+                newTask.title,
+                assignment.due_date,
+                1,
+                professionalName
+              )
+            );
+
+            await Promise.all(reminderPromises);
+            console.log(`Reminders scheduled for ${groupClients.length} group members`);
+          }
+        } else if (taskData.assignee_type === 'client' && assignment.client) {
+          // Schedule reminder for individual client
+          await scheduleReminderEmail(
+            assignment.id,
+            assignment.client.client_email,
+            assignment.client.client_name,
+            newTask.title,
+            assignment.due_date,
+            1,
+            professionalName
+          );
+          console.log('Reminder scheduled for individual client');
+        }
+      }
+
+      // 4. Refresh the data
       await handleDataChange();
 
-      return task;
+      return assignment;
     } catch (error) {
       console.error('Error creating task:', error);
       throw error;

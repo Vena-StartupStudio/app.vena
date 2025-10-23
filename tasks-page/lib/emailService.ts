@@ -1,6 +1,5 @@
 import { supabase } from './supabaseClient';
 
-// Existing function - sends emails immediately
 export async function sendTaskEmail(
   taskId: string,
   clientEmail: string,
@@ -8,7 +7,8 @@ export async function sendTaskEmail(
   taskTitle: string,
   status: string,
   taskDescription?: string,
-  dueDate?: string
+  dueDate?: string,
+  professionalName?: string
 ) {
   try {
     console.log('Sending email with data:', {
@@ -18,7 +18,8 @@ export async function sendTaskEmail(
       taskTitle,
       status,
       taskDescription,
-      dueDate
+      dueDate,
+      professionalName
     });
 
     const { data, error } = await supabase.functions.invoke('send-task-email', {
@@ -29,7 +30,8 @@ export async function sendTaskEmail(
         taskTitle,
         taskDescription,
         dueDate,
-        status
+        status,
+        professionalName
       }
     });
 
@@ -46,34 +48,41 @@ export async function sendTaskEmail(
   }
 }
 
-// NEW: Function to schedule emails for later
 export async function scheduleTaskEmail(
   taskId: string,
   clientEmail: string,
   clientName: string,
   taskTitle: string,
   status: string,
-  scheduledFor: Date, // When to send the email
+  scheduledFor: Date,
   taskDescription?: string,
-  dueDate?: string
+  dueDate?: string,
+  professionalName?: string
 ) {
   try {
     console.log('Scheduling email for:', scheduledFor);
 
-    // Store the scheduled email in database
+    // Prepare the data object
+    const emailData: any = {
+      task_id: taskId,
+      client_email: clientEmail,
+      client_name: clientName,
+      task_title: taskTitle,
+      task_description: taskDescription,
+      due_date: dueDate,
+      status: status,
+      scheduled_for: scheduledFor.toISOString(),
+      sent: false
+    };
+
+    // Only add professional_name if it's provided
+    if (professionalName) {
+      emailData.professional_name = professionalName;
+    }
+
     const { data, error } = await supabase
-      .from('scheduled_emails') // You need to create this table first
-      .insert({
-        task_id: taskId,
-        client_email: clientEmail,
-        client_name: clientName,
-        task_title: taskTitle,
-        task_description: taskDescription,
-        due_date: dueDate,
-        status: status,
-        scheduled_for: scheduledFor.toISOString(),
-        sent: false
-      });
+      .from('scheduled_emails')
+      .insert(emailData);
 
     if (error) {
       console.error('Error scheduling email:', error);
@@ -88,28 +97,27 @@ export async function scheduleTaskEmail(
   }
 }
 
-// Your existing function - this creates a reminder
 export async function scheduleReminderEmail(
   taskId: string,
   clientEmail: string,
   clientName: string,
   taskTitle: string,
   dueDate: string,
-  reminderDaysBefore: number = 1
+  reminderDaysBefore: number = 1,
+  professionalName?: string
 ) {
-  // Calculate when to send the reminder
   const dueDateTime = new Date(dueDate);
   const reminderDate = new Date(dueDateTime.getTime() - (reminderDaysBefore * 24 * 60 * 60 * 1000));
   
-  // Schedule the email
   return scheduleTaskEmail(
     taskId,
     clientEmail,
     clientName,
     taskTitle,
     'Reminder Sent',
-    reminderDate, // Send on this date
+    reminderDate,
     `Reminder: This task is due on ${dueDateTime.toLocaleDateString()}`,
-    dueDate
+    dueDate,
+    professionalName
   );
 }

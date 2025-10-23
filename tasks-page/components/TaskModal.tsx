@@ -29,6 +29,8 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const [dueDate, setDueDate] = useState('');
   const [selectedClient, setSelectedClient] = useState('');
   const [sendReminder, setSendReminder] = useState(false);
+  const [assigneeType, setAssigneeType] = useState<'client' | 'group'>('client');
+  const [selectedGroup, setSelectedGroup] = useState('');
 
   // Pre-populate form when editing
   useEffect(() => {
@@ -36,13 +38,23 @@ const TaskModal: React.FC<TaskModalProps> = ({
       setTitle(editingTask.title);
       setDescription(editingTask.details);
       setDueDate(editingTask.dueDate.split('T')[0]); // Format for date input
-      setSelectedClient(editingTask.assignee.id);
+      setAssigneeType(editingTask.assignee.type);
+      
+      if (editingTask.assignee.type === 'client') {
+        setSelectedClient(editingTask.assignee.id);
+        setSelectedGroup('');
+      } else {
+        setSelectedGroup(editingTask.assignee.id);
+        setSelectedClient('');
+      }
     } else {
       // Reset form for new task
       setTitle('');
       setDescription('');
       setDueDate('');
       setSelectedClient('');
+      setSelectedGroup('');
+      setAssigneeType('client');
     }
   }, [editingTask]);
 
@@ -53,8 +65,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
       title,
       description,
       due_date: dueDate,
-      client_id: selectedClient,
-      // Add other required fields...
+      assignee_type: assigneeType,
+      client_id: assigneeType === 'client' ? selectedClient : null,
+      group_id: assigneeType === 'group' ? selectedGroup : null,
     };
 
     await onTaskCreated(taskData);
@@ -64,85 +77,113 @@ const TaskModal: React.FC<TaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-xl font-semibold text-purple-800">
-              {editingTask ? 'Edit Task' : 'Create New Task'}
-            </h2>
-            <button type="button" onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
-              <CloseIcon className="w-6 h-6 text-gray-600" />
-            </button>
-          </div>
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">
+          {editingTask ? 'Edit Task' : 'Create New Task'}
+        </h2>
+        
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Task title"
+            className="w-full p-2 border rounded mb-4"
+            required
+          />
+          
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Task description"
+            className="w-full p-2 border rounded mb-4"
+            rows={3}
+          />
+          
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="w-full p-2 border rounded mb-4"
+            required
+          />
 
-          <div className="p-6 space-y-4 overflow-y-auto">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-purple-700">Task Title</label>
-              <input
-                id="title"
-                type="text"
-                placeholder="e.g., Morning Mobility Video"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-purple-700">Details (optional)</label>
-              <textarea
-                id="description"
-                placeholder="e.g., Follow the 15-minute yoga video."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="assignee" className="block text-sm font-medium text-purple-700">Client / Group</label>
-                <select
-                  id="assignee"
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="">Select client...</option>
-                  {clients.map(client => (
-                    <option key={client.id} value={client.id}>
-                      {client.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="dueDate" className="block text-sm font-medium text-purple-700">When to send</label>
+          {/* Assignee Type Selection */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Assign to:
+            </label>
+            <div className="flex gap-4 mb-2">
+              <label className="flex items-center">
                 <input
-                  id="dueDate"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  type="radio"
+                  value="client"
+                  checked={assigneeType === 'client'}
+                  onChange={(e) => setAssigneeType(e.target.value as 'client' | 'group')}
+                  className="mr-2"
                 />
-              </div>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="sendReminder"
-                type="checkbox"
-                checked={sendReminder}
-                onChange={(e) => setSendReminder(e.target.checked)}
-                className="h-4 w-4 rounded text-purple-600 focus:ring-purple-500"
-              />
-              <label htmlFor="sendReminder" className="ml-2 block text-sm text-gray-700">Send a reminder if not done</label>
+                Individual Client
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  value="group"
+                  checked={assigneeType === 'group'}
+                  onChange={(e) => setAssigneeType(e.target.value as 'client' | 'group')}
+                  className="mr-2"
+                />
+                Client Group
+              </label>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 p-4 bg-gray-50 border-t rounded-b-2xl">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700">
+          {/* Client Selection */}
+          {assigneeType === 'client' && (
+            <select
+              value={selectedClient}
+              onChange={(e) => setSelectedClient(e.target.value)}
+              className="w-full p-2 border rounded mb-4"
+              required
+            >
+              <option value="">Select client...</option>
+              {clients.map(client => (
+                <option key={client.id} value={client.id}>
+                  {client.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Group Selection */}
+          {assigneeType === 'group' && (
+            <select
+              value={selectedGroup}
+              onChange={(e) => setSelectedGroup(e.target.value)}
+              className="w-full p-2 border rounded mb-4"
+              required
+            >
+              <option value="">Select group...</option>
+              {clientGroups.map(group => (
+                <option key={group.id} value={group.id}>
+                  {group.name} ({group.clientIds.length} members)
+                </option>
+              ))}
+            </select>
+          )}
+          
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+            >
               {editingTask ? 'Update Task' : 'Create Task'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+            >
+              Cancel
             </button>
           </div>
         </form>
