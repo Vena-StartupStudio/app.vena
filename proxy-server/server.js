@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://localhost:3001';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets']);
+const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'scheduler']);
 
 const shouldServeLandingSlug = (slug = '') => {
   const normalized = String(slug).trim().toLowerCase();

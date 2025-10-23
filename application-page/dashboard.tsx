@@ -317,12 +317,12 @@ const Dashboard: React.FC = () => {
                   <div className="bg-white/10 rounded-lg px-4 py-2 mb-4">
                     <p className="text-sm text-violet-100 mb-1">Your public booking link:</p>
                     <code className="text-white font-mono text-sm">
-                      https://app.vena.software/scheduler/{scheduleSlug}
+                      https://app.vena.software/scheduler/s/{scheduleSlug}
                     </code>
                   </div>
                   <div className="flex gap-3 flex-wrap">
                     <a
-                      href={`/scheduler/${scheduleSlug}`}
+                      href={`/scheduler/s/${scheduleSlug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
