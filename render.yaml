@@ -4,8 +4,11 @@ services:
     name: vena-scheduler
     runtime: node
     rootDir: scheduler
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
+    buildFilter:
+      paths:
+      - "scheduler/**"
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
@@ -21,9 +24,13 @@ services:
     name: vena-application
     runtime: node
     buildCommand: |
-      cd application-page && yarn install --frozen-lockfile && yarn build
-      cd ../proxy-server && npm install
+      cd application-page && yarn install --frozen-lockfile --prefer-offline && yarn build
+      cd ../proxy-server && npm ci --production
     startCommand: cd proxy-server && npm start
+    buildFilter:
+      paths:
+      - "application-page/**"
+      - "proxy-server/**"
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
@@ -43,6 +50,9 @@ services:
     rootDir: marketing-page
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
+    buildFilter:
+      paths:
+      - "marketing-page/**"
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
