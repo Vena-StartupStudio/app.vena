@@ -18,7 +18,7 @@ export default async function EditPage() {
   const { data: schedule } = await supabase
     .from('schedules')
     .select('slug, edit_token')
-    .eq('user_id', user.id)
+    .eq('owner_id', user.id)
     .single();
   
   if (!schedule) {

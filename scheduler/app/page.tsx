@@ -42,7 +42,7 @@ export default async function HomePage() {
   let { data: schedule } = await supabase
     .from('schedules')
     .select('slug')
-    .eq('user_id', user.id)
+    .eq('owner_id', user.id)
     .single();
   
   if (!schedule) {
@@ -67,7 +67,7 @@ export default async function HomePage() {
     const { error } = await supabase
       .from('schedules')
       .insert({
-        user_id: user.id,
+        owner_id: user.id,
         slug: slug,
         title: registration.business_name,
         timezone: 'Asia/Jerusalem',

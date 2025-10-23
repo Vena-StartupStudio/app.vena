@@ -82,7 +82,7 @@ const Dashboard: React.FC = () => {
           const { data: scheduleData } = await supabase
             .from('schedules')
             .select('slug')
-            .eq('user_id', user.id)
+            .eq('owner_id', user.id)
             .single();
           
           if (scheduleData) {
