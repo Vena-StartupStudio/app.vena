@@ -24,9 +24,9 @@ services:
     name: vena-application
     runtime: node
     buildCommand: |
-      cd application-page && yarn install --frozen-lockfile --prefer-offline && yarn build
-      cd ../proxy-server && npm ci --production
-    startCommand: cd proxy-server && npm start
+      cd application-page && yarn install --frozen-lockfile --prefer-offline && yarn build && cd ..
+      cd proxy-server && npm ci --production && cd ..
+    startCommand: cd application-page && yarn start
     buildFilter:
       paths:
       - "application-page/**"
