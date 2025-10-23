@@ -63,6 +63,18 @@ export default async function HomePage({ searchParams }: { searchParams: { acces
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
   
+  // First, let's see ALL schedules for this user to diagnose the issue
+  const { data: allSchedules, error: allSchedulesError } = await supabase
+    .from('schedules')
+    .select('id, slug, created_at')
+    .eq('owner_id', user.id);
+  
+  console.log('=== DIAGNOSTIC INFO ===');
+  console.log('User ID:', user.id);
+  console.log('All schedules for user:', allSchedules);
+  console.log('Schedules count:', allSchedules?.length);
+  console.log('All schedules error:', allSchedulesError);
+  
   // Check if a schedule exists for this user, if not create one
   const { data: scheduleData, error: scheduleError } = await supabase
     .from('schedules')
@@ -71,6 +83,8 @@ export default async function HomePage({ searchParams }: { searchParams: { acces
     .order('created_at', { ascending: true })
     .limit(1)
     .maybeSingle();
+
+  console.log('Schedule lookup result:', { scheduleData, scheduleError });
 
   if (scheduleError) {
     console.warn('Scheduler lookup issue:', scheduleError);
