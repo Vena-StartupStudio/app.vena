@@ -138,7 +138,7 @@ revoke all on availability_windows from anon, authenticated;
 revoke all on bookings from anon, authenticated;
 
 -- Column-level grants for metadata
-grant select (slug, title, timezone) on schedules to anon, authenticated;
+grant select (slug, title, timezone, owner_id) on schedules to anon, authenticated;
 
 grant select, insert, update, delete on schedules to authenticated;
 grant select, insert, update, delete on availability_windows to authenticated;
