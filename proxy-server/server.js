@@ -12,9 +12,11 @@ const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://localhost:300
 app.use('/scheduler', createProxyMiddleware({
   target: SCHEDULER_URL,
   changeOrigin: true,
-  // Don't rewrite path - Next.js expects /scheduler prefix
+  pathRewrite: {
+    '^/scheduler': '', // Remove /scheduler prefix when forwarding to Next.js
+  },
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying: ${req.method} ${req.url} -> ${SCHEDULER_URL}${req.url}`);
+    console.log(`Proxying: ${req.method} ${req.url} -> ${SCHEDULER_URL}${req.url.replace('/scheduler', '')}`);
   },
   onError: (err, req, res) => {
     console.error('Proxy error:', err);
