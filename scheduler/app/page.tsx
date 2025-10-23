@@ -1,32 +1,25 @@
 ﻿import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies, headers } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
+import { Suspense } from 'react';
+import AuthHandler from '@/components/AuthHandler';
 
 export default async function HomePage({ searchParams }: { searchParams: { access_token?: string; refresh_token?: string } }) {
   const supabase = createServerComponentClient({ cookies });
   
-  // Check if tokens are provided in query parameters
+  // If tokens are in the URL, render the client component to handle them
   if (searchParams.access_token && searchParams.refresh_token) {
-    console.log('Tokens found in query params, attempting to set session...');
-    
-    // Create a client with the provided tokens
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const supabaseWithToken = createClient(supabaseUrl, supabaseKey);
-    
-    const { data, error } = await supabaseWithToken.auth.setSession({
-      access_token: searchParams.access_token,
-      refresh_token: searchParams.refresh_token,
-    });
-    
-    if (error) {
-      console.error('Error setting session from query params:', error);
-    } else if (data.user) {
-      console.log('Session established from query params, user:', data.user.id);
-      // Redirect without the tokens in URL
-      redirect('/scheduler');
-    }
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Suspense fallback={<div>Loading...</div>}>
+          <AuthHandler />
+        </Suspense>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Setting up your session...</p>
+        </div>
+      </div>
+    );
   }
   
   // Get the authenticated user
