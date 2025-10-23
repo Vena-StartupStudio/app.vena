@@ -88,6 +88,8 @@ app.use('/scheduler', (req, res, next) => {
   // Preserve cookies and headers - critical for Supabase auth
   cookieDomainRewrite: false,
   preserveHeaderKeyCase: true,
+  timeout: 30000, // 30 second timeout
+  proxyTimeout: 30000,
   onProxyReq: (proxyReq, req, res) => {
     const newPath = req.url.replace('/scheduler', '') || '/';
     console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
@@ -101,6 +103,17 @@ app.use('/scheduler', (req, res, next) => {
     if (req.headers.authorization) {
       proxyReq.setHeader('Authorization', req.headers.authorization);
     }
+
+    // Forward Supabase auth headers
+    Object.keys(req.headers).forEach(key => {
+      if (key.toLowerCase().startsWith('x-supabase') || 
+          key.toLowerCase() === 'apikey') {
+        proxyReq.setHeader(key, req.headers[key]);
+      }
+    });
+    
+    // Set proper host header
+    proxyReq.setHeader('Host', new URL(SCHEDULER_URL).host);
   },
   onProxyRes: (proxyRes, req, res) => {
     // Log response status for debugging
@@ -112,9 +125,14 @@ app.use('/scheduler', (req, res, next) => {
     const setCookie = proxyRes.headers['set-cookie'];
     if (setCookie) {
       proxyRes.headers['set-cookie'] = setCookie.map(cookie => {
-        // Don't modify domain/path for cookies
-        return cookie;
+        // Rewrite domain to allow cookies to work across proxy
+        return cookie.replace(/Domain=[^;]+;?/gi, '');
       });
+    }
+
+    // Add CORS headers if needed
+    if (!proxyRes.headers['access-control-allow-origin']) {
+      proxyRes.headers['access-control-allow-credentials'] = 'true';
     }
   },
   onError: (err, req, res) => {
@@ -124,12 +142,17 @@ app.use('/scheduler', (req, res, next) => {
     console.error('[SCHEDULER PROXY] Target was:', SCHEDULER_URL);
     console.error('[SCHEDULER PROXY] Request:', req.method, req.url);
     console.error('[SCHEDULER PROXY] ==========================================');
-    res.status(502).json({ 
-      error: 'Scheduler service unavailable', 
-      details: err.message,
-      target: SCHEDULER_URL,
-      requestUrl: req.url
-    });
+    
+    // Check if response is already sent
+    if (!res.headersSent) {
+      res.status(502).json({ 
+        error: 'Scheduler service unavailable', 
+        details: err.message,
+        target: SCHEDULER_URL,
+        requestUrl: req.url,
+        hint: 'The scheduler service may be starting up or unavailable. Please try again in a moment.'
+      });
+    }
   }
 }));
 

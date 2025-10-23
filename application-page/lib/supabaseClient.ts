@@ -5,6 +5,10 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables:', {
+    VITE_SUPABASE_URL: supabaseUrl ? 'SET' : 'NOT SET',
+    VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? 'SET' : 'NOT SET'
+  });
   throw new Error('Missing Supabase environment variables');
 }
 
@@ -13,16 +17,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    // Store session in localStorage instead of cookies for better cross-origin support
+    // Store session in localStorage for better cross-origin support
     storageKey: 'vena-auth-token',
     storage: window.localStorage,
-    flowType: 'pkce'
+    flowType: 'pkce',
+    // Set debug mode in development
+    debug: import.meta.env.DEV
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'vena-application'
+    }
   }
 });
 
-// (optional) quick sanity log — remove later
+// Log configuration on startup (sanitized)
 console.log(
-  '[supabase env]',
+  '[Supabase Client] Initialized:',
   (supabaseUrl || '').replace(/(https:\/\/)(.*?)(\.supabase\.co)/, '$1***$3'),
-  (supabaseAnonKey || '').slice(0, 8) + '…'
+  'Key:', (supabaseAnonKey || '').slice(0, 8) + '...'
 );
