@@ -11,6 +11,14 @@ const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'scheduler']);
 
+// Log configuration on startup
+console.log('=== PROXY SERVER CONFIGURATION ===');
+console.log('PORT:', PORT);
+console.log('SCHEDULER_URL:', SCHEDULER_URL);
+console.log('SUPABASE_URL:', SUPABASE_URL ? '[SET]' : '[NOT SET]');
+console.log('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? '[SET]' : '[NOT SET]');
+console.log('==================================');
+
 const shouldServeLandingSlug = (slug = '') => {
   const normalized = String(slug).trim().toLowerCase();
   if (!normalized) {
@@ -63,8 +71,13 @@ const fetchLandingProfile = async (slug) => {
 // Proxy /scheduler/* requests to the scheduler service
 // IMPORTANT: This must come BEFORE static file serving
 app.use('/scheduler', (req, res, next) => {
+  console.log(`[SCHEDULER PROXY] ==========================================`);
   console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.url}`);
-  console.log(`[SCHEDULER PROXY] Cookies:`, req.headers.cookie);
+  console.log(`[SCHEDULER PROXY] Full Path: ${req.path}`);
+  console.log(`[SCHEDULER PROXY] Query: ${JSON.stringify(req.query)}`);
+  console.log(`[SCHEDULER PROXY] Cookies:`, req.headers.cookie || '[none]');
+  console.log(`[SCHEDULER PROXY] Target: ${SCHEDULER_URL}`);
+  console.log(`[SCHEDULER PROXY] ==========================================`);
   next();
 }, createProxyMiddleware({
   target: SCHEDULER_URL,
@@ -100,11 +113,17 @@ app.use('/scheduler', (req, res, next) => {
     }
   },
   onError: (err, req, res) => {
-    console.error('[SCHEDULER PROXY] Error:', err.message);
+    console.error('[SCHEDULER PROXY] ==========================================');
+    console.error('[SCHEDULER PROXY] ERROR:', err.message);
+    console.error('[SCHEDULER PROXY] Stack:', err.stack);
+    console.error('[SCHEDULER PROXY] Target was:', SCHEDULER_URL);
+    console.error('[SCHEDULER PROXY] Request:', req.method, req.url);
+    console.error('[SCHEDULER PROXY] ==========================================');
     res.status(502).json({ 
       error: 'Scheduler service unavailable', 
       details: err.message,
-      target: SCHEDULER_URL 
+      target: SCHEDULER_URL,
+      requestUrl: req.url
     });
   }
 }));
