@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './lib/supabaseClient';
+import { supabase, sendTaskEmail } from './lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import AuthForm from './components/AuthForm'; 
+import AuthForm from './components/AuthForm';
 import Header from './components/Header';
 import TaskList from './components/TaskList';
 import { Client, ClientGroup, TaskAssignment, Task, TaskStatus } from './types';
@@ -130,6 +130,30 @@ function App() {
     if (error) {
       alert('Error updating status: ' + error.message);
     } else {
+      // Send email notification to client
+      try {
+        const taskAssignment = taskAssignments.find(ta => ta.id === taskId);
+        if (taskAssignment) {
+          // Find the client details from the clients array
+          const client = clients.find(c => c.id === taskAssignment.client.id);
+          if (client) {
+            await sendTaskEmail(
+              taskId,
+              client.email,
+              client.name,
+              taskAssignment.task.title,
+              taskAssignment.task.description,
+              taskAssignment.due_date || undefined,
+              mapEnumToDatabaseStatus(status)
+            );
+            console.log('Task email sent successfully');
+          }
+        }
+      } catch (emailError) {
+        console.error('Failed to send task email:', emailError);
+        // Don't show error to user as the status update was successful
+      }
+
       handleDataChange();
     }
   };
