@@ -61,18 +61,27 @@ const fetchLandingProfile = async (slug) => {
 };
 
 // Proxy /scheduler/* requests to the scheduler service
-app.use('/scheduler', createProxyMiddleware({
+// IMPORTANT: This must come BEFORE static file serving
+app.use('/scheduler', (req, res, next) => {
+  console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.url}`);
+  next();
+}, createProxyMiddleware({
   target: SCHEDULER_URL,
   changeOrigin: true,
   pathRewrite: {
     '^/scheduler': '', // Remove /scheduler prefix when forwarding to Next.js
   },
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`Proxying: ${req.method} ${req.url} -> ${SCHEDULER_URL}${req.url.replace('/scheduler', '')}`);
+    const newPath = req.url.replace('/scheduler', '') || '/';
+    console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
   },
   onError: (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(500).send('Scheduler service unavailable');
+    console.error('[SCHEDULER PROXY] Error:', err.message);
+    res.status(502).json({ 
+      error: 'Scheduler service unavailable', 
+      details: err.message,
+      target: SCHEDULER_URL 
+    });
   }
 }));
 
@@ -114,21 +123,28 @@ app.use(express.static(staticPath, {
 
 // Fallback to index.html for SPA routes (except API routes and scheduler)
 app.get('*', (req, res, next) => {
-  // Don't fallback for /scheduler or /api routes
+  // Don't fallback for /scheduler or /api routes - let them 404 properly
   if (req.path.startsWith('/scheduler') || req.path.startsWith('/api')) {
-    return next();
+    return res.status(404).send('Not Found');
   }
   
   // Serve the appropriate HTML file based on the route
   if (req.path === '/' || req.path === '/index.html') {
-    res.sendFile(path.join(staticPath, 'index.html'));
+    return res.sendFile(path.join(staticPath, 'index.html'));
   } else if (req.path.startsWith('/dashboard')) {
-    res.sendFile(path.join(staticPath, 'dashboard.html'));
-  } else if (req.path.startsWith('/landing') || req.path.length > 1) {
-    res.sendFile(path.join(staticPath, 'landing.html'));
-  } else {
-    res.sendFile(path.join(staticPath, 'index.html'));
+    return res.sendFile(path.join(staticPath, 'dashboard.html'));
+  } else if (req.path.startsWith('/landing')) {
+    return res.sendFile(path.join(staticPath, 'landing.html'));
   }
+  
+  // For custom landing slugs (single path segment, no file extension)
+  const pathSegments = req.path.split('/').filter(Boolean);
+  if (pathSegments.length === 1 && !req.path.includes('.')) {
+    return res.sendFile(path.join(staticPath, 'landing.html'));
+  }
+  
+  // Default fallback
+  return res.sendFile(path.join(staticPath, 'index.html'));
 });
 
 app.listen(PORT, () => {
