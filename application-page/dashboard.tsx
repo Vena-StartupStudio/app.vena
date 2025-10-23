@@ -302,7 +302,7 @@ const Dashboard: React.FC = () => {
               </p>
               <div className="flex gap-3 flex-wrap">
                 <a
-                  href="/scheduler/s/demo-schedule"
+                  href="/scheduler"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
@@ -313,7 +313,7 @@ const Dashboard: React.FC = () => {
                   View Public Page
                 </a>
                 <a
-                  href="/scheduler/s/demo-schedule/edit?token=a101fcc60cc09715cacce4965cde7693acd61d23"
+                  href="/scheduler/edit?token=a101fcc60cc09715cacce4965cde7693acd61d23"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-800 transition-colors"
