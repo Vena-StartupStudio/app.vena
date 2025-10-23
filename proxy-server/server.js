@@ -70,8 +70,7 @@ const fetchLandingProfile = async (slug) => {
 
 // Proxy /scheduler/* requests to the scheduler service
 // IMPORTANT: This must come BEFORE static file serving
-app.use('/', (req, res, next) => {
-  if (!req.path.startsWith('/scheduler')) return next();
+app.use('/scheduler', (req, res, next) => {
   console.log(`[SCHEDULER PROXY] ==========================================`);
   console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.url}`);
   console.log(`[SCHEDULER PROXY] Full Path: ${req.path}`);
