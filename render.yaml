@@ -29,6 +29,10 @@ services:
         value: 20.11.0
       - key: SCHEDULER_SERVICE_URL
         value: https://vena-scheduler.onrender.com
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
       - key: PORT
         value: 10000
 
