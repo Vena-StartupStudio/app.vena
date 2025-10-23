@@ -1,11 +1,7 @@
 import { OwnerScheduleEditor } from '@/components/OwnerScheduleEditor';
 
-type PageProps = {
-  searchParams: { token?: string };
-};
-
-export default function EditPage({ searchParams }: PageProps) {
-  const token = searchParams.token;
-  // Default to demo-schedule, or can be made dynamic based on user session
-  return <OwnerScheduleEditor slug="demo-schedule" token={token} />;
+export default function EditPage() {
+  // Authentication will be handled within OwnerScheduleEditor using Supabase session
+  // No token needed - user must be logged in to edit their schedule
+  return <OwnerScheduleEditor slug="demo-schedule" token={undefined} />;
 }

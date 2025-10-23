@@ -313,7 +313,7 @@ const Dashboard: React.FC = () => {
                   View Public Page
                 </a>
                 <a
-                  href="/scheduler/edit?token=a101fcc60cc09715cacce4965cde7693acd61d23"
+                  href="/scheduler/edit"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-800 transition-colors"
