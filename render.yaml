@@ -1,27 +1,5 @@
 services:
-  # Application Page (Registration and Dashboard)
-  - type: web
-    name: vena-application
-    runtime: node
-    rootDir: application-page
-    buildCommand: yarn install --frozen-lockfile && yarn build
-    staticPublishPath: ./dist
-    envVars:
-      - key: NODE_VERSION
-        value: 20.11.0
-
-  # Marketing Page
-  - type: web
-    name: vena-marketing
-    runtime: node
-    rootDir: marketing-page
-    buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    envVars:
-      - key: NODE_VERSION
-        value: 20.11.0
-
-  # Scheduler (Next.js App)
+  # Scheduler (Next.js App) - Private service
   - type: web
     name: vena-scheduler
     runtime: node
@@ -37,3 +15,30 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+
+  # Main Application (Proxy + Static Files)
+  - type: web
+    name: vena-application
+    runtime: node
+    buildCommand: |
+      cd application-page && yarn install --frozen-lockfile && yarn build
+      cd ../proxy-server && npm install
+    startCommand: cd proxy-server && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: SCHEDULER_SERVICE_URL
+        value: https://vena-scheduler.onrender.com
+      - key: PORT
+        value: 10000
+
+  # Marketing Page
+  - type: web
+    name: vena-marketing
+    runtime: node
+    rootDir: marketing-page
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
