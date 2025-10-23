@@ -9,14 +9,14 @@ const landingRewrite = (): Plugin => {
     if (pathname.includes('.') || pathname.startsWith('/@')) {
       return false;
     }
-    if (pathname.startsWith('/api') || pathname.startsWith('/dashboard') || pathname.startsWith('/uploads') || pathname.startsWith('/assets')) {
+    if (pathname.startsWith('/api') || pathname.startsWith('/dashboard') || pathname.startsWith('/uploads') || pathname.startsWith('/assets') || pathname.startsWith('/scheduler')) {
       return false;
     }
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length !== 1) {
       return false;
     }
-    const reserved = new Set(['signin', 'login', 'register', 'landing', 'index', 'dashboard']);
+    const reserved = new Set(['signin', 'login', 'register', 'landing', 'index', 'dashboard', 'scheduler']);
     return !reserved.has(segments[0].toLowerCase());
   };
 
