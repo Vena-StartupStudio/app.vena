@@ -6,7 +6,9 @@ export default async function HomePage() {
   const supabase = createServerComponentClient({ cookies });
   
   // Get the authenticated user
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  console.log('Auth check:', { user: user?.id, error: authError });
   
   if (!user) {
     // If not logged in, redirect to sign-in
@@ -14,11 +16,13 @@ export default async function HomePage() {
   }
   
   // Fetch the user's business name from registrations table
-  const { data: registration } = await supabase
+  const { data: registration, error: regError } = await supabase
     .from('registrations')
     .select('business_name')
     .eq('id', user.id)
     .single();
+  
+  console.log('Registration check:', { registration, error: regError });
   
   if (!registration?.business_name) {
     // If no business name, show error or redirect
@@ -27,6 +31,10 @@ export default async function HomePage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Business Name Required</h1>
           <p>Please set up your business name in your profile first.</p>
+          <div className="mt-4 text-sm text-gray-600">
+            <p>User ID: {user.id}</p>
+            {regError && <p className="text-red-600">Error: {regError.message}</p>}
+          </div>
         </div>
       </div>
     );
