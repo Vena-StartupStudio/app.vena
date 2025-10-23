@@ -12,7 +12,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    // Store session in localStorage instead of cookies for better cross-origin support
+    storageKey: 'vena-auth-token',
+    storage: window.localStorage,
+    flowType: 'pkce'
   }
 });
 
