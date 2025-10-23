@@ -43,7 +43,7 @@ fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // ------------ App init ------------
 const app = express();
-const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets']);
+const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'tasks']);
 
 const shouldServeLandingSlug = (slug?: string) => {
   if (!slug) {

@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://localhost:3001';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'scheduler']);
+const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'scheduler', 'tasks']);
 
 // Log configuration on startup
 console.log('=== PROXY SERVER CONFIGURATION ===');
@@ -176,7 +176,7 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'Not found' });
   }
-  
+
   // Serve the appropriate HTML file based on the route
   if (req.path === '/' || req.path === '/index.html') {
     return res.sendFile(path.join(staticPath, 'index.html'));
@@ -184,14 +184,16 @@ app.get('*', (req, res, next) => {
     return res.sendFile(path.join(staticPath, 'dashboard.html'));
   } else if (req.path.startsWith('/landing')) {
     return res.sendFile(path.join(staticPath, 'landing.html'));
+  } else if (req.path === '/tasks') {
+    return res.sendFile(path.join(staticPath, 'index.html'));
   }
-  
+
   // For custom landing slugs (single path segment, no file extension)
   const pathSegments = req.path.split('/').filter(Boolean);
   if (pathSegments.length === 1 && !req.path.includes('.')) {
     return res.sendFile(path.join(staticPath, 'landing.html'));
   }
-  
+
   // Default fallback
   return res.sendFile(path.join(staticPath, 'index.html'));
 });
