@@ -1,5 +1,8 @@
 {
   "/s/[slug]/page": "app/s/[slug]/page.js",
+  "/api/scheduler/[slug]/availability/route": "app/api/scheduler/[slug]/availability/route.js",
+  "/api/scheduler/[slug]/settings/route": "app/api/scheduler/[slug]/settings/route.js",
   "/s/[slug]/edit/page": "app/s/[slug]/edit/page.js",
-  "/api/scheduler/[slug]/availability/route": "app/api/scheduler/[slug]/availability/route.js"
+  "/api/scheduler/[slug]/book/route": "app/api/scheduler/[slug]/book/route.js",
+  "/api/scheduler/[slug]/windows/route": "app/api/scheduler/[slug]/windows/route.js"
 }
