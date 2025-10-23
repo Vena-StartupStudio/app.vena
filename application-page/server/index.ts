@@ -170,8 +170,15 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(clientDistPath, 'dashboard.html'));
 });
 
+// Serve tasks page 
+app.get('/tasks', (req, res) => {
+  console.log('LOG: Request received for /tasks. Sending index.html.');
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
+
 // Serve ProfileEditor assets
 app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
+
 app.get('/:slug', (req, res, next) => {
   const { slug } = req.params;
   if (!shouldServeLandingSlug(slug)) {
