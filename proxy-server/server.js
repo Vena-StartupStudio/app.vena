@@ -143,7 +143,7 @@ app.get('/healthz', (_req, res) => {
   res.status(200).json({
     ok: true,
     service: 'vena-application-proxy',
-    schedulerTarget: SCHEDULER_URL,
+    schedulerTarget: SCHEDULER_SERVICE_URL || 'static',
     time: new Date().toISOString(),
   });
 });
