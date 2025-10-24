@@ -492,7 +492,7 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
           <a
 
-            href={`/${normalizedLandingPageSlug}`}
+            href={`https://app.vena.software/${normalizedLandingPageSlug}`}
 
             target="_blank"
 

@@ -340,7 +340,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="flex gap-3 flex-wrap">
                     <a
-                      href={`/scheduler/s/${scheduleSlug}`}
+                      href={`https://app.vena.software/scheduler/s/${scheduleSlug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
@@ -351,7 +351,7 @@ const Dashboard: React.FC = () => {
                       View Public Page
                     </a>
                     <a
-                      href="/scheduler/edit"
+                      href="https://app.vena.software/scheduler/edit"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-violet-800 transition-colors"
@@ -367,7 +367,7 @@ const Dashboard: React.FC = () => {
               ) : (
                 <div className="flex gap-3 flex-wrap">
                   <a
-                    href="/scheduler"
+                    href="https://app.vena.software/scheduler"
                     className="inline-flex items-center gap-2 bg-white text-violet-600 px-4 py-2 rounded-lg font-semibold hover:bg-violet-50 transition-colors"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
