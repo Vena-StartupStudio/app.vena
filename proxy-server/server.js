@@ -68,12 +68,17 @@ const fetchLandingProfile = async (slug) => {
   return payload.profile_config || null;
 };
 
-// Proxy /scheduler/* requests to the scheduler service
+// Redirect legacy /schedule* to /scheduler*
+app.get('/schedule*', (req, res) => {
+  const dest = req.originalUrl.replace(/^\/schedule/, '/scheduler');
+  return res.redirect(301, dest);
+});
+
+// Proxy only /scheduler/* requests to the scheduler service
 // IMPORTANT: This must come BEFORE static file serving
-app.use('/', (req, res, next) => {
-  if (!req.path.startsWith('/scheduler')) return next();
+app.use('/scheduler', (req, res, next) => {
   console.log(`[SCHEDULER PROXY] ==========================================`);
-  console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.url}`);
+  console.log(`[SCHEDULER PROXY] Intercepted: ${req.method} ${req.originalUrl}`);
   console.log(`[SCHEDULER PROXY] Full Path: ${req.path}`);
   console.log(`[SCHEDULER PROXY] Query: ${JSON.stringify(req.query)}`);
   console.log(`[SCHEDULER PROXY] Cookies:`, req.headers.cookie || '[none]');
@@ -92,8 +97,9 @@ app.use('/', (req, res, next) => {
   timeout: 30000, // 30 second timeout
   proxyTimeout: 30000,
   onProxyReq: (proxyReq, req, res) => {
-    const newPath = req.url.replace('/scheduler', '') || '/';
-    proxyReq.path = newPath;
+    // Compute the path sent upstream after rewrite for logging purposes
+    const original = (req.originalUrl || req.url || '/');
+    const newPath = original.replace(/^\/scheduler/, '') || '/';
     console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
 
     // Forward all cookies - critical for authentication
@@ -161,6 +167,16 @@ app.use('/', (req, res, next) => {
 // Serve static files from application-page/dist
 const staticPath = path.join(__dirname, '..', 'application-page', 'dist');
 console.log('Serving static files from:', staticPath);
+
+// Simple health check for platform probes
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: 'vena-application-proxy',
+    schedulerTarget: SCHEDULER_URL,
+    time: new Date().toISOString(),
+  });
+});
 
 app.get('/api/landing/:slug', async (req, res) => {
   const rawSlug = String(req.params.slug || '').trim();
