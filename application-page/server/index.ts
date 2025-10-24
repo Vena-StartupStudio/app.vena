@@ -179,6 +179,9 @@ app.get('/tasks', (req, res) => {
 // Serve ProfileEditor assets
 app.use('/dashboard', express.static(path.join(__dirname, '../dist')));
 
+// Add '/scheduler' to your list of app routes
+const appRoutes = ['/tasks', '/dashboard', '/signin', '/scheduler'];
+
 app.get('/:slug', (req, res, next) => {
   const { slug } = req.params;
   if (!shouldServeLandingSlug(slug)) {

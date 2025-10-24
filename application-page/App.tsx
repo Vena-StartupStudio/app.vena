@@ -4,6 +4,7 @@ import RegistrationForm from './components/RegistrationForm';
 import ConfirmationMessage from './components/ConfirmationMessage';
 import { IntegrationSettings } from './components/IntegrationSettings';
 import TasksPage from './components/TasksPage';
+import SchedulerPage from './components/SchedulerPage';
 import VenaLogo from './components/icons/VenaLogo.png';
 
 const RegistrationPage: React.FC = () => {
@@ -68,14 +69,17 @@ const RegistrationPage: React.FC = () => {
   );
 };
 
-const App: React.FC = () => (
-  <Router>
-    <Routes>
-      <Route path="/" element={<RegistrationPage />} />
-      <Route path="/tasks" element={<TasksPage />} />
-    </Routes>
-  </Router>
-);
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<RegistrationPage />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/scheduler" element={<SchedulerPage />} />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App;
 
