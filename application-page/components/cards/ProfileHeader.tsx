@@ -269,30 +269,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 </div>
               </div>
 
-              {loungeVisible && (
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleMembersLoungeClick}
-                    className="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400"
-                  >
-                    <span>Explore Members Club</span>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                      <svg
-                        className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.8}
-                        aria-hidden="true"
-                      >
-                        <path d="M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
