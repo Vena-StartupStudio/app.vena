@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 // Get the scheduler service URL from environment variable
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://localhost:3001';
+const SCHEDULER_BASE_PATH = (process.env.SCHEDULER_BASE_PATH || '/scheduler').replace(/\/+$/, '') || '/scheduler';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'scheduler', 'tasks']);
@@ -15,6 +16,7 @@ const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'regi
 console.log('=== PROXY SERVER CONFIGURATION ===');
 console.log('PORT:', PORT);
 console.log('SCHEDULER_URL:', SCHEDULER_URL);
+console.log('SCHEDULER_BASE_PATH:', SCHEDULER_BASE_PATH);
 console.log('SUPABASE_URL:', SUPABASE_URL ? '[SET]' : '[NOT SET]');
 console.log('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? '[SET]' : '[NOT SET]');
 console.log('==================================');
@@ -113,8 +115,12 @@ app.use('/scheduler', (req, res, next) => {
 }, createProxyMiddleware({
   target: SCHEDULER_URL,
   changeOrigin: true,
-  pathRewrite: {
-    '^/scheduler': '', // Remove /scheduler prefix when forwarding to Next.js
+  pathRewrite: (path, req) => {
+    if (path.startsWith(SCHEDULER_BASE_PATH)) {
+      const rewritten = path.slice(SCHEDULER_BASE_PATH.length);
+      return rewritten.startsWith('/') ? rewritten : `/${rewritten}`;
+    }
+    return path;
   },
   // Preserve cookies and headers - critical for Supabase auth
   cookieDomainRewrite: false,
@@ -124,7 +130,9 @@ app.use('/scheduler', (req, res, next) => {
   onProxyReq: (proxyReq, req, res) => {
     // Compute the path sent upstream after rewrite for logging purposes
     const original = (req.originalUrl || req.url || '/');
-    const newPath = original.replace(/^\/scheduler/, '') || '/';
+    const newPath = original.startsWith(SCHEDULER_BASE_PATH)
+      ? original.slice(SCHEDULER_BASE_PATH.length) || '/'
+      : original;
     console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
 
     // Forward all cookies - critical for authentication
@@ -153,6 +161,18 @@ app.use('/scheduler', (req, res, next) => {
     const status = proxyRes.statusCode;
     const location = proxyRes.headers['location'];
     console.log(`[SCHEDULER PROXY] Response from upstream: ${req.method} ${req.originalUrl} -> ${status}${location ? ` (Location: ${location})` : ''}`);
+
+    if (location && status && [301, 302, 303, 307, 308].includes(status)) {
+      const normalized = location.replace(/\/{2,}/g, '/');
+      if (normalized === '/') {
+        proxyRes.headers['location'] = SCHEDULER_BASE_PATH;
+      } else if (normalized.startsWith('/')) {
+        const withBase = normalized.startsWith(SCHEDULER_BASE_PATH)
+          ? normalized
+          : `${SCHEDULER_BASE_PATH}${normalized}`;
+        proxyRes.headers['location'] = withBase.replace(/\/{2,}/g, '/');
+      }
+    }
 
     // Forward Set-Cookie headers back to client
     const setCookie = proxyRes.headers['set-cookie'];
