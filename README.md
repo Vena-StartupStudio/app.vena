@@ -1,3 +1,10 @@
+# Vena — The All-in-One Wellness Business Hub
+
+Vena is a digital platform built to help independent wellness professionals manage their business effortlessly.  
+It brings together scheduling, client management, personalized landing pages, and automated workflows — all in one seamless, interactive hub.
+
+---
+
 ## Overview
 
 Vena gives wellness professionals the tools to connect with clients, manage their schedule, and grow their boutique practice with ease.  
