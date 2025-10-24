@@ -1,95 +1,79 @@
-# Vena Task Management System
+Vena — The All-in-One Wellness Business Hub
 
-A comprehensive task management application for wellness professionals to assign and track follow-up tasks with their clients.
+Vena is a digital platform built to help independent wellness professionals manage their business effortlessly.
+It brings together scheduling, client management, personalized landing pages, and automated workflows — all in one seamless, interactive hub.
 
-## Features
+Overview
 
-- ✅ **Client Management**: Add, edit, and organize clients
-- ✅ **Group Management**: Create client groups for bulk task assignment
-- ✅ **Task Assignment**: Assign tasks to individual clients or groups
-- ✅ **Status Tracking**: Track task completion with visual status badges
-- ✅ **Email Notifications**: Automatic email notifications when task status changes
-- ✅ **Responsive Design**: Works on desktop and mobile devices
-- ✅ **Real-time Updates**: Live data synchronization with Supabase
+Vena gives wellness professionals the tools to connect with clients, manage their schedule, and grow their boutique practice with ease.
+The platform eliminates the need for multiple apps by integrating everything into one place — from booking to automation.
 
-## Email Integration
+Core Features
 
-The system automatically sends email notifications to clients when task statuses are updated. The email system supports:
+Intelligent Time Management
+Advanced scheduling tools that optimize your calendar and maximize client focus.
 
-### Email Service Options
+Automated Workflow Generation
+Automatically generate post-appointment tasks and follow-up workflows to maintain strong client relationships.
 
-1. **Resend API (Recommended)**
-   - Sign up at [resend.com](https://resend.com)
-   - Get your API key from the dashboard
-   - Add to `.env.local`: `RESEND_API_KEY=your_api_key_here`
+Dynamic Personal Landing Page
+Showcase your professional brand with a fully customizable landing page to attract and retain clients.
 
-2. **SMTP Configuration (Alternative)**
-   - Configure SMTP settings in `.env.local`:
-   ```
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=your-email@gmail.com
-   SMTP_PASS=your-app-password
-   SMTP_FROM_EMAIL=noreply@vena.software
-   ```
+Client Management
+Store and organize client information with a centralized dashboard connected to Supabase.
 
-### Email Templates
+Integrated Communication
+Send personalized updates, notifications, and confirmations directly to clients.
 
-The system sends beautifully formatted HTML emails with:
-- Professional Vena branding
-- Task details and descriptions
-- Due dates and status information
-- Status-specific messaging (completed, pending, missed, reminders)
-- Responsive design for all devices
+Real-Time Sync
+All updates are instantly synchronized across the platform for both professionals and clients.
 
-## Setup Instructions
+For Modern Wellness Professionals
 
-### 1. Environment Configuration
+Vena is designed for coaches, trainers, therapists, and independent wellness experts who want to simplify their day-to-day operations.
 
-Copy `.env.local` and configure:
+It helps you:
 
-```bash
+Elevate your professional image online
+
+Simplify client bookings and payments
+
+Save valuable administrative hours
+
+Share personalized content effortlessly
+
+Grow your practice with powerful digital tools
+
+Tech Stack
+
+Frontend: React + TypeScript + Vite
+
+Backend: Supabase (PostgreSQL, Auth, Functions)
+
+Deployment: Render
+
+Email Integration: Resend API or SMTP
+
+Real-time Sync: Supabase subscriptions
+
+Environment Configuration
+
+Copy .env.local and configure:
+
 # Required
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Email Configuration (choose one)
+# Optional email integration
 RESEND_API_KEY=your_resend_api_key
-# OR SMTP settings
+# OR SMTP
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 SMTP_FROM_EMAIL=noreply@vena.software
-```
 
-### 2. Database Setup
-
-The application uses Supabase with the following tables:
-- `clients` - Client information
-- `client_groups` - Client group definitions
-- `group_members` - Group membership relationships
-- `tasks` - Task templates
-- `client_tasks` - Task assignments with status tracking
-
-### 3. Supabase Functions
-
-Deploy the email function:
-
-```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Login to Supabase
-supabase login
-
-# Deploy functions
-supabase functions deploy send-task-email
-```
-
-### 4. Development
-
-```bash
+Development
 # Install dependencies
 npm install
 
@@ -98,34 +82,7 @@ npm run dev
 
 # Build for production
 npm run build
-```
 
-## Usage
+License
 
-1. **Sign In**: Use Google OAuth or email/password authentication
-2. **Manage Clients**: Add clients and organize them into groups
-3. **Create Tasks**: Assign tasks to clients or groups with due dates
-4. **Track Progress**: Update task statuses and automatically notify clients via email
-5. **Monitor Activity**: View task completion rates and client engagement
-
-## Email Flow
-
-When a task status is updated:
-
-1. **Status Change** → User updates task status in the UI
-2. **Database Update** → Task status is saved to Supabase
-3. **Email Trigger** → System automatically sends email notification
-4. **Client Notification** → Client receives formatted email with task details
-5. **Status Confirmation** → Email status is logged in the system
-
-## Support
-
-For issues or questions:
-- Check the browser console for error messages
-- Verify email configuration in environment variables
-- Ensure Supabase functions are properly deployed
-- Check email service provider limits and settings
-
-## License
-
-This project is part of the Vena wellness platform ecosystem.
+This project is part of the Vena wellness ecosystem, providing modern digital tools for wellness professionals to manage clients, automate workflows, and grow their business.
