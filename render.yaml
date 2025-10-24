@@ -1,45 +1,21 @@
 services:
-  # Scheduler (Next.js App) - Private service
-  - type: web
-    name: vena-scheduler
-    runtime: node
-    rootDir: scheduler
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
-    buildFilter:
-      paths:
-      - "scheduler/**"
-    envVars:
-      - key: NODE_VERSION
-        value: 20.11.0
-      - key: NEXT_PUBLIC_SUPABASE_URL
-        sync: false
-      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
-
   # Main Application (Proxy + Static Files)
   - type: web
     name: vena-application
     runtime: node
     buildCommand: |
       cd application-page && yarn install --frozen-lockfile --prefer-offline && yarn build && cd ..
+      cd new-scheduler && npm ci && npm run build && cd ..
       cd proxy-server && npm ci --production && cd ..
     startCommand: cd application-page && yarn start
     buildFilter:
       paths:
       - "application-page/**"
+      - "new-scheduler/**"
       - "proxy-server/**"
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
-      - key: SCHEDULER_SERVICE_URL
-        value: https://vena-scheduler.onrender.com
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
