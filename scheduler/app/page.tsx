@@ -136,5 +136,5 @@ export default async function HomePage({ searchParams }: { searchParams: { acces
     schedule = { slug };
   }
 
-  redirect(`/scheduler/s/${schedule.slug}`);
+  redirect(`/s/${schedule.slug}`);
 }
