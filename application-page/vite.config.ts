@@ -16,7 +16,7 @@ const landingRewrite = (): Plugin => {
     if (segments.length !== 1) {
       return false;
     }
-    const reserved = new Set(['signin', 'login', 'register', 'landing', 'index', 'dashboard', 'scheduler']);
+    const reserved = new Set(['signin', 'login', 'register', 'landing', 'index', 'dashboard', 'scheduler', 'tasks']);
     return !reserved.has(segments[0].toLowerCase());
   };
 
@@ -52,7 +52,7 @@ export default defineConfig({
       input: {
         main: './index.html',
         dashboard: './dashboard.html',
-        landing: './landing.html',
+        landing: './landing.tsx',
       },
     },
   },
