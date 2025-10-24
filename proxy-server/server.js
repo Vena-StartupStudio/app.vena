@@ -171,16 +171,39 @@ app.use('/scheduler', (req, res, next) => {
     console.log(`[SCHEDULER PROXY] Response from upstream: ${req.method} ${req.originalUrl} -> ${status}${location ? ` (Location: ${location})` : ''}`);
 
     if (location && status && [301, 302, 303, 307, 308].includes(status)) {
-      const normalized = location.replace(/\/{2,}/g, '/');
-      if (normalized === '/') {
-        proxyRes.headers['location'] = SCHEDULER_BASE_PATH;
-      } else if (normalized.startsWith('/')) {
-        const withBase = normalized.startsWith(SCHEDULER_BASE_PATH)
-          ? normalized
-          : `${SCHEDULER_BASE_PATH}${normalized}`;
-        proxyRes.headers['location'] = withBase.replace(/\/{2,}/g, '/');
+      let rewrittenLocation = location;
+      try {
+        const locUrl = new URL(location, SCHEDULER_URL);
+        const schedulerHost = new URL(SCHEDULER_URL).host;
+        if (locUrl.host === schedulerHost) {
+          // Convert absolute URL pointing to the scheduler service into a relative path
+          rewrittenLocation = locUrl.pathname + locUrl.search + locUrl.hash;
+        }
+      } catch {
+        // Non-URL strings are handled below as relative paths
       }
-      console.log(`[SCHEDULER PROXY] Rewriting Location header from "${location}" to "${proxyRes.headers['location']}"`);
+
+      if (!rewrittenLocation.startsWith('http://') && !rewrittenLocation.startsWith('https://')) {
+        let relative = rewrittenLocation.trim();
+        if (!relative.startsWith('/')) {
+          relative = `/${relative}`;
+        }
+        relative = relative.replace(/\/{2,}/g, '/');
+
+        if (relative === '/') {
+          rewrittenLocation = SCHEDULER_BASE_PATH;
+        } else if (SCHEDULER_BASE_PATH === '/') {
+          rewrittenLocation = relative;
+        } else {
+          const withBase = relative.startsWith(SCHEDULER_BASE_PATH)
+            ? relative
+            : `${SCHEDULER_BASE_PATH}${relative}`;
+          rewrittenLocation = withBase.replace(/\/{2,}/g, '/');
+        }
+      }
+
+      proxyRes.headers['location'] = rewrittenLocation;
+      console.log(`[SCHEDULER PROXY] Rewriting Location header from "${location}" to "${rewrittenLocation}"`);
     }
 
     // Forward Set-Cookie headers back to client
