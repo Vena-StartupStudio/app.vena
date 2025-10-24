@@ -114,9 +114,17 @@ const fetchLandingProfile = async (slug) => {
   return null;
 };
 
-// Redirect legacy /schedule* to /scheduler*
-app.get('/schedule*', (req, res) => {
-  const dest = req.originalUrl.replace(/^\/schedule/, '/scheduler');
+// Redirect legacy /schedule/* to /scheduler/* (but not /scheduler itself)
+app.get('/schedule', (req, res) => {
+  return res.redirect(301, '/scheduler');
+});
+
+app.get('/schedule/', (req, res) => {
+  return res.redirect(301, '/scheduler/');
+});
+
+app.get(/^\/schedule\/(.*)$/, (req, res) => {
+  const dest = `/scheduler/${req.params[0]}`;
   return res.redirect(301, dest);
 });
 
