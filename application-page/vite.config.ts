@@ -52,7 +52,7 @@ export default defineConfig({
       input: {
         main: './index.html',
         dashboard: './dashboard.html',
-        landing: './landing.tsx',
+        landing: './landing.html',
       },
     },
   },
