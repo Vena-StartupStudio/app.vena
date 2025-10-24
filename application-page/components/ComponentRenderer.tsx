@@ -7,7 +7,7 @@ interface ComponentRendererProps {
   onUpdate: (updates: Partial<PageComponent>) => void;
 }
 
-const HeroRenderer: React.FC<{ component: HeroComponent; isEditing: boolean; onUpdate: (updates: Partial<HeroComponent>) => void }> = ({ component, isEditing }) => {
+const HeroRenderer: React.FC<{ component: HeroComponent; isEditing: boolean; onUpdate: (updates: Partial<HeroComponent>) => void }> = ({ component }) => {
   const { content, styles } = component;
   
   return (
@@ -464,7 +464,9 @@ const ComponentRenderer: React.FC<ComponentRendererProps> = ({ component, isEdit
     case 'social':
       return <SocialRenderer component={component as SocialComponent} isEditing={isEditing} onUpdate={onUpdate as any} />;
     default:
-      return <div className="p-4 bg-gray-100 text-center">Unknown component type: {component.type}</div>;
+      const exhaustiveCheck: never = component;
+      console.warn('Unknown component type', exhaustiveCheck);
+      return null;
   }
 };
 

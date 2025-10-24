@@ -4,7 +4,7 @@ import { BUSINESS_NICHES } from "../constants";
 import { supabase } from "../lib/supabaseClient";
 
 interface RegistrationFormProps {
-  onSuccess: () => void;
+  onSuccess: (details: { email: string }) => void;
 }
 
 const initialFormData: RegistrationFormData = {
@@ -98,7 +98,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSuccess }) => {
       if (insertError) throw insertError;
 
       // Step 3: Call the onSuccess callback to trigger the redirect
-      onSuccess();
+      onSuccess({ email: formData.email });
 
     } catch (err: any) {
       console.error('Registration failed:', err);

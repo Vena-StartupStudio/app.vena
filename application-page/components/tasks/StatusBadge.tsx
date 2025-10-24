@@ -9,18 +9,31 @@ interface StatusBadgeProps {
   onStatusChange: (taskId: string, status: TaskStatus) => void;
 }
 
-const statusConfig = {
+type StatusConfigEntry = {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  bgColor: string;
+  textColor: string;
+  label: string;
+};
+
+const statusConfig: Record<TaskStatus, StatusConfigEntry> = {
   [TaskStatus.Assigned]: {
     icon: UsersIcon,
     bgColor: 'bg-purple-100',
     textColor: 'text-purple-800',
     label: 'Assigned',
   },
-  [TaskStatus.Done]: {
+  [TaskStatus.Completed]: {
     icon: CheckCircleIcon,
     bgColor: 'bg-green-100',
     textColor: 'text-green-800',
-    label: 'Done',
+    label: 'Completed',
+  },
+  [TaskStatus.InProgress]: {
+    icon: ClockIcon,
+    bgColor: 'bg-blue-100',
+    textColor: 'text-blue-800',
+    label: 'In Progress',
   },
   [TaskStatus.Pending]: {
     icon: ClockIcon,
@@ -36,8 +49,8 @@ const statusConfig = {
   },
   [TaskStatus.ReminderSent]: {
     icon: RefreshIcon,
-    bgColor: 'bg-blue-100',
-    textColor: 'text-blue-800',
+    bgColor: 'bg-indigo-100',
+    textColor: 'text-indigo-800',
     label: 'Reminder Sent',
   },
 };

@@ -24,7 +24,7 @@ export default function AuthForm() {
       });
 
       if (error) {
-        alert(error.error_description || error.message);
+        alert(error.message);
       } else {
         alert('Check your email for the confirmation link!');
       }
@@ -36,7 +36,7 @@ export default function AuthForm() {
       });
 
       if (error) {
-        alert(error.error_description || error.message);
+        alert(error.message);
       }
       // On successful sign-in, the listener in App.tsx will automatically show the tasks page.
     }

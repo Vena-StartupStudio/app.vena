@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
-import { Client, ClientGroup, User } from '../../types/tasks';
+import { Client, ClientGroup } from '../../types/tasks';
 
 interface ClientManagementModalProps {
   isOpen: boolean;

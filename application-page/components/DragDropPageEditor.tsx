@@ -4,7 +4,24 @@ import { arrayMove } from '@dnd-kit/sortable';
 import ComponentPalette from './ComponentPalette';
 import PageCanvas from './PageCanvas';
 import PropertyPanel from './PropertyPanel';
-import type { PageComponent, ComponentType, PageLayout, EditorState, DragItem } from '../types/page-editor';
+import type {
+  PageComponent,
+  ComponentType,
+  PageLayout,
+  EditorState,
+  DragItem,
+  HeroComponent,
+  AboutComponent,
+  ServicesComponent,
+  TestimonialsComponent,
+  PricingComponent,
+  ContactComponent,
+  BookingComponent,
+  GalleryComponent,
+  TextComponent,
+  SpacerComponent,
+  SocialComponent,
+} from '../types/page-editor';
 import { supabase } from '../lib/supabaseClient';
 
 interface DragDropPageEditorProps {
@@ -28,8 +45,8 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
 
   // Add type-specific default content
   switch (type) {
-    case 'hero':
-      return {
+    case 'hero': {
+      const component: HeroComponent = {
         ...baseComponent,
         type: 'hero',
         content: {
@@ -40,18 +57,23 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           layout: 'center',
         },
       };
-    case 'about':
-      return {
+      return component;
+    }
+    case 'about': {
+      const component: AboutComponent = {
         ...baseComponent,
         type: 'about',
         content: {
           title: 'About Me',
-          description: 'Certified wellness coach with over 10 years of experience helping clients achieve their health and wellness goals.',
+          description:
+            'Certified wellness coach with over 10 years of experience helping clients achieve their health and wellness goals.',
           layout: 'text-left',
         },
       };
-    case 'services':
-      return {
+      return component;
+    }
+    case 'services': {
+      const component: ServicesComponent = {
         ...baseComponent,
         type: 'services',
         content: {
@@ -60,8 +82,10 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           layout: 'grid',
         },
       };
-    case 'booking':
-      return {
+      return component;
+    }
+    case 'booking': {
+      const component: BookingComponent = {
         ...baseComponent,
         type: 'booking',
         content: {
@@ -71,8 +95,10 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           reservekitIntegration: false,
         },
       };
-    case 'testimonials':
-      return {
+      return component;
+    }
+    case 'testimonials': {
+      const component: TestimonialsComponent = {
         ...baseComponent,
         type: 'testimonials',
         content: {
@@ -81,8 +107,10 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           layout: 'grid',
         },
       };
-    case 'pricing':
-      return {
+      return component;
+    }
+    case 'pricing': {
+      const component: PricingComponent = {
         ...baseComponent,
         type: 'pricing',
         content: {
@@ -91,8 +119,10 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           layout: 'cards',
         },
       };
-    case 'contact':
-      return {
+      return component;
+    }
+    case 'contact': {
+      const component: ContactComponent = {
         ...baseComponent,
         type: 'contact',
         content: {
@@ -105,8 +135,10 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           layout: 'side-by-side',
         },
       };
-    case 'gallery':
-      return {
+      return component;
+    }
+    case 'gallery': {
+      const component: GalleryComponent = {
         ...baseComponent,
         type: 'gallery',
         content: {
@@ -115,8 +147,10 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           layout: 'grid',
         },
       };
-    case 'text':
-      return {
+      return component;
+    }
+    case 'text': {
+      const component: TextComponent = {
         ...baseComponent,
         type: 'text',
         content: {
@@ -124,16 +158,20 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           alignment: 'left',
         },
       };
-    case 'spacer':
-      return {
+      return component;
+    }
+    case 'spacer': {
+      const component: SpacerComponent = {
         ...baseComponent,
         type: 'spacer',
         content: {
           height: 40,
         },
       };
-    case 'social':
-      return {
+      return component;
+    }
+    case 'social': {
+      const component: SocialComponent = {
         ...baseComponent,
         type: 'social',
         content: {
@@ -142,8 +180,13 @@ const createComponent = (type: ComponentType, order: number): PageComponent => {
           style: 'icons',
         },
       };
-    default:
-      return baseComponent as PageComponent;
+      return component;
+    }
+    default: {
+      return {
+        ...baseComponent,
+      } as PageComponent;
+    }
   }
 };
 
@@ -231,10 +274,12 @@ const DragDropPageEditor: React.FC<DragDropPageEditorProps> = ({ className = '' 
   }, []);
 
   const handleUpdateComponent = useCallback((componentId: string, updates: Partial<PageComponent>) => {
-    setComponents(prev => prev.map(comp => 
-      comp.id === componentId ? { ...comp, ...updates } : comp
-    ));
-    setEditorState(prev => ({ ...prev, hasUnsavedChanges: true }));
+    setComponents((prev) =>
+      prev.map((comp) =>
+        comp.id === componentId ? ({ ...comp, ...updates } as PageComponent) : comp,
+      ),
+    );
+    setEditorState((prev) => ({ ...prev, hasUnsavedChanges: true }));
   }, []);
 
   const handleDeleteComponent = useCallback(() => {

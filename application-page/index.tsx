@@ -9,9 +9,11 @@ import VenaLogo from './components/icons/VenaLogo.png';
 // Your existing registration app component - UNCHANGED
 const RegistrationApp: React.FC = () => {
   const [isRegistered, setIsRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>('');
 
-  const handleSuccess = () => {
+  const handleSuccess = ({ email }: { email: string }) => {
     setIsRegistered(true);
+    setRegisteredEmail(email);
     // Wait for 3 seconds before redirecting
     setTimeout(() => {
       window.location.href = '/dashboard.html';
@@ -25,10 +27,12 @@ const RegistrationApp: React.FC = () => {
           <img src={VenaLogo} alt="Vena logo" className="mx-auto h-12 w-auto" />
         </div>
         {isRegistered ? (
-          <ConfirmationMessage 
-            title="Welcome to Vena!"
-            message="Your account has been created successfully. We're redirecting you to your dashboard..."
-          />
+          <>
+            <ConfirmationMessage email={registeredEmail} />
+            <p className="mt-4 text-sm text-zinc-600 text-center">
+              We're redirecting you to your dashboard...
+            </p>
+          </>
         ) : (
           <RegistrationForm onSuccess={handleSuccess} />
         )}
@@ -58,5 +62,4 @@ ReactDOM.createRoot(rootElement).render(
     <App />
   </React.StrictMode>
 );
-
 

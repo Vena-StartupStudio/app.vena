@@ -1,9 +1,10 @@
 export enum TaskStatus {
-  Assigned = 'Assigned',
-  Done = 'Done',
-  Pending = 'Pending',
-  Missed = 'Missed',
-  ReminderSent = 'Reminder Sent',
+  Pending = 'pending',
+  InProgress = 'in_progress',
+  Completed = 'completed',
+  Missed = 'missed',
+  ReminderSent = 'reminder_sent',
+  Assigned = 'assigned',
 }
 
 export interface Client {
@@ -19,33 +20,42 @@ export interface ClientGroup {
   clientIds: string[];
 }
 
+export interface TaskAssignee {
+  id: string;
+  type: 'client' | 'group';
+}
+
 export interface Task {
   id: string;
   title: string;
-  details: string; // Make sure this matches your database field
-  dueDate: string; // Make sure this matches your database field
+  details: string;
+  dueDate: string;
   status: TaskStatus;
-  assignee: {
-    id: string;
-    type: 'client' | 'group';
-  };
-  createdAt: string;
+  assignee: TaskAssignee;
+  deliveryMethod?: string;
+  reminder?: boolean;
+  taskId?: string;
+  createdAt?: string;
 }
 
-// Add this new interface for the combined data structure
 export interface TaskAssignment {
   id: string;
-  status: string; // or TaskStatus if you prefer
-  due_date: string | null;
-  client: {
+  status: TaskStatus;
+  dueDate: string | null;
+  clientId: string | null;
+  groupId: string | null;
+  taskId: string;
+  taskTitle: string;
+  taskDescription: string | null;
+  client?: {
     id: string;
     name: string;
-    avatar: string;
+    email?: string;
+    avatar?: string;
   };
-  task: {
+  group?: {
     id: string;
-    title: string;
-    description: string;
+    name: string;
   };
 }
 

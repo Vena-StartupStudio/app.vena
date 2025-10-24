@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
-import { PlusIcon, UsersIcon, SignOutIcon } from './Icons';
 import TaskModal from './TaskModal';
 import ClientManagementModal from './ClientManagementModal';
-import { Client, ClientGroup } from '../../types/tasks';
+import { Client, ClientGroup, Task } from '../../types/tasks';
 import VenaLogo from '../icons/VenaLogo.png';
 
 interface HeaderProps {
@@ -49,10 +48,10 @@ const Header: React.FC<HeaderProps> = ({
       console.log('Task submit with data:', taskData);
       
       if (editingTask && onUpdateTask) {
-        // Update existing task
         await onUpdateTask({
           ...taskData,
-          id: editingTask.taskId || editingTask.id // Use the actual task ID
+          id: editingTask.taskId || editingTask.id,
+          assignmentId: editingTask.id
         });
       } else {
         // Create new task
@@ -131,7 +130,6 @@ const Header: React.FC<HeaderProps> = ({
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={handleModalClose} // Use the updated close handler
-        user={user}
         onTaskCreated={handleTaskSubmit}
         clients={clients}
         clientGroups={clientGroups}

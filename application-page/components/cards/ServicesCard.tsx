@@ -27,10 +27,12 @@ const createServiceId = (): number => {
   return Date.now() + Math.floor(Math.random() * 1000);
 };
 
+type SortableInstance = ReturnType<typeof useSortable>;
+
 interface SortableRenderProps {
-  attributes: Record<string, unknown>;
-  listeners: Record<string, unknown>;
-  setActivatorNodeRef: (element: HTMLElement | null) => void;
+  attributes: SortableInstance['attributes'];
+  listeners: SortableInstance['listeners'];
+  setActivatorNodeRef: SortableInstance['setActivatorNodeRef'];
   isDragging: boolean;
 }
 
@@ -164,7 +166,11 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
                 const sortableId = serviceIds[index];
                 return (
                   <SortableServiceItem key={sortableId} id={sortableId} disabled={isView}>
-                    {({ attributes, listeners, setActivatorNodeRef, isDragging }) => (
+                    {({ attributes, listeners, setActivatorNodeRef, isDragging }) => {
+                      const activatorProps = attributes as React.ButtonHTMLAttributes<HTMLButtonElement>;
+                      const listenerProps = (listeners ?? {}) as React.DOMAttributes<HTMLButtonElement>;
+
+                      return (
                       <BaseCard
                         variant="glass"
                         padding="md"
@@ -177,9 +183,9 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
                           <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               type="button"
-                              ref={setActivatorNodeRef as (element: HTMLElement | null) => void}
-                              {...(attributes as Record<string, unknown>)}
-                              {...(listeners as Record<string, unknown>)}
+                              ref={setActivatorNodeRef}
+                              {...activatorProps}
+                              {...listenerProps}
                               className="p-2 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-600 shadow-sm transition-colors"
                               title="Drag to reorder"
                             >
@@ -227,7 +233,8 @@ const ServicesCard: React.FC<ServicesCardProps> = ({
                           )}
                         </div>
                       </BaseCard>
-                    )}
+                      );
+                    }}
                   </SortableServiceItem>
                 );
               })}

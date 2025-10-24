@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '../../lib/supabaseClient';
 import { Client, ClientGroup, Task } from '../../types/tasks';
-import { CloseIcon } from './Icons';
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: User | null;
   onTaskCreated: (taskData: any) => void;
   clients: Client[];
   clientGroups: ClientGroup[];
@@ -17,7 +13,6 @@ interface TaskModalProps {
 const TaskModal: React.FC<TaskModalProps> = ({ 
   isOpen, 
   onClose, 
-  user, 
   onTaskCreated, 
   clients = [], 
   clientGroups = [],
@@ -28,7 +23,6 @@ const TaskModal: React.FC<TaskModalProps> = ({
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [selectedClient, setSelectedClient] = useState('');
-  const [sendReminder, setSendReminder] = useState(false);
   const [assigneeType, setAssigneeType] = useState<'client' | 'group'>('client');
   const [selectedGroup, setSelectedGroup] = useState('');
 

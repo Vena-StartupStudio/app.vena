@@ -1,35 +1,22 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { Task, Client, TaskStatus, ClientGroup, TaskAssignment } from '../../types/tasks';
-import { EditIcon, TrashIcon, UsersIcon } from './Icons';
-import StatusBadge from './StatusBadge';
-import { User } from '@supabase/supabase-js';
-import { sendTaskEmail } from '../lib/emailService';
-import { supabase } from '../../lib/supabaseClient';
+import { useMemo, type FC } from 'react';
+import { Task, Client, ClientGroup } from '../../types/tasks';
 
 interface TaskListProps {
   tasks: Task[];
   clients: Client[];
   clientGroups: ClientGroup[];
   onEditTask: (task: Task) => void;
-  onDeleteTask: (taskId: string) => void;
-  onStatusChange: (taskId: string, status: TaskStatus) => void;
-  onNotifyClient: (taskId: string) => void; // ADD THIS NEW PROP
-  user: User | null;
-  assignments: TaskAssignment[];
-  onDataChange: () => void;
+  onDeleteTask: (taskId: string) => Promise<void> | void;
+  onNotifyClient: (taskId: string) => Promise<void> | void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ 
+const TaskList: FC<TaskListProps> = ({ 
   tasks, 
   clients, 
   clientGroups, 
   onEditTask, 
   onDeleteTask, 
-  onStatusChange, 
-  onNotifyClient, // ADD THIS
-  user, 
-  assignments = [], 
-  onDataChange 
+  onNotifyClient
 }) => {
   const clientMap = useMemo(() => {
     return new Map(clients.map(client => [client.id, client]));
@@ -42,58 +29,6 @@ const TaskList: React.FC<TaskListProps> = ({
   const sortedTasks = useMemo(() => {
     return [...tasks].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
   }, [tasks]);
-
-  // Function to assign a task to clients
-  const handleAssignTask = async (taskId: string, clientIds: string[]) => {
-    if (clientIds.length === 0) return;
-
-    const assignments = clientIds.map(clientId => ({
-      task_id: taskId,
-      client_id: clientId,
-    }));
-
-    // @ts-ignore - Supabase type inference issue
-    const { error } = await supabase.from('client_tasks').insert(assignments);
-
-    if (error) {
-      alert('Error assigning task: ' + error.message);
-    } else {
-      alert('Task assigned successfully!');
-    }
-  };
-
-  const handleStatusChange = async (taskId: string, newStatus: string) => {
-    try {
-      console.log('Updating task status:', { taskId, newStatus });
-
-      // Update task status in database - REMOVE updated_at since it doesn't exist
-      const { error } = await supabase
-        .from('client_tasks')
-        .update({ status: newStatus })
-        .eq('id', taskId);
-
-      if (error) throw error;
-
-      // REMOVED: Email sending code - now just call onStatusChange
-      onStatusChange(taskId, newStatus as any);
-      onDataChange();
-
-    } catch (error) {
-      console.error('Error updating task:', error);
-      alert('Error updating task status: ' + error.message);
-    }
-  };
-
-  const getStatusChip = (status: string) => {
-    switch (status?.toLowerCase()) { // Added safety check for status
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'missed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
 
   if (tasks.length === 0) {
     return (
