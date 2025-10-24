@@ -52,10 +52,10 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     return json({
       ok: true,
       booking: {
-        id: data.id,
-        startTs: data.start_ts,
-        endTs: data.end_ts,
-        status: data.status
+        id: (data as any).id,
+        startTs: (data as any).start_ts,
+        endTs: (data as any).end_ts,
+        status: (data as any).status
       }
     });
   } catch (error: any) {

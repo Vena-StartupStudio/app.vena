@@ -34,10 +34,12 @@ export function SlotList({ slots, timezone, selected, onSelect }: SlotListProps)
   const grouped = slots.reduce<GroupedSlots>((acc, slot) => {
     const day = DateTime.fromISO(slot.startTs, { zone: "utc" }).setZone(timezone);
     const key = day.toISODate();
-    if (!acc[key]) {
+    if (key && !acc[key]) {
       acc[key] = [];
     }
-    acc[key].push(slot);
+    if (key) {
+      acc[key].push(slot);
+    }
     return acc;
   }, {});
 

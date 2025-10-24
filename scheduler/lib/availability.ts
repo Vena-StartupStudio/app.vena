@@ -87,10 +87,14 @@ export function computeAvailability({
 
         const slotInterval = Interval.fromDateTimes(slotStartUtc, slotEndUtc);
         if (!overlaps(bookingIntervals, slotInterval)) {
-          slots.push({
-            startTs: slotStartUtc.toISO(),
-            endTs: slotEndUtc.toISO()
-          });
+          const startIso = slotStartUtc.toISO();
+          const endIso = slotEndUtc.toISO();
+          if (startIso && endIso) {
+            slots.push({
+              startTs: startIso,
+              endTs: endIso
+            });
+          }
         }
 
         cursor = cursor.plus({ minutes: window.slot_minutes });

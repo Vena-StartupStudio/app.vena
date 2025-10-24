@@ -1,6 +1,7 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -65,6 +66,7 @@ const fetchLandingProfile = async (slug) => {
         apikey: SUPABASE_SERVICE_ROLE_KEY,
         Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
         Prefer: 'return=representation,single-object',
+        Accept: 'application/vnd.pgrst.object+json',
       },
     });
 
@@ -78,11 +80,21 @@ const fetchLandingProfile = async (slug) => {
     }
 
     const payload = await response.json().catch(() => null);
-    if (!payload || typeof payload !== 'object') {
+    if (!payload) {
       return null;
     }
 
-    return payload.profile_config || null;
+    const record = Array.isArray(payload) ? payload[0] : payload;
+    if (!record || typeof record !== 'object') {
+      return null;
+    }
+
+    const profileConfig = record.profile_config;
+    if (!profileConfig || typeof profileConfig !== 'object') {
+      return null;
+    }
+
+    return profileConfig;
   };
 
   for (const candidate of candidates) {
