@@ -329,7 +329,20 @@ app.get('*', (req, res, next) => {
   // For custom landing slugs (single path segment, no file extension)
   const pathSegments = req.path.split('/').filter(Boolean);
   if (pathSegments.length === 1 && !req.path.includes('.')) {
-    return res.sendFile(path.join(staticPath, 'landing.html'));
+    const slug = pathSegments[0].toLowerCase();
+    
+    // Check if it's a typo of a reserved path - redirect to correct path
+    if (slug.startsWith('scheduler') && slug !== 'scheduler') {
+      return res.redirect(301, '/scheduler');
+    }
+    if (slug.startsWith('dashboard') && slug !== 'dashboard') {
+      return res.redirect(301, '/dashboard');
+    }
+    
+    // Only serve landing.html if it's not a reserved segment
+    if (shouldServeLandingSlug(slug)) {
+      return res.sendFile(path.join(staticPath, 'landing.html'));
+    }
   }
 
   // Default fallback
