@@ -226,6 +226,6 @@ app.get('*', (req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Vena proxy server running on port ${PORT}`);
-  console.log(`Proxying /scheduler/* to ${SCHEDULER_URL}`);
+  console.log(`Serving scheduler files from ${schedulerPath}`);
   console.log(`Serving static files from ${staticPath}`);
 });
