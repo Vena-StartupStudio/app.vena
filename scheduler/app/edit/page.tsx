@@ -3,6 +3,16 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { OwnerScheduleEditor } from '@/components/OwnerScheduleEditor';
 
+const schedulerBasePath = (process.env.NEXT_PUBLIC_SCHEDULER_BASE_PATH ?? (process.env.NODE_ENV === 'production' ? '/scheduler' : '')).replace(/\/+$/, '');
+const buildSchedulerPath = (suffix = '') => {
+  const normalizedSuffix = suffix ? (suffix.startsWith('/') ? suffix : `/${suffix}`) : '';
+  const combined = `${schedulerBasePath}${normalizedSuffix}`;
+  if (!combined) {
+    return '/';
+  }
+  return combined.startsWith('/') ? combined : `/${combined}`;
+};
+
 export default async function EditPage() {
   const supabase = createServerComponentClient({ cookies });
   
@@ -23,7 +33,7 @@ export default async function EditPage() {
   
   if (!schedule) {
     // If no schedule exists, redirect to home page which will create one
-    redirect('/scheduler');
+    redirect(buildSchedulerPath());
   }
   
   // Render the editor with the user's schedule

@@ -37,35 +37,60 @@ const fetchLandingProfile = async (slug) => {
     throw new Error('Landing profile lookup unavailable: missing Supabase configuration.');
   }
 
-  const params = new URLSearchParams();
-  params.append('select', 'profile_config');
-  params.append('profile_config->landingPage->>slug', `eq.${slug}`);
-  params.append('profile_config->landingPage->>published', 'eq.true');
-  params.append('limit', '1');
-
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/registrations?${params.toString()}`, {
-    headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      Prefer: 'return=representation,single-object',
-    },
-  });
-
-  if (response.status === 404) {
+  const rawSlug = (slug ?? '').toString().trim();
+  if (!rawSlug) {
     return null;
   }
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => String(response.status));
-    throw new Error(`Supabase returned ${response.status}: ${errorText}`);
+  const candidates = Array.from(new Set([rawSlug, rawSlug.toLowerCase()].filter(Boolean)));
+
+  const runQuery = async (candidate, comparator) => {
+    const params = new URLSearchParams();
+    params.append('select', 'profile_config');
+    params.append('profile_config->landingPage->>slug', `${comparator}.${candidate}`);
+    params.append('profile_config->landingPage->>published', 'eq.true');
+    params.append('limit', '1');
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/registrations?${params.toString()}`, {
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        Prefer: 'return=representation,single-object',
+      },
+    });
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => String(response.status));
+      throw new Error(`Supabase returned ${response.status}: ${errorText}`);
+    }
+
+    const payload = await response.json().catch(() => null);
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    return payload.profile_config || null;
+  };
+
+  for (const candidate of candidates) {
+    const profile = await runQuery(candidate, 'eq');
+    if (profile) {
+      return profile;
+    }
   }
 
-  const payload = await response.json().catch(() => null);
-  if (!payload || typeof payload !== 'object') {
-    return null;
+  for (const candidate of candidates) {
+    const profile = await runQuery(candidate, 'ilike');
+    if (profile) {
+      return profile;
+    }
   }
 
-  return payload.profile_config || null;
+  return null;
 };
 
 // Redirect legacy /schedule* to /scheduler*
@@ -186,7 +211,7 @@ app.get('/api/landing/:slug', async (req, res) => {
   }
 
   try {
-    const profile = await fetchLandingProfile(rawSlug.toLowerCase());
+    const profile = await fetchLandingProfile(rawSlug);
 
     if (!profile) {
       return res.status(404).json({ ok: false, error: 'Landing page not found.' });

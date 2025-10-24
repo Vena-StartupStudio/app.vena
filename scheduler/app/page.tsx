@@ -4,6 +4,16 @@ import { cookies } from 'next/headers';
 import { Suspense } from 'react';
 import AuthHandler from '@/components/AuthHandler';
 
+const schedulerBasePath = (process.env.NEXT_PUBLIC_SCHEDULER_BASE_PATH ?? (process.env.NODE_ENV === 'production' ? '/scheduler' : '')).replace(/\/+$/, '');
+const buildSchedulerPath = (suffix = '') => {
+  const normalizedSuffix = suffix ? (suffix.startsWith('/') ? suffix : `/${suffix}`) : '';
+  const combined = `${schedulerBasePath}${normalizedSuffix}`;
+  if (!combined) {
+    return '/';
+  }
+  return combined.startsWith('/') ? combined : `/${combined}`;
+};
+
 export default async function HomePage({ searchParams }: { searchParams: { access_token?: string; refresh_token?: string } }) {
   const supabase = createServerComponentClient({ cookies });
   
@@ -130,5 +140,5 @@ export default async function HomePage({ searchParams }: { searchParams: { acces
   }
   
   // Redirect to the user's specific schedule page
-  redirect(`/s/${schedule.slug}`);
+  redirect(buildSchedulerPath(`/s/${schedule.slug}`));
 }

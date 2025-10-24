@@ -324,9 +324,9 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
 
 
-  const landingPageSlug = config.landingPage?.slug;
-
-  const isLandingPageLive = Boolean(config.landingPage?.published && landingPageSlug);
+  const landingPageSlug = config.landingPage?.slug?.trim();
+  const normalizedLandingPageSlug = landingPageSlug ? landingPageSlug.toLowerCase() : '';
+  const isLandingPageLive = Boolean(config.landingPage?.published && normalizedLandingPageSlug);
 
 
 
@@ -386,7 +386,7 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
     : publishStatus === 'success'
 
-    ? (landingPageSlug ? `Landing page published! Live at /${landingPageSlug}` : 'Landing page published!')
+    ? (normalizedLandingPageSlug ? `Landing page published! Live at /${normalizedLandingPageSlug}` : 'Landing page published!')
 
     : null;
 
@@ -488,11 +488,11 @@ const PreviewCanvas: React.FC<PreviewCanvasProps> = ({
 
         )}
 
-        {isLandingPageLive && landingPageSlug && (
+        {isLandingPageLive && normalizedLandingPageSlug && (
 
           <a
 
-            href={`/${landingPageSlug}`}
+            href={`/${normalizedLandingPageSlug}`}
 
             target="_blank"
 
