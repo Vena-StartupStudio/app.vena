@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams, Link } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { PublicScheduleView } from './components/PublicScheduleView';
 import UserDashboard from './components/UserDashboard';
 import AuthForm from './components/AuthForm';
+import { VenaLogo } from './components/Icons';
 
 function SchedulePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -19,7 +20,6 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [loadingSchedules, setLoadingSchedules] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -95,7 +95,7 @@ function HomePage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <img src="/vena_logo.png" alt="Vena Logo" className="h-12 w-auto mx-auto mb-4" />
+          <VenaLogo className="h-12 w-auto mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Scheduler</h1>
           <p className="text-gray-600">Book appointments and manage your schedule</p>
         </div>
@@ -119,12 +119,12 @@ function HomePage() {
                     <h3 className="font-medium text-gray-900">{schedule.title}</h3>
                     <p className="text-sm text-gray-500">/{schedule.slug}</p>
                   </div>
-                  <a
-                    href={`/${schedule.slug}`}
+                  <Link
+                    to={`/${schedule.slug}`}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                   >
                     View Schedule
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -133,24 +133,24 @@ function HomePage() {
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">No Schedules Found</h2>
             <p className="text-gray-600 mb-4">No public schedules are available at the moment.</p>
-            <a
-              href="/test-schedule"
+            <Link
+              to="/test-schedule"
               className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors inline-block"
             >
               Try Test Schedule
-            </a>
+            </Link>
           </div>
         )}
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Test Schedule</h2>
           <p className="text-gray-600 mb-4">Try the test schedule to see how the booking system works.</p>
-          <a
-            href="/test-schedule"
+          <Link
+            to="/test-schedule"
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors inline-block"
           >
             Open Test Schedule
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -158,8 +158,12 @@ function HomePage() {
 }
 
 function App() {
+  const rawBase = import.meta.env.BASE_URL ?? '/';
+  const normalizedBase = rawBase === '/' ? '/' : rawBase.replace(/\/+$/, '');
+  const routerBase = normalizedBase === '/' ? undefined : normalizedBase;
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBase}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/:slug" element={<SchedulePage />} />

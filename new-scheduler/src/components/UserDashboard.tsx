@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { VenaLogo, SignOutIcon, PlusIcon, EditIcon, TrashIcon } from './Icons';
 import AvailabilityEditor from './AvailabilityEditor';
+import { Link } from 'react-router-dom';
 
 type AvailabilityWindow = {
   id: string;
@@ -27,6 +28,10 @@ export default function UserDashboard({ user }: { user: User }) {
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState('');
   const [timezone, setTimezone] = useState('Asia/Jerusalem');
+  const schedulerBaseHref =
+    typeof window !== 'undefined'
+      ? new URL(import.meta.env.BASE_URL ?? '/', window.location.origin).href.replace(/\/$/, '')
+      : '';
 
   const weekdays = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -326,24 +331,24 @@ export default function UserDashboard({ user }: { user: User }) {
           <div className="flex items-center gap-2">
             <input
               type="text"
-              value={`${window.location.origin}/${schedule.slug}`}
+              value={`${schedulerBaseHref}/${schedule.slug}`}
               readOnly
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
             />
             <button
-              onClick={() => navigator.clipboard.writeText(`${window.location.origin}/${schedule.slug}`)}
+              onClick={() => navigator.clipboard.writeText(`${schedulerBaseHref}/${schedule.slug}`)}
               className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
             >
               Copy
             </button>
-            <a
-              href={`/${schedule.slug}`}
+            <Link
+              to={`/${schedule.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 inline-block"
             >
               View Page
-            </a>
+            </Link>
           </div>
           <p className="text-sm text-gray-600 mt-2">
             Share this URL with your clients so they can book appointments with you.

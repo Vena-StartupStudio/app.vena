@@ -7,6 +7,10 @@ export default function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const resolveSchedulerRootUrl = () => {
+    const base = import.meta.env.BASE_URL ?? '/';
+    return new URL(base, window.location.origin).toString();
+  };
 
   const handleAuth = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -19,7 +23,7 @@ export default function AuthForm() {
         password,
         options: {
           // This is where the user will be sent after confirming their email
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: resolveSchedulerRootUrl(),
         },
       });
 
@@ -49,7 +53,7 @@ export default function AuthForm() {
       provider: 'google',
       options: {
         // Redirect to the main app after Google sign-in
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: resolveSchedulerRootUrl(),
       },
     });
   };
