@@ -6,8 +6,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Get the scheduler service URL from environment variable
+const rawSchedulerBase = process.env.SCHEDULER_BASE_PATH ?? '/scheduler';
+const normalizeBasePath = (value) => {
+  if (!value || value === '/') {
+    return '/';
+  }
+  return `/${String(value).replace(/^\/+|\/+$/g, '')}`;
+};
+const SCHEDULER_BASE_PATH = normalizeBasePath(rawSchedulerBase);
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://localhost:3001';
-const SCHEDULER_BASE_PATH = (process.env.SCHEDULER_BASE_PATH || '/scheduler').replace(/\/+$/, '') || '/scheduler';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESERVED_LANDING_SEGMENTS = new Set(['dashboard', 'signin', 'login', 'register', 'landing', 'index', 'api', 'uploads', 'assets', 'scheduler', 'tasks']);
@@ -115,9 +122,9 @@ app.use('/scheduler', (req, res, next) => {
 }, createProxyMiddleware({
   target: SCHEDULER_URL,
   changeOrigin: true,
-  pathRewrite: (path, req) => {
-    if (path.startsWith(SCHEDULER_BASE_PATH)) {
-      const rewritten = path.slice(SCHEDULER_BASE_PATH.length);
+  pathRewrite: (path) => {
+    if (SCHEDULER_BASE_PATH !== '/' && path.startsWith(SCHEDULER_BASE_PATH)) {
+      const rewritten = path.slice(SCHEDULER_BASE_PATH.length) || '/';
       return rewritten.startsWith('/') ? rewritten : `/${rewritten}`;
     }
     return path;
@@ -130,9 +137,10 @@ app.use('/scheduler', (req, res, next) => {
   onProxyReq: (proxyReq, req, res) => {
     // Compute the path sent upstream after rewrite for logging purposes
     const original = (req.originalUrl || req.url || '/');
-    const newPath = original.startsWith(SCHEDULER_BASE_PATH)
-      ? original.slice(SCHEDULER_BASE_PATH.length) || '/'
-      : original;
+    const newPath =
+      SCHEDULER_BASE_PATH !== '/' && original.startsWith(SCHEDULER_BASE_PATH)
+        ? original.slice(SCHEDULER_BASE_PATH.length) || '/'
+        : original;
     console.log(`[SCHEDULER PROXY] Forwarding to: ${SCHEDULER_URL}${newPath}`);
 
     // Forward all cookies - critical for authentication
@@ -172,6 +180,7 @@ app.use('/scheduler', (req, res, next) => {
           : `${SCHEDULER_BASE_PATH}${normalized}`;
         proxyRes.headers['location'] = withBase.replace(/\/{2,}/g, '/');
       }
+      console.log(`[SCHEDULER PROXY] Rewriting Location header from "${location}" to "${proxyRes.headers['location']}"`);
     }
 
     // Forward Set-Cookie headers back to client
